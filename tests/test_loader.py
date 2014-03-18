@@ -4,8 +4,8 @@
 from unittest import TestCase, main
 from excalibur.loader import ConfigurationLoader, PluginLoader
 from excalibur.exceptions import ConfigurationLoaderError, PluginLoaderError
-from tests.plugins.Test1 import Test1
-from tests.plugins.Test2 import Test2
+from tests.plugins.Plugin1 import Plugin1
+from tests.plugins.Plugin2 import Plugin2
 
 
 class ConfigurationLoaderTest(TestCase):
@@ -33,19 +33,19 @@ class PluginLoaderTest(TestCase):
 
     def setUp(self):
         self.plugin_module = "tests.plugins"
-        self.plugin1 = "Test1"
+        self.plugin1 = "Plugin1"
         self.plugin_doesntexist = "NotExist"
-        self.plugin_wrong = "Test2"
+        self.plugin_wrong = "Plugin2"
 
     def test_load_plugin_ok(self):
         p = PluginLoader(self.plugin_module)
         instance = p.get_plugin(self.plugin1)
-        self.assertIsInstance(instance, Test1)
+        self.assertIsInstance(instance, Plugin1)
 
     def test_load_plugin_wrong(self):
         p = PluginLoader(self.plugin_module)
         instance = p.get_plugin(self.plugin1)
-        self.assertNotIsInstance(instance, Test2)
+        self.assertNotIsInstance(instance, Plugin2)
 
     def test_load_plugin_doesntexist(self):
         with self.assertRaises(PluginLoaderError):

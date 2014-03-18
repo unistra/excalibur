@@ -179,3 +179,16 @@ class DecodeAlgorithmNotFoundError(ExcaliburError):
 
     def __str__(self):
         return self.message
+
+
+class RunPluginsError(ExcaliburError):
+    """
+    check error
+    """
+
+    def __init__(self, message, *args, **kwargs):
+        super(RunPluginsError, self).__init__(*args,**kwargs)
+        self.message = '%s : %s' % (self.__class__.__name__, message)
+
+    def __str__(self):
+        return self.message
