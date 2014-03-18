@@ -1,2 +1,4 @@
 *.sublime-*
 *.egg-info
+excalibur/plugins
+*.pyc
