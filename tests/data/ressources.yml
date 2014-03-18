@@ -1,0 +1,16 @@
+actions:
+    action1:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
+
+    action2:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
