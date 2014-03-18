@@ -158,8 +158,11 @@ class CheckTest(TestCase):
     """
     def test_check_all(self):
         try:
-            check_all(self.acl, self.sources, self.ressources, self.request_method, 
-                self.source, self.ressource, self.method, self.remote_ip, self.arguments, self.signature)
+            query = {'request_method' : self.request_method, 
+                'source':self.source, 'ressource':self.ressource, 'method':self.method, 
+                'remote_ip':self.remote_ip, 'arguments':self.arguments, 'signature':self.signature}
+                
+            check_all(self.acl, self.sources, self.ressources, query)
         except:
             self.fail("error check all")
 

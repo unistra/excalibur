@@ -21,12 +21,8 @@ class PluginsRunner(object):
         sources = ConfigurationLoader(self.__sources_file).content
         ressources = ConfigurationLoader(self.__ressources_file).content
 
-        check_all(acl, sources, ressources, self.__query['request_method'], 
-                self.__query['source'], self.__query['ressource'], self.__query['method'], self.__query['remote_ip'], 
-                self.__query['arguments'], self.__query['signature'])
-
-        data, errors = run_plugins(sources[self.__query['source']]["plugins"], self.__query['ressource'], 
-            self.__query['method'], self.__query['arguments'], self.__query['source'], self.__plugins_module)
+        check_all(acl, sources, ressources, self.__query)
+        data, errors = run_plugins(sources[self.__query['source']]["plugins"], self.__query, self.__plugins_module)
 
         return data, errors
 
