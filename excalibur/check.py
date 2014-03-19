@@ -3,11 +3,12 @@ import hashlib
 import re
 
 from excalibur.exceptions import ArgumentError, ArgumentCheckMethodNotFoundError, CheckMethodError,\
-NoACLMatchedError, RessourceNotFoundError, MethodNotFoundError, HTTPMethodError, SourceNotFoundError, \
-IPNotAuthorizedError, WrongSignatureError
+    NoACLMatchedError, RessourceNotFoundError, MethodNotFoundError, HTTPMethodError, SourceNotFoundError, \
+    IPNotAuthorizedError, WrongSignatureError
 
 
 class Check(object):
+
     """
     Classe mere pour implementer les Checks.
     """
@@ -17,6 +18,7 @@ class Check(object):
 
 
 class CheckArguments(Check):
+
     """
     Classe verifiant la consistance des arguments.
 
@@ -29,11 +31,13 @@ class CheckArguments(Check):
         self.ressources = ressources
 
     def check(self, arguments, ressource, method):
-        errors = {} # Garde la trace des arguments qui ont echoue aux checks
+        errors = {}  # Garde la trace des arguments qui ont echoue aux checks
         for argument_name in arguments:
-            # Construction et verification de la batterie de checks (check_list)
+            # Construction et verification de la batterie de checks
+            # (check_list)
             try:
-                check_list = self.ressources[ressource][method]["arguments"][argument_name]["checks"]
+                check_list = self.ressources[ressource][method][
+                    "arguments"][argument_name]["checks"]
             except KeyError:
                 raise ArgumentError("unexpected argument %s" % argument_name)
 
@@ -41,7 +45,8 @@ class CheckArguments(Check):
                 try:
                     check_method_name = "check_" + check.replace(" ", "_")
                     check_method = getattr(self, check_method_name)
-                    check_parameter = self.ressources[ressource][method]["arguments"][argument_name]["checks"][check]
+                    check_parameter = self.ressources[ressource][method][
+                        "arguments"][argument_name]["checks"][check]
                     value_to_check = arguments[argument_name]
 
                     if not check_method(value_to_check, check_parameter):
@@ -71,6 +76,7 @@ class CheckArguments(Check):
 
 
 class CheckACL(Check):
+
     """
     Verifie les acces aux ressources et methodes. Les ACL sont definies dans
     le fichier acl.yml.
@@ -89,6 +95,7 @@ class CheckACL(Check):
 
 
 class CheckRequest(Check):
+
     """
     Verifie la requete realisee sur divers criteres. La verification d'un critere
     est effectuee par l'appel de l'une des methodes definies ci-dessous.
@@ -105,16 +112,20 @@ class CheckRequest(Check):
         if method not in self.ressources[ressource]:
             raise MethodNotFoundError(method)
         if http_method != self.ressources[ressource][method]["request method"]:
-            raise HTTPMethodError(self.ressources[ressource][method]["request method"])
+            raise HTTPMethodError(
+                self.ressources[ressource][method]["request method"])
 
-        expected_nb_arguments = len(self.ressources[ressource][method]["arguments"])
+        expected_nb_arguments = len(
+            self.ressources[ressource][method]["arguments"])
         received_nb_arguments = len(arguments)
 
         if expected_nb_arguments != received_nb_arguments:
-            raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (received_nb_arguments, expected_nb_arguments))
+            raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (
+                received_nb_arguments, expected_nb_arguments))
 
 
 class CheckSource(Check):
+
     """
     S'assure que la source est legitime en suivant les donnees presentes
     dans le fichier sources.yml.
@@ -143,4 +154,3 @@ class CheckSource(Check):
 
         if signature != signkey:
             raise WrongSignatureError(signature)
-

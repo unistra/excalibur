@@ -10,8 +10,8 @@ with open('README.md') as readme:
 with open('requirements.txt') as requirements:
     lines = requirements.readlines()
     libraries = [lib for lib in lines if not lib.startswith('-')]
-    dependency_links = [link.split()[1] for link in lines if 
-            link.startswith('-f')]
+    dependency_links = [link.split()[1] for link in lines if
+                        link.startswith('-f')]
 
 setup(
     name='excalibur',
@@ -29,7 +29,7 @@ setup(
     install_requires=libraries,
     dependency_links=dependency_links,
     keywords=['plugins', 'yaml'],
-    classifiers = (
+    classifiers=(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',

@@ -2,9 +2,11 @@
 
 
 class ExcaliburError(Exception):
+
     """
     base exception for excalibur
     """
+
     def __init__(self, *args, **kwargs):
         super(ExcaliburError, self).__init__(*args, **kwargs)
 
@@ -13,12 +15,13 @@ class ExcaliburError(Exception):
 
 
 class ConfigurationLoaderError(ExcaliburError):
+
     """
     base exception for configuration loader
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(ConfigurationLoaderError, self).__init__(*args,**kwargs)
+        super(ConfigurationLoaderError, self).__init__(*args, **kwargs)
         self.message = '%s : %s ' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -26,12 +29,13 @@ class ConfigurationLoaderError(ExcaliburError):
 
 
 class PluginLoaderError(ExcaliburError):
+
     """
     base exception for plugin loader
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(PluginLoaderError, self).__init__(*args,**kwargs)
+        super(PluginLoaderError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -39,12 +43,13 @@ class PluginLoaderError(ExcaliburError):
 
 
 class ArgumentError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(ArgumentError, self).__init__(*args,**kwargs)
+        super(ArgumentError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -52,12 +57,13 @@ class ArgumentError(ExcaliburError):
 
 
 class ArgumentCheckMethodNotFoundError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(ArgumentCheckMethodNotFoundError, self).__init__(*args,**kwargs)
+        super(ArgumentCheckMethodNotFoundError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -65,12 +71,13 @@ class ArgumentCheckMethodNotFoundError(ExcaliburError):
 
 
 class CheckMethodError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(CheckMethodError, self).__init__(*args,**kwargs)
+        super(CheckMethodError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -78,12 +85,13 @@ class CheckMethodError(ExcaliburError):
 
 
 class NoACLMatchedError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(NoACLMatchedError, self).__init__(*args,**kwargs)
+        super(NoACLMatchedError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -91,12 +99,13 @@ class NoACLMatchedError(ExcaliburError):
 
 
 class RessourceNotFoundError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(RessourceNotFoundError, self).__init__(*args,**kwargs)
+        super(RessourceNotFoundError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -104,12 +113,13 @@ class RessourceNotFoundError(ExcaliburError):
 
 
 class MethodNotFoundError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(MethodNotFoundError, self).__init__(*args,**kwargs)
+        super(MethodNotFoundError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -117,12 +127,13 @@ class MethodNotFoundError(ExcaliburError):
 
 
 class HTTPMethodError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(HTTPMethodError, self).__init__(*args,**kwargs)
+        super(HTTPMethodError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -130,12 +141,13 @@ class HTTPMethodError(ExcaliburError):
 
 
 class SourceNotFoundError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(SourceNotFoundError, self).__init__(*args,**kwargs)
+        super(SourceNotFoundError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -143,12 +155,13 @@ class SourceNotFoundError(ExcaliburError):
 
 
 class IPNotAuthorizedError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(IPNotAuthorizedError, self).__init__(*args,**kwargs)
+        super(IPNotAuthorizedError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -156,12 +169,13 @@ class IPNotAuthorizedError(ExcaliburError):
 
 
 class WrongSignatureError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(WrongSignatureError, self).__init__(*args,**kwargs)
+        super(WrongSignatureError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -169,12 +183,13 @@ class WrongSignatureError(ExcaliburError):
 
 
 class DecodeAlgorithmNotFoundError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(DecodeAlgorithmNotFoundError, self).__init__(*args,**kwargs)
+        super(DecodeAlgorithmNotFoundError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
@@ -182,14 +197,14 @@ class DecodeAlgorithmNotFoundError(ExcaliburError):
 
 
 class RunPluginsError(ExcaliburError):
+
     """
     check error
     """
 
     def __init__(self, message, *args, **kwargs):
-        super(RunPluginsError, self).__init__(*args,**kwargs)
+        super(RunPluginsError, self).__init__(*args, **kwargs)
         self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
         return self.message
-    

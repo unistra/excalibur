@@ -6,7 +6,9 @@ les urls.
 """
 from excalibur.exceptions import ArgumentError, DecodeAlgorithmNotFoundError
 
+
 class DecodeArguments(object):
+
     """
     Classe contenant les differents algorithmes de decodage.
 
@@ -14,6 +16,7 @@ class DecodeArguments(object):
     regle de nommage suivante decode_nomalgo doit recevoir la
     valeur en argument. Et retourner la valeur decodee.
     """
+
     def __init__(self, ressources):
         self.ressources = ressources
 
@@ -25,8 +28,9 @@ class DecodeArguments(object):
         try:
             for argument_name in arguments:
                 if "encoding" in self.ressources[ressource][method_name]["arguments"][argument_name]:
-                    algo = self.ressources[ressource][method_name]["arguments"][argument_name]["encoding"]
-                    method = getattr(self, "decode_"+algo)
+                    algo = self.ressources[ressource][method_name][
+                        "arguments"][argument_name]["encoding"]
+                    method = getattr(self, "decode_" + algo)
                     arguments[argument_name] = method(arguments[argument_name])
         except KeyError:
             raise ArgumentError(argument_name)

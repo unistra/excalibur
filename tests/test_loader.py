@@ -12,9 +12,10 @@ class ConfigurationLoaderTest(TestCase):
 
     def setUp(self):
         self.file_path_ok = "./data/sources.yml"
-        self.file_path_wrong = "/tmp/doesntexist" 
-        self.raw = {'etab2': {'ip': ['127.0.0.1'], 'apikey': 'S3CR3T2', 'plugins': {'Plugin1': [{'spore': 'S3CR3T2', 'token': 'S3CR3T2'}], 'Plugin2': [{'spore': 'S3CR3T2', 'token': 'S3CR3T2'}]}}, 'etab1': {'ip': ['127.0.0.1'], 'apikey': 'S3CR3T', 'plugins': {'Plugin1': [{'spore': 'S3CR3T', 'token': 'S3CR3T'}], 'Plugin2': [{'spore': 'S3CR3T', 'token': 'S3CR3T'}]}}}
-        self.raw_wrong = {'error' : 'error'}
+        self.file_path_wrong = "/tmp/doesntexist"
+        self.raw = {'etab2': {'ip': ['127.0.0.1'], 'apikey': 'S3CR3T2', 'plugins': {'Plugin1': [{'spore': 'S3CR3T2', 'token': 'S3CR3T2'}], 'Plugin2': [{'spore': 'S3CR3T2', 'token': 'S3CR3T2'}]}}, 'etab1': {
+            'ip': ['127.0.0.1'], 'apikey': 'S3CR3T', 'plugins': {'Plugin1': [{'spore': 'S3CR3T', 'token': 'S3CR3T'}], 'Plugin2': [{'spore': 'S3CR3T', 'token': 'S3CR3T'}]}}}
+        self.raw_wrong = {'error': 'error'}
 
     def test_load_content_ok(self):
         c = ConfigurationLoader(self.file_path_ok)
@@ -55,5 +56,3 @@ class PluginLoaderTest(TestCase):
 
 if __name__ == '__main__':
     main()
-
-

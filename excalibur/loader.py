@@ -7,18 +7,21 @@ from excalibur.exceptions import ExcaliburError, ConfigurationLoaderError, Plugi
 import importlib
 import yaml
 
+
 class ConfigurationLoader(object):
+
     """
     load config from yaml
     """
-    def __init__(self, file_path,query=None):
-        self.__query=query
+
+    def __init__(self, file_path):
         try:
             with open(file_path, "r") as configuration_file:
                 self.__content = yaml.load(configuration_file)
         except Exception:
-            raise ConfigurationLoaderError("error with the configuration loader: %s" % file_path)
-        
+            raise ConfigurationLoaderError(
+                "error with the configuration loader: %s" % file_path)
+
     @property
     def content(self):
         """
@@ -26,7 +29,9 @@ class ConfigurationLoader(object):
         """
         return self.__content
 
+
 class PluginLoader(object):
+
     """
     Create plugin instance
     """
@@ -39,9 +44,10 @@ class PluginLoader(object):
         return plugin instance
         """
         try:
-            module = importlib.import_module("%s.%s" % (self.plugin_module, plugin_name))
-            plugin=getattr(module, plugin_name)
+            module = importlib.import_module(
+                "%s.%s" % (self.plugin_module, plugin_name))
+            plugin = getattr(module, plugin_name)
             return plugin()
         except Exception as e:
-            raise PluginLoaderError("Plugin %s failed to load: %s" % (plugin_name, e))
-        
+            raise PluginLoaderError(
+                "Plugin %s failed to load: %s" % (plugin_name, e))
