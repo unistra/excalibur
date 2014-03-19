@@ -38,8 +38,7 @@ class PluginsTest(TestCase):
 
 
     def test_run_plugins(self):
-        plugins = self.plugin_runner.sources[self.plugin_runner.query.source]["plugins"]
-        data, errors = self.plugin_runner.run_plugins(plugins)
+        data, errors = self.plugin_runner.run_plugins()
 
         self.assertEqual(data, self.data_ok)
         self.assertEqual(errors, {})
@@ -47,8 +46,7 @@ class PluginsTest(TestCase):
 
     def test_run_plugins_error(self):
         plugin_runner = PluginsRunner("./data/acl.yml", "./data/sources.yml", "./data/ressources.yml", "tests.plugins", self.query2)
-        plugins = plugin_runner.sources[plugin_runner.query.source]["plugins"]
-        data, errors = plugin_runner.run_plugins(plugins)
+        data, errors = plugin_runner.run_plugins()
  
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})

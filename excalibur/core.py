@@ -16,7 +16,11 @@ class PluginsRunner(object):
         self.__ressources = ConfigurationLoader(ressources_file).content
         self.__plugins_module = plugins_module
         self.__query = query
-
+    
+    @property
+    def plugins(self):
+        return self.__sources[self.__query.source]["plugins"]
+        
     @property
     def acl(self):
         return self.__acl
@@ -39,7 +43,7 @@ class PluginsRunner(object):
 
     def __call__(self):
         self.check_all()
-        data, errors = self.run_plugins(self.__sources[self.__query.source]["plugins"])
+        data, errors = self.run_plugins()
         return data, errors
     
 
@@ -64,7 +68,7 @@ class PluginsRunner(object):
         check_arguments.check(self.__query.arguments, self.__query.ressource, self.__query.method)
 
 
-    def run_plugins(self, plugins):
+    def run_plugins(self):
         """
         Parcours les plugins et execute la méthode demandée
         """
@@ -73,7 +77,7 @@ class PluginsRunner(object):
         errors = {}
         plugin_loader = PluginLoader(self.__plugins_module)
     
-        for plugin_name, parameters_sets in plugins.iteritems():
+        for plugin_name, parameters_sets in self.plugins.iteritems():
             for parameters_index, parameters in enumerate(parameters_sets):
                 plugin = plugin_loader.get_plugin(plugin_name)
                 plugin_data = None
