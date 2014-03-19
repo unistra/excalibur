@@ -1,4 +1,4 @@
 excalibur
 =========
 
-A tool to manage plugins
+Un outil de gestion de plugins / A tool to manage plugins

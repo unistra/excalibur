@@ -5,3 +5,4 @@ excalibur/plugins
 .project
 .pydevproject
 .settings
+docs/build/
