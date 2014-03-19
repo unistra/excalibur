@@ -1,5 +1,5 @@
 project1:
-
+     sources:
         etab1:
             apikey: S3CR3T
             ip:
@@ -30,7 +30,7 @@ project1:
 
 
 project2:
-
+    sources:
         etab1:
             apikey: S3CR3T
             ip:
