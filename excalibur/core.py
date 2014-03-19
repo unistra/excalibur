@@ -19,7 +19,7 @@ class PluginsRunner(object):
     
     @property
     def plugins(self):
-        return self.__sources[self.__query.source]["plugins"]
+       return self.sources[self.__query.source]["plugins"]
         
     @property
     def acl(self):
@@ -27,7 +27,10 @@ class PluginsRunner(object):
     
     @property
     def sources(self):
-        return self.__sources
+        if self.__query.project:
+            return self.__sources[self.__query.project]["sources"]
+        else:
+            return self.__sources
 
     @property
     def ressources(self):
@@ -52,11 +55,11 @@ class PluginsRunner(object):
         check all yml
         """
         
-        check_source = CheckSource(self.__sources)
+        check_source = CheckSource(self.sources)
         check_source.check(self.__query.source, self.__query.remote_ip, self.__query.signature, self.__query.arguments)
         
         check_acl = CheckACL(self.__acl)
-        check_acl.check(self.__query.source, self.__query.ressource, self.__query.method)
+        check_acl.check(self.__query.source, self.__query.ressource, self.__query.method,self.__query.project)
         
         check_request = CheckRequest(self.__ressources)
         check_request.check(self.__query.request_method, self.__query.ressource, self.__query.method, self.__query.arguments)
@@ -150,4 +153,3 @@ class Query(object):
     @property
     def request_method(self):
         return self.__request_method
-

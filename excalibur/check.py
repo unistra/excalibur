@@ -79,9 +79,13 @@ class CheckACL(Check):
     def __init__(self, acl):
         self.acl = acl
 
-    def check(self, source, ressource, method):
-        if method not in self.acl[source][ressource]:
-            raise NoACLMatchedError("%s/%s" % (ressource, method))
+    def check(self, source, ressource, method, project=None):
+        if project:
+            if method not in self.acl[project][source][ressource]:
+                raise NoACLMatchedError("%s/%s" % (ressource, method))
+        else:
+            if method not in self.acl[source][ressource]:
+                raise NoACLMatchedError("%s/%s" % (ressource, method))
 
 
 class CheckRequest(Check):
