@@ -83,7 +83,7 @@ class PluginsRunner(object):
         errors = {}
         plugin_loader = PluginLoader(self.__plugins_module)
 
-        for plugin_name, parameters_sets in self.plugins.iteritems():
+        for plugin_name, parameters_sets in self.plugins.items():
             for parameters_index, parameters in enumerate(parameters_sets):
                 plugin = plugin_loader.get_plugin(plugin_name)
                 plugin_data = None

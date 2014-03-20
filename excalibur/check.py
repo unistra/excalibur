@@ -53,7 +53,7 @@ class CheckArguments(Check):
                         errors[argument_name] = check
                 except AttributeError:
                     raise ArgumentCheckMethodNotFoundError(check_method_name)
-                except Exception, e:
+                except Exception as e:
                     # Erreur dans la 'check method'
                     raise CheckMethodError(e)
 
@@ -150,7 +150,7 @@ class CheckSource(Check):
         for argument in arguments_list:
             to_hash += (argument + arguments[argument])
 
-        signkey = hashlib.sha1(to_hash).hexdigest()
+        signkey = hashlib.sha1(to_hash.encode("utf-8")).hexdigest()
 
         if signature != signkey:
             raise WrongSignatureError(signature)
