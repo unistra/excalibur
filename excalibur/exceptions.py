@@ -14,7 +14,34 @@ class ExcaliburError(Exception):
         return self.message
 
 
-class ConfigurationLoaderError(ExcaliburError):
+
+class ExcaliburClientError(ExcaliburError):
+
+    """
+    base exception for excalibur
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(ExcaliburClientError, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        return self.message
+
+
+class ExcaliburInternalError(ExcaliburError):
+
+    """
+    base exception for excalibur
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(ExcaliburInternalError, self).__init__(*args, **kwargs)
+
+    def __str__(self):
+        return self.message
+
+
+class ConfigurationLoaderError(ExcaliburInternalError):
 
     """
     base exception for configuration loader
@@ -28,7 +55,7 @@ class ConfigurationLoaderError(ExcaliburError):
         return self.message
 
 
-class PluginLoaderError(ExcaliburError):
+class PluginLoaderError(ExcaliburInternalError):
 
     """
     base exception for plugin loader
@@ -42,7 +69,7 @@ class PluginLoaderError(ExcaliburError):
         return self.message
 
 
-class ArgumentError(ExcaliburError):
+class ArgumentError(ExcaliburClientError):
 
     """
     check error
@@ -56,7 +83,7 @@ class ArgumentError(ExcaliburError):
         return self.message
 
 
-class ArgumentCheckMethodNotFoundError(ExcaliburError):
+class ArgumentCheckMethodNotFoundError(ExcaliburInternalError):
 
     """
     check error
@@ -70,7 +97,7 @@ class ArgumentCheckMethodNotFoundError(ExcaliburError):
         return self.message
 
 
-class CheckMethodError(ExcaliburError):
+class CheckMethodError(ExcaliburInternalError):
 
     """
     check error
@@ -84,7 +111,7 @@ class CheckMethodError(ExcaliburError):
         return self.message
 
 
-class NoACLMatchedError(ExcaliburError):
+class NoACLMatchedError(ExcaliburClientError):
 
     """
     check error
@@ -98,7 +125,7 @@ class NoACLMatchedError(ExcaliburError):
         return self.message
 
 
-class RessourceNotFoundError(ExcaliburError):
+class RessourceNotFoundError(ExcaliburClientError):
 
     """
     check error
@@ -112,7 +139,7 @@ class RessourceNotFoundError(ExcaliburError):
         return self.message
 
 
-class MethodNotFoundError(ExcaliburError):
+class MethodNotFoundError(ExcaliburClientError):
 
     """
     check error
@@ -126,7 +153,7 @@ class MethodNotFoundError(ExcaliburError):
         return self.message
 
 
-class HTTPMethodError(ExcaliburError):
+class HTTPMethodError(ExcaliburClientError):
 
     """
     check error
@@ -140,7 +167,7 @@ class HTTPMethodError(ExcaliburError):
         return self.message
 
 
-class SourceNotFoundError(ExcaliburError):
+class SourceNotFoundError(ExcaliburClientError):
 
     """
     check error
@@ -154,7 +181,7 @@ class SourceNotFoundError(ExcaliburError):
         return self.message
 
 
-class IPNotAuthorizedError(ExcaliburError):
+class IPNotAuthorizedError(ExcaliburClientError):
 
     """
     check error
@@ -168,7 +195,7 @@ class IPNotAuthorizedError(ExcaliburError):
         return self.message
 
 
-class WrongSignatureError(ExcaliburError):
+class WrongSignatureError(ExcaliburClientError):
 
     """
     check error
@@ -182,7 +209,7 @@ class WrongSignatureError(ExcaliburError):
         return self.message
 
 
-class DecodeAlgorithmNotFoundError(ExcaliburError):
+class DecodeAlgorithmNotFoundError(ExcaliburInternalError):
 
     """
     check error
@@ -195,16 +222,3 @@ class DecodeAlgorithmNotFoundError(ExcaliburError):
     def __str__(self):
         return self.message
 
-
-class RunPluginsError(ExcaliburError):
-
-    """
-    check error
-    """
-
-    def __init__(self, message, *args, **kwargs):
-        super(RunPluginsError, self).__init__(*args, **kwargs)
-        self.message = '%s : %s' % (self.__class__.__name__, message)
-
-    def __str__(self):
-        return self.message
