@@ -31,7 +31,7 @@ class PluginsTest(TestCase):
 
         # Files
         self.plugin_runner = PluginsRunner(
-            "./data/acl.yml", "./data/sources.yml", "./data/ressources.yml", "tests.plugins", self.query)
+            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query)
 
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
         self.errors_raw = {'Plugin1': {'method': 'action2', 'source': 'etab1', 'arguments': {'login': 'testzombie1'}, 'error': 'Exception', 'ressource': 'actions', 'parameters_index': 0}, 'Plugin2': {
@@ -45,7 +45,7 @@ class PluginsTest(TestCase):
 
     def test_run_plugins_error(self):
         plugin_runner = PluginsRunner(
-            "./data/acl.yml", "./data/sources.yml", "./data/ressources.yml", "tests.plugins", self.query2)
+            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query2)
         data, errors = plugin_runner.run_plugins()
 
         self.assertEqual(errors, self.errors_raw)
@@ -75,7 +75,7 @@ class RunnerTest(TestCase):
                             )
 
         self.plugin_runner = PluginsRunner(
-            "./data/acl.yml", "./data/sources.yml", "./data/ressources.yml", "tests.plugins", self.query)
+            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query)
 
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
         self.errors_raw = {'Plugin1': {'method': 'action2', 'source': 'etab1', 'arguments': {'login': 'testzombie1'}, 'error': 'Exception', 'ressource': 'actions', 'parameters_index': 0}, 'Plugin2': {
@@ -89,7 +89,7 @@ class RunnerTest(TestCase):
     def test_runner_errors(self):
 
         plugin_runner = PluginsRunner(
-            "./data/acl.yml", "./data/sources.yml", "./data/ressources.yml", "tests.plugins", self.query2)
+            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query2)
         data, errors = plugin_runner()
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})
@@ -120,7 +120,7 @@ class RunnerWithProjectsTest(TestCase):
                             )
 
         self.plugin_runner = PluginsRunner(
-            "./data/acl_projects.yml", "./data/sources_projects.yml", "./data/ressources.yml", "tests.plugins", self.query)
+            "./tests/data/acl_projects.yml", "./tests/data/sources_projects.yml", "./tests/data/ressources.yml", "tests.plugins", self.query)
 
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
         self.errors_raw = {'Plugin1': {'method': 'action2', 'source': 'etab1', 'arguments': {'login': 'testzombie1'}, 'error': 'Exception', 'ressource': 'actions', 'parameters_index': 0}, 'Plugin2': {
@@ -134,7 +134,7 @@ class RunnerWithProjectsTest(TestCase):
     def test_runner_errors(self):
 
         plugin_runner = PluginsRunner(
-            "./data/acl_projects.yml", "./data/sources_projects.yml", "./data/ressources.yml", "tests.plugins", self.query2)
+            "./tests/data/acl_projects.yml", "./tests/data/sources_projects.yml", "./tests/data/ressources.yml", "tests.plugins", self.query2)
         data, errors = plugin_runner()
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})

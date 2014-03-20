@@ -31,7 +31,7 @@ class CheckTest(TestCase):
         )
         # Files
         self.plugin_runner = PluginsRunner(
-            "./data/acl.yml", "./data/sources.yml", "./data/ressources.yml", "tests.plugins", self.query)
+            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query)
 
     """
     Check Source

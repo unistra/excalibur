@@ -1,8 +1,9 @@
 *.sublime-*
 *.egg-info
-excalibur/plugins
 *.pyc
 .project
 .pydevproject
 .settings
 docs/build/
+.coverage
+htmlcov
