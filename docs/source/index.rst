@@ -13,8 +13,8 @@ Excalibur
 Documentation
 =============
 
-L'ensemble de cette documentation est valable pour la version 2.7 de
-Python. Elle est composée de détails relatifs à son installation, à sa configuration et à son utilisation.
+This documentation is Python 2.7, 3.2, 3.3 compliant.
+It contains details concerning its installation, configuration and usage.
 
 .. toctree::
 
@@ -24,12 +24,10 @@ Python. Elle est composée de détails relatifs à son installation, à sa confi
 
 
 
-Développement
+Development
 -------------
 
-Cette :doc:`section <development>` documentera les liens vers le dépôt des sources, les futures
-fonctionnalités de la librairie et les conseils pour le développement de
-nouvelles fonctionnalités de la librairie
+This :doc:`section <development>` should contain revelant links to the code repository, incoming features of the lib, and directives for future contributors.
 
 .. toctree::
    :hidden:

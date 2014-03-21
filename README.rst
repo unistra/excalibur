@@ -1,9 +1,9 @@
 excalibur
 =========
 
-Un outil de gestion de plugins / A tool to manage plugins
+A tool to manage plugins.
 
-Pour plus d'information consultez la documentation sphinx / For more information have a look at sphinx's documentation
+For more information have a look at sphinx's documentation.
 
 .. image:: https://secure.travis-ci.org/unistra/excalibur.png?branch=master
     :target: https://travis-ci.org/unistra/excalibur

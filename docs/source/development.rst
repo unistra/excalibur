@@ -1,15 +1,15 @@
-=============
-Développement
-=============
+===========
+Development
+===========
 
-Sources et gestion des évolutions
-=================================
+Sources and evolution management
+================================
 
-* Pour obtenir les sources de l'application: ::
+* To obtain the application's sources: ::
 
     $> git clone https://github.com/unistra/excalibur.git
 
-* Installer l'environnement de développement avec virtualenv et distribute: ::
+* To install the development environment using virtualenv and distribute: ::
 
     $> mkvirtualenv excalibur
     $> cd excalibur

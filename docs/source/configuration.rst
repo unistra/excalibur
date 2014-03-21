@@ -2,15 +2,15 @@
 Configuration
 =============
 
-Toutes les configurations de cette librairie seront réalisées via des fichiers yaml.
+All settings directives are done by yaml files.
 
 
 sources.yml
 ===========
 
-Paramétrage de l'api et des plugins en fonction des établissements.
+Api configuration by sources.
 
-Exemple : ::
+Example : ::
 
 	uds:
 		apikey: S3CR3T
@@ -58,28 +58,29 @@ Exemple : ::
 		...
 
 
-On peut également rajouter un niveau supérieur par projet si besoin.
+A further level can be set in order to manage sources by projects.
 
-Exemple : ::
+Example : ::
 
 	project1:
-	    etab1:
+	    source1:
 	        ...
 
-	    etab2:
+	    source2:
 	        ...
 
 	project2:
-	    etab1:
+	    source1:
 	        ...
 
 
 ressources.yml
 ==============
 
-Description des méthodes et des arguments en fonction des établissements.
 
-Exemple : ::
+Methods and arguments descriptions by sources.
+
+Example : ::
 
 	user:
 		setpassword:
@@ -101,9 +102,9 @@ Exemple : ::
 acl.yml
 =======
 
-Liste des méthodes autorisées en fonction des établissements.
+List of allowed methods by sources.
 
-Exemple : ::
+Example : ::
 
 	uds:
 		user:
@@ -114,44 +115,44 @@ Exemple : ::
 		user:
 			- setpassword
 
-On peut également rajouter un niveau supérieur par projet si besoin.
+A further level can be specified to manage sources by project.
 
-Exemple : ::
+Example : ::
 
 	project1:
-	    etab1:
+	    source1:
 	        actions:
 	            - action1
 	            - action2
 
-	    etab2:
+	    source2:
 	        actions:
 	            - action1
 
 	project2:
-	    etab1:
+	    source1:
 	        actions:
 	            - action1
 	            - action2
 
 
-module plugins
+plugins module
 ==============
 
-Un module réservé aux plugins doit être présent dans votre application.
+A private module dedicated to plugins must be present in your app.
 
-Celui-ci sera présenté de la manière suivante : ::
+It should conform to the following format : ::
 
 	plugins
 		Plugin1.py
 		Plugin2.py
 		Plugin3.py
 
-Chaque fichier doit contenir une classe du même nom.
-Cette classe doit contenir les méthodes disponibles décrits dans les fichiers de configuration précédents.
-Ces méthodes doivent prendre comme arguments "parameters" et "arguments" et peuvent retourner des données.
+Each plugin class must be contained in an homonymous .py.
+This class must contain all the methods that the yml description files describe as available.
+Those methods signatures should at least be able to take as arguments "parameters" and "arguments", their return type is up to you.
 
-Exemple : ::
+Example : ::
 
 	class Plugin1(object) :
 
@@ -168,9 +169,16 @@ Exemple : ::
 			return data
 
 
-Dans un projet django
-=====================
+In a Django project
+===================
 
-Dans le settings.py de votre projet django, il faudra définir les chemins de vos fichiers yaml et le chemin du module de plugins de la manière suivante :
+In your django project's settings.py, the yaml file paths and the plugins module's name should be specified, for instance : ::
 
-TODO
+	from os.path import abspath, basename, dirname, join, normpath
+
+	SETTINGS_ROOT = dirname(abspath(__file__))
+	
+	EXCALIBUR_SOURCES_FILE = join(SETTINGS_ROOT, "sources.yml")
+	EXCALIBUR_RESSOURCES_FILE = join(SETTINGS_ROOT, "ressources.yml")
+	EXCALIBUR_ACL_FILE = join(SETTINGS_ROOT, "acl.yml")
+	EXCALIBUR_PLUGINS_MODULE = "yourproject.yourapp.plugins"
