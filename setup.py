@@ -15,25 +15,28 @@ with open('requirements.txt') as requirements:
 
 setup(
     name='excalibur',
-    version='0.0.1',
-    author='DIP',
+    version='1.0.0',
+    author='di-dip-unistra',
     author_email='di-dip@unistra.fr',
-    maintainer='DIP',
+    maintainer='di-dip-unistra',
     maintainer_email='di-dip@unistra.fr',
     url='https://github.com/unistra/excalibur',
     license='PSF',
     description='A tool to manage plugins',
     long_description=long_description,
     packages=find_packages(),
-    download_url='https://github.com/unistra/excalibur',
+    download_url='http://pypi.python.org/pypi/excalibur',
     install_requires=libraries,
     dependency_links=dependency_links,
-    keywords=['plugins', 'yaml'],
+    keywords=['plugins', 'yaml', 'parser'],
+    entry_points={},
     classifiers=(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3'
     )
 )
