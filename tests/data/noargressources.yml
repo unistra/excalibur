@@ -1,0 +1,6 @@
+actions:
+    action1:
+        request method: GET
+
+    action2:
+        request method: GET

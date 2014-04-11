@@ -5,9 +5,13 @@ from unittest import TestCase, main
 from excalibur.decode import DecodeArguments
 from excalibur.loader import ConfigurationLoader
 from excalibur.check import CheckSource, CheckACL, CheckRequest, CheckArguments
-from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError, WrongSignatureError, NoACLMatchedError,\
-    RessourceNotFoundError, MethodNotFoundError, HTTPMethodError, ArgumentError, ArgumentCheckMethodNotFoundError,ExcaliburError
+from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError,\
+    WrongSignatureError, NoACLMatchedError,RessourceNotFoundError,\
+    MethodNotFoundError, HTTPMethodError, ArgumentError, \
+    ArgumentCheckMethodNotFoundError,ExcaliburError,DecodeAlgorithmNotFoundError
 from excalibur.core import PluginsRunner, Query
+import base64
+
 
 
 class CheckTest(TestCase):
@@ -180,7 +184,6 @@ class CheckTest(TestCase):
             source="etab1",
             remote_ip="127.0.0.1",
             arguments={"login": "testzombie1", },
-            signature="",
             ressource="actions",
             method="action1",
             request_method="GET"
@@ -220,11 +223,90 @@ class CheckTest(TestCase):
          except Exception as e:
              error = "error"
          self.assertTrue(error == None)
+         
     def test_encode_base64(self):
-        pass
+       
+        encodedzombie = base64.b64encode("testzombie1")
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            arguments={"login": encodedzombie, },
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            ressource="actions",
+            method="action1",
+            request_method="GET")
+        plugin_runner = PluginsRunner(
+        "./tests/data/acl.yml",
+        "./tests/data/sources.yml",
+        "./tests/data/ressourceswithencodingrequired.yml",
+        "tests.plugins",
+        query)
+        decode_arguments = DecodeArguments(plugin_runner.ressources)
+        decode_arguments.decode(
+            plugin_runner.query.ressource, plugin_runner.query.method,
+            plugin_runner.query.arguments)
+        self.assertEqual(query.arguments["login"],"testzombie1")
+        self.assertTrue(query.arguments["login"]=="testzombie1")  
+        
+    def test_encode_base64_attribute_error(self):
+        with self.assertRaises(DecodeAlgorithmNotFoundError):
+            encodedzombie = base64.b64encode("testzombie1")
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                arguments={"login": encodedzombie, },
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                ressource="actions",
+                method="action1",
+                request_method="GET")
+            plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sources.yml",
+            "./tests/data/ressourceswithundecodableencoding.yml",
+            "tests.plugins",
+            query)
+            decode_arguments = DecodeArguments(plugin_runner.ressources)
+            decode_arguments.decode(
+                plugin_runner.query.ressource, plugin_runner.query.method,
+                plugin_runner.query.arguments)
+        
+    def test_encode_base64_key_error(self):
+        try:
+            encodedzombie = base64.b64encode("testzombie1")
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                arguments={"login": encodedzombie, },
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                ressource="actions",
+                method="action1",
+                request_method="GET")
+            plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sources.yml",
+            "./tests/data//noargressources.yml",
+            "tests.plugins",
+            query)
+            decode_arguments = DecodeArguments(plugin_runner.ressources)
+            decode_arguments.decode(
+                plugin_runner.query.ressource, plugin_runner.query.method,
+                plugin_runner.query.arguments)
+            
+        except Exception as e: 
+             self.assertTrue(isinstance(e,ExcaliburError))
+           
+            
+        
     def test_key_errors(self):
+        """
+        KeyErrors should not be explicitly raised,
+        they should instead be caught, and raise
+        ExcaliburErrors.
+        """
         
-        
+        """
+        Generate queries with wrong values and launches checks
+        """
         def query_generator(pos):
             query = Query(
             source="etab1",
