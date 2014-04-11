@@ -297,7 +297,19 @@ class CheckTest(TestCase):
              self.assertTrue(isinstance(e,ExcaliburError))
            
     def test_all_error_risen(self): 
-       pass
+        module = import_module('excalibur.exceptions') 
+        message = "message sublime"
+        def str_caller(e):
+            exception_class= getattr(module,e)
+             
+            exception_instance = exception_class(message)
+            if not exception_instance.__class__.__name__ in ['ExcaliburInternalError','ExcaliburClientError','ExcaliburError']:
+                self.assertEqual ('%s : %s' % (exception_instance.__class__.__name__, message),exception_instance.__str__())
+            else:
+                self.assertEqual (message,exception_instance.__str__())
+             
+             
+        [str_caller(error) for error in dir(module) if not error.startswith('_') ]
         
     def test_key_errors(self):
         """

@@ -11,6 +11,7 @@ class ExcaliburError(Exception):
         super(ExcaliburError, self).__init__(*args, **kwargs)
 
     def __str__(self):
+        
         return self.message
 
 
@@ -49,7 +50,7 @@ class ConfigurationLoaderError(ExcaliburInternalError):
 
     def __init__(self, message, *args, **kwargs):
         super(ConfigurationLoaderError, self).__init__(*args, **kwargs)
-        self.message = '%s : %s ' % (self.__class__.__name__, message)
+        self.message = '%s : %s' % (self.__class__.__name__, message)
 
     def __str__(self):
         return self.message
