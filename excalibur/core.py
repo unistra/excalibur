@@ -123,7 +123,7 @@ class Query(object):
     """
     """
 
-    def __init__(self, source, remote_ip, signature, ressource, method, request_method, project=None, arguments=None):
+    def __init__(self, source, remote_ip, ressource, method, request_method, signature=None, project=None, arguments=None):
         self.__project = project
         self.__source = source
         self.__remote_ip = remote_ip

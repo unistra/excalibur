@@ -220,7 +220,8 @@ class CheckTest(TestCase):
          except Exception as e:
              error = "error"
          self.assertTrue(error == None)
-    
+    def test_encode_base64(self):
+        pass
     def test_key_errors(self):
         
         
