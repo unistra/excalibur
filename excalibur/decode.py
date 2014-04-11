@@ -27,9 +27,9 @@ class DecodeArguments(object):
         """
         try:
             for argument_name in arguments:
-                if "encoding" in self.ressources[ressource][method_name]["arguments"][argument_name]['checks']:
+                if "encoding" in self.ressources[ressource][method_name]["arguments"][argument_name]:
                     algo = self.ressources[ressource][method_name][
-                        "arguments"][argument_name]['checks']["encoding"]
+                        "arguments"][argument_name]["encoding"]
                     method = getattr(self, "decode_" + algo)
                     arguments[argument_name] = method(arguments[argument_name])
         except KeyError:

@@ -6,7 +6,7 @@ actions:
                 checks:
                     min length: 2
                     max length: 50
-                    encoding: base200000
+                encoding: base200000
 
     action2:
         request method: GET
@@ -15,4 +15,4 @@ actions:
                 checks:
                     min length: 2
                     max length: 50
-                    encoding: base200000
+                encoding: base200000

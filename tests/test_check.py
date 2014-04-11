@@ -11,6 +11,7 @@ from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError,\
     ArgumentCheckMethodNotFoundError,ExcaliburError,DecodeAlgorithmNotFoundError
 from excalibur.core import PluginsRunner, Query
 import base64
+from importlib import import_module
 
 
 
@@ -295,7 +296,8 @@ class CheckTest(TestCase):
         except Exception as e: 
              self.assertTrue(isinstance(e,ExcaliburError))
            
-            
+    def test_all_error_risen(self): 
+       pass
         
     def test_key_errors(self):
         """
