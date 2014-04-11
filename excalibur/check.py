@@ -86,12 +86,15 @@ class CheckACL(Check):
         self.acl = acl
 
     def check(self, source, ressource, method, project=None):
-        if project:
-            if method not in self.acl[project][source][ressource]:
-                raise NoACLMatchedError("%s/%s" % (ressource, method))
-        else:
-            if method not in self.acl[source][ressource]:
-                raise NoACLMatchedError("%s/%s" % (ressource, method))
+        try:
+            if project:
+                if method not in self.acl[project][source][ressource]:
+                    raise NoACLMatchedError("%s/%s" % (ressource, method))
+            else:
+                if method not in self.acl[source][ressource]:
+                    raise NoACLMatchedError("%s/%s" % (ressource, method))
+        except KeyError:
+            raise NoACLMatchedError("%s/%s" % (ressource, method))
 
 
 class CheckRequest(Check):
@@ -107,21 +110,24 @@ class CheckRequest(Check):
         self.ressources = ressources
 
     def check(self, http_method, ressource, method, arguments):
-        if ressource not in self.ressources:
-            raise RessourceNotFoundError(ressource)
-        if method not in self.ressources[ressource]:
-            raise MethodNotFoundError(method)
-        if http_method != self.ressources[ressource][method]["request method"]:
-            raise HTTPMethodError(
-                self.ressources[ressource][method]["request method"])
-
-        expected_nb_arguments = len(
-            self.ressources[ressource][method]["arguments"])
-        received_nb_arguments = len(arguments)
-
-        if expected_nb_arguments != received_nb_arguments:
-            raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (
-                received_nb_arguments, expected_nb_arguments))
+        try:
+            if ressource not in self.ressources:
+                raise RessourceNotFoundError(ressource)
+            if method not in self.ressources[ressource]:
+                raise MethodNotFoundError(method)
+            if http_method != self.ressources[ressource][method]["request method"]:
+                raise HTTPMethodError(
+                    self.ressources[ressource][method]["request method"])
+    
+            expected_nb_arguments = len(
+                self.ressources[ressource][method]["arguments"])
+            received_nb_arguments = len(arguments)
+    
+            if expected_nb_arguments != received_nb_arguments:
+                raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (
+                    received_nb_arguments, expected_nb_arguments))
+        except KeyError:
+            raise ArgumentError("key not found in sources")
 
 
 class CheckSource(Check):
@@ -134,23 +140,30 @@ class CheckSource(Check):
     def __init__(self, sources):
         self.sources = sources
 
-    def check(self, source, ip, signature, arguments):
-        if source not in self.sources:
-            raise SourceNotFoundError("Unknown source %s" % source)
-
-        # Check if IP is authorized
-        if ip not in self.sources[source]["ip"]:
-            raise IPNotAuthorizedError(ip)
-
-        # Signature check
-        arguments_list = sorted(arguments)
-
-        to_hash = self.sources[source]["apikey"]
-
-        for argument in arguments_list:
-            to_hash += (argument + arguments[argument])
-
-        signkey = hashlib.sha1(to_hash.encode("utf-8")).hexdigest()
-
-        if signature != signkey:
-            raise WrongSignatureError(signature)
+    def check(self, source, ip, signature, arguments, sha1check=True):
+        try:
+            if source not in self.sources:
+                raise SourceNotFoundError("Unknown source %s" % source)
+    
+            # Check if IP is authorized
+            if ip not in self.sources[source]["ip"]:
+                raise IPNotAuthorizedError(ip)
+            
+            # Signature check
+            if sha1check:
+                arguments_list = sorted(arguments)
+        
+                to_hash = self.sources[source]["apikey"]
+        
+                for argument in arguments_list:
+                    to_hash += (argument + arguments[argument])
+        
+                signkey = hashlib.sha1(to_hash.encode("utf-8")).hexdigest()
+        
+                if signature != signkey: 
+                    raise WrongSignatureError(signature)
+        except KeyError:
+            raise SourceNotFoundError("key was not found in sources")
+        except TypeError:
+            raise SourceNotFoundError("key was not found in sources")
+            

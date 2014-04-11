@@ -67,6 +67,19 @@ class PluginLoaderError(ExcaliburInternalError):
 
     def __str__(self):
         return self.message
+    
+class PluginRunnerError(ExcaliburInternalError):
+
+    """
+    base exception for plugin runner
+    """
+
+    def __init__(self, message, *args, **kwargs):
+        super(PluginRunnerError, self).__init__(*args, **kwargs)
+        self.message = '%s : %s' % (self.__class__.__name__, message)
+
+    def __str__(self):
+        return self.message
 
 
 class ArgumentError(ExcaliburClientError):

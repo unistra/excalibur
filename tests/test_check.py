@@ -6,7 +6,7 @@ from excalibur.decode import DecodeArguments
 from excalibur.loader import ConfigurationLoader
 from excalibur.check import CheckSource, CheckACL, CheckRequest, CheckArguments
 from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError, WrongSignatureError, NoACLMatchedError,\
-    RessourceNotFoundError, MethodNotFoundError, HTTPMethodError, ArgumentError, ArgumentCheckMethodNotFoundError
+    RessourceNotFoundError, MethodNotFoundError, HTTPMethodError, ArgumentError, ArgumentCheckMethodNotFoundError,ExcaliburError
 from excalibur.core import PluginsRunner, Query
 
 
@@ -174,6 +174,104 @@ class CheckTest(TestCase):
             self.plugin_runner.check_all()
         except:
             self.fail("error check all")
+            
+    def test_signature_not_required(self):
+         query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            arguments={"login": "testzombie1", },
+            signature="",
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+         error = None
+         try:
+             plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml", 
+                "./tests/data/sources.yml", 
+                "./tests/data/ressources.yml",
+                "tests.plugins",
+                query,
+                check_signature=False)
+         except Exception as e:
+             error = "error"
+         self.assertTrue(error == None)
+         
+    def test_signature_explicitely_required(self):
+         query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            arguments={"login": "testzombie1", },
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+         error = None
+         try:
+             plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml", 
+                "./tests/data/sources.yml", 
+                "./tests/data/ressources.yml",
+                "tests.plugins",
+                query,
+                check_signature=True)
+         except Exception as e:
+             error = "error"
+         self.assertTrue(error == None)
+    
+    def test_key_errors(self):
+        
+        
+        def query_generator(pos):
+            query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+            setattr(query,pos,"wrong")
+            plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml", "./tests/data/sources.yml", 
+            "./tests/data/ressources.yml", 
+            "tests.plugins", 
+            query)
+            
+            #with self.assertRaises(ExcaliburError):
+            try:
+                CheckSource(plugin_runner.sources).check(
+                    plugin_runner.query.source, plugin_runner.query.remote_ip, 
+                    plugin_runner.query.signature,
+                     plugin_runner.query.arguments)
+                CheckRequest(plugin_runner.ressources).check(
+                    plugin_runner.query.request_method,
+                    plugin_runner.query.ressource, 
+                    plugin_runner.query.method, 
+                    plugin_runner.query.arguments)
+                CheckArguments(plugin_runner.ressources).check(
+                    plugin_runner.query.arguments,
+                    plugin_runner.query.ressource,
+                    plugin_runner.query.method)
+                CheckACL(plugin_runner.acl).check(
+                    plugin_runner.query.source,
+                    plugin_runner.query.ressource,
+                    plugin_runner.query.method,
+                    project=None)
+                
+            except Exception as e:
+                self.assertTrue(isinstance(e,ExcaliburError))
+            
+            return query
+            
+        query_generator_by_arg = lambda pos : query_generator(pos)
+        
+        [query_generator_by_arg(attr) for attr in dir(self.query) \
+         if attr.startswith("_Query") and not attr in ["_Query__remote_ip"]]
+        
 
 
 if __name__ == '__main__':

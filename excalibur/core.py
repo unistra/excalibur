@@ -6,20 +6,25 @@ class to run all the process
 from excalibur.loader import ConfigurationLoader, PluginLoader
 from excalibur.check import CheckACL, CheckArguments, CheckRequest, CheckSource
 from excalibur.decode import DecodeArguments
+from excalibur.exceptions import PluginRunnerError
 
 
 class PluginsRunner(object):
 
-    def __init__(self, acl_file, sources_file, ressources_file, plugins_module, query):
+    def __init__(self, acl_file, sources_file, ressources_file, plugins_module, query, check_signature=True):
         self.__acl = ConfigurationLoader(acl_file).content
         self.__sources = ConfigurationLoader(sources_file).content
         self.__ressources = ConfigurationLoader(ressources_file).content
         self.__plugins_module = plugins_module
         self.__query = query
+        self.__check_signature=check_signature
 
     @property
     def plugins(self):
-        return self.sources[self.__query.source]["plugins"]
+        try:
+            return self.sources[self.__query.source]["plugins"]
+        except KeyError:
+            raise PluginRunnerError("no such plugin found")
 
     @property
     def acl(self):
@@ -28,7 +33,10 @@ class PluginsRunner(object):
     @property
     def sources(self):
         if self.__query.project:
-            return self.__sources[self.__query.project]["sources"]
+            try:
+                return self.__sources[self.__query.project]["sources"]
+            except KeyError:
+                raise PluginRunnerError("no such source found")
         else:
             return self.__sources
 
@@ -56,7 +64,7 @@ class PluginsRunner(object):
 
         check_source = CheckSource(self.sources)
         check_source.check(self.__query.source, self.__query.remote_ip,
-                           self.__query.signature, self.__query.arguments)
+                           self.__query.signature, self.__query.arguments,sha1check=self.__check_signature)
 
         check_acl = CheckACL(self.__acl)
         check_acl.check(self.__query.source, self.__query.ressource,
