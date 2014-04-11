@@ -227,7 +227,7 @@ class CheckTest(TestCase):
          
     def test_encode_base64(self):
        
-        encodedzombie = base64.b64encode("testzombie1")
+        encodedzombie = base64.b64encode(b"testzombie1")
         query = Query(
             source="etab1",
             remote_ip="127.0.0.1",
@@ -251,7 +251,7 @@ class CheckTest(TestCase):
         
     def test_encode_base64_attribute_error(self):
         with self.assertRaises(DecodeAlgorithmNotFoundError):
-            encodedzombie = base64.b64encode("testzombie1")
+            encodedzombie = base64.b64encode(b"testzombie1")
             query = Query(
                 source="etab1",
                 remote_ip="127.0.0.1",
@@ -273,7 +273,7 @@ class CheckTest(TestCase):
         
     def test_encode_base64_key_error(self):
         try:
-            encodedzombie = base64.b64encode("testzombie1")
+            encodedzombie = base64.b64encode(b"testzombie1")
             query = Query(
                 source="etab1",
                 remote_ip="127.0.0.1",

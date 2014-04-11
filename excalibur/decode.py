@@ -5,7 +5,7 @@ l'encodage en base64 pour palier au probleme de caracteres speciaux non geres pa
 les urls.
 """
 from excalibur.exceptions import ArgumentError, DecodeAlgorithmNotFoundError
-
+import base64
 
 class DecodeArguments(object):
 
@@ -43,5 +43,5 @@ class DecodeArguments(object):
         """
 
         # base64 decoding returns bytestrings
-        decoded_value = value.decode("base64").decode("utf-8")
+        decoded_value = base64.b64decode(value).decode("utf-8")
         return decoded_value

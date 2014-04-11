@@ -10,9 +10,6 @@ class ExcaliburError(Exception):
     def __init__(self, *args, **kwargs):
         super(ExcaliburError, self).__init__(*args, **kwargs)
 
-    def __str__(self):
-        
-        return self.message
 
 
 
@@ -25,8 +22,6 @@ class ExcaliburClientError(ExcaliburError):
     def __init__(self, *args, **kwargs):
         super(ExcaliburClientError, self).__init__(*args, **kwargs)
 
-    def __str__(self):
-        return self.message
 
 
 class ExcaliburInternalError(ExcaliburError):
@@ -38,8 +33,6 @@ class ExcaliburInternalError(ExcaliburError):
     def __init__(self, *args, **kwargs):
         super(ExcaliburInternalError, self).__init__(*args, **kwargs)
 
-    def __str__(self):
-        return self.message
 
 
 class ConfigurationLoaderError(ExcaliburInternalError):
