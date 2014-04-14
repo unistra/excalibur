@@ -62,9 +62,8 @@ class PluginsRunner(object):
         check all yml
         """
 
-        check_source = CheckSource(self.sources)
-        check_source.check(self.__query.source, self.__query.remote_ip,
-                           self.__query.signature, self.__query.arguments,sha1check=self.__check_signature)
+        check_source = CheckSource(self.query,self.sources,sha1check=self.__check_signature)
+        check_source.check()
 
         check_acl = CheckACL(self.__acl)
         check_acl.check(self.__query.source, self.__query.ressource,
