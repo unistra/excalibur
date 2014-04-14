@@ -45,35 +45,56 @@ class CheckTest(TestCase):
     def test_check_source(self):
         """ test check sources """
         try:
-            check_source = CheckSource(self.plugin_runner.sources)
-            check_source.check(self.plugin_runner.query.source, self.plugin_runner.query.remote_ip,
-                               self.plugin_runner.query.signature, self.plugin_runner.query.arguments)
+            check_source = CheckSource(self.query,self.plugin_runner.sources)
+            check_source.check()
         except:
             self.fail("Error check source")
 
     def test_check_source_not_found(self):
         """ test check sources """
-        source = "etabnull"
+        query1 = Query(
+            source="etabnull",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
         with self.assertRaises(SourceNotFoundError):
-            check_source = CheckSource(self.plugin_runner.sources)
-            check_source.check(source, self.plugin_runner.query.remote_ip,
-                               self.plugin_runner.query.signature, self.plugin_runner.query.arguments)
+            check_source = CheckSource(query1,self.plugin_runner.sources)
+            check_source.check()
 
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
-        remote_ip = "9.9.9.9"
+        query2 = Query(
+            source="etab1",
+            remote_ip="9.9.9.9",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
         with self.assertRaises(IPNotAuthorizedError):
-            check_source = CheckSource(self.plugin_runner.sources)
-            check_source.check(self.plugin_runner.query.source, remote_ip,
-                               self.plugin_runner.query.signature, self.plugin_runner.query.arguments)
+            check_source = CheckSource(query2,self.plugin_runner.sources)
+            check_source.check()
 
     def test_check_source_signature_error(self):
         """ test check sources """
-        signature = "ERROR"
+        query3 = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="ERROR",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+       
         with self.assertRaises(WrongSignatureError):
-            check_source = CheckSource(self.plugin_runner.sources)
-            check_source.check(self.plugin_runner.query.source, self.plugin_runner.query.remote_ip,
-                               signature, self.plugin_runner.query.arguments)
+            check_source = CheckSource(query3,self.plugin_runner.sources)
+            check_source.check()
 
     """
     Check ACL
@@ -304,7 +325,6 @@ class CheckTest(TestCase):
             plugin_runner.query.ressource, plugin_runner.query.method,
             plugin_runner.query.arguments)
         self.assertEqual(query.arguments["login"],"testzombie1")
-        self.assertTrue(query.arguments["login"]=="testzombie1")  
         
     def test_encode_base64_attribute_error(self):
         with self.assertRaises(DecodeAlgorithmNotFoundError):
@@ -397,10 +417,7 @@ class CheckTest(TestCase):
             
             #with self.assertRaises(ExcaliburError):
             try:
-                CheckSource(plugin_runner.sources).check(
-                    plugin_runner.query.source, plugin_runner.query.remote_ip, 
-                    plugin_runner.query.signature,
-                     plugin_runner.query.arguments)
+                CheckSource(query,plugin_runner.sources).check()
                 CheckRequest(plugin_runner.ressources).check(
                     plugin_runner.query.request_method,
                     plugin_runner.query.ressource, 

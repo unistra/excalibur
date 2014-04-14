@@ -133,37 +133,69 @@ class CheckRequest(Check):
 class CheckSource(Check):
 
     """
-    S'assure que la source est legitime en suivant les donnees presentes
-    dans le fichier sources.yml.
+    Ensures source legitimacy according to sources.yml file
     """
 
-    def __init__(self, sources):
+    def __init__(self,query, sources,sha1check=True):
         self.sources = sources
-
-    def check(self, source, ip, signature, arguments, sha1check=True):
-        try:
-            if source not in self.sources:
-                raise SourceNotFoundError("Unknown source %s" % source)
-    
+        self.source = query.source
+        self.ip = query.remote_ip
+        self.signature = query.signature
+        self.arguments = query.arguments
+        self.sha1check = sha1check
+       
+    def check(self):
+         
+          
+          try:
+            if self.source not in self.sources:
+                raise SourceNotFoundError("Unknown source %s" % self.source)
+     
             # Check if IP is authorized
-            if ip not in self.sources[source]["ip"]:
-                raise IPNotAuthorizedError(ip)
-            
+            if self.ip not in self.sources[self.source]["ip"]:
+                raise IPNotAuthorizedError(self.ip)
+             
             # Signature check
-            if sha1check:
-                arguments_list = sorted(arguments)
-        
-                to_hash = self.sources[source]["apikey"]
-        
+            if self.sha1check:
+                arguments_list = sorted(self.arguments)
+         
+                to_hash = self.sources[self.source]["apikey"]
+         
                 for argument in arguments_list:
-                    to_hash += (argument + arguments[argument])
-        
+                    to_hash += (argument + self.arguments[argument])
+         
                 signkey = hashlib.sha1(to_hash.encode("utf-8")).hexdigest()
-        
-                if signature != signkey: 
-                    raise WrongSignatureError(signature)
-        except KeyError:
-            raise SourceNotFoundError("key was not found in sources")
-        except TypeError:
-            raise SourceNotFoundError("key was not found in sources")
+         
+                if self.signature != signkey: 
+                    raise WrongSignatureError(self.signature)
+          except KeyError:
+                raise SourceNotFoundError("key was not found in sources")
+          except TypeError:
+                raise SourceNotFoundError("key was not found in sources")
+#     def check(self, source, ip, signature, arguments, sha1check=True):
+#         try:
+#             if source not in self.sources:
+#                 raise SourceNotFoundError("Unknown source %s" % source)
+#     
+#             # Check if IP is authorized
+#             if ip not in self.sources[source]["ip"]:
+#                 raise IPNotAuthorizedError(ip)
+#             
+#             # Signature check
+#             if sha1check:
+#                 arguments_list = sorted(arguments)
+#         
+#                 to_hash = self.sources[source]["apikey"]
+#         
+#                 for argument in arguments_list:
+#                     to_hash += (argument + arguments[argument])
+#         
+#                 signkey = hashlib.sha1(to_hash.encode("utf-8")).hexdigest()
+#         
+#                 if signature != signkey: 
+#                     raise WrongSignatureError(signature)
+#         except KeyError:
+#             raise SourceNotFoundError("key was not found in sources")
+#         except TypeError:
+#             raise SourceNotFoundError("key was not found in sources")
             
