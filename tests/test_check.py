@@ -36,7 +36,11 @@ class CheckTest(TestCase):
         )
         # Files
         self.plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query)
+            "./tests/data/acl.yml",
+            "./tests/data/sources.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",
+            self.query)
 
     """
     Check Source
@@ -145,7 +149,11 @@ class CheckTest(TestCase):
             project="project1"
         )
         plugin_runner = PluginsRunner(
-            "./tests/data/acl_projects.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", query3)
+            "./tests/data/acl_projects.yml", 
+            "./tests/data/sources.yml", 
+            "./tests/data/ressources.yml", 
+            "tests.plugins", 
+            query3)
         
         with self.assertRaises(NoACLMatchedError):
             CheckACL(query3,plugin_runner.acl)()
@@ -244,7 +252,8 @@ class CheckTest(TestCase):
     def test_check_arguments(self):
         """ test check arguments """
         try:
-            decode_arguments = DecodeArguments(self.plugin_runner.query,self.plugin_runner.ressources)()
+            DecodeArguments(self.plugin_runner.query,
+                            self.plugin_runner.ressources)()
             CheckArguments(self.query,self.plugin_runner.ressources)()
             
         except:
@@ -263,7 +272,8 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(ArgumentError):
-            DecodeArguments(self.plugin_runner.query,self.plugin_runner.ressources)()
+            DecodeArguments(self.plugin_runner.query,
+                            self.plugin_runner.ressources)()
             CheckArguments(query,self.plugin_runner.ressources)()
         
         query2 = Query(
@@ -435,11 +445,15 @@ class CheckTest(TestCase):
             
             exception_class= getattr(module,e)
             exception_instance = exception_class(message)
-            if not exception_instance.__class__.__name__ in ['ExcaliburInternalError','ExcaliburClientError','ExcaliburError']:
-                self.assertEqual ('%s : %s' % (exception_instance.__class__.__name__, message),exception_instance.__str__())
+            errorList = ['ExcaliburInternalError',
+                         'ExcaliburClientError',
+                         'ExcaliburError']
+            if not exception_instance.__class__.__name__ in errorList:
+                exceptionName = exception_instance.__class__.__name__
+                self.assertEqual ('%s : %s' % (exceptionName, message),
+                                  exception_instance.__str__())
             else:
                 self.assertEqual (message,exception_instance.__str__())
-             
              
         [str_caller(error) for error in dir(module) if not error.startswith('_') ]
         
