@@ -106,22 +106,26 @@ class CheckRequest(Check):
     Les criteres attendus sont definis dans le fichier ressources.yml.
     """
 
-    def __init__(self, ressources):
+    def __init__(self,query, ressources):
         self.ressources = ressources
-
-    def check(self, http_method, ressource, method, arguments):
+        self.http_method = query.request_method
+        self.method= query.method
+        self.arguments = query.arguments
+        self.ressource = query.ressource
+        
+    def __call__(self):
         try:
-            if ressource not in self.ressources:
-                raise RessourceNotFoundError(ressource)
-            if method not in self.ressources[ressource]:
-                raise MethodNotFoundError(method)
-            if http_method != self.ressources[ressource][method]["request method"]:
+            if self.ressource not in self.ressources:
+                raise RessourceNotFoundError(self.ressource)
+            if self.method not in self.ressources[self.ressource]:
+                raise MethodNotFoundError(self.method)
+            if self.http_method != self.ressources[self.ressource][self.method]["request method"]:
                 raise HTTPMethodError(
-                    self.ressources[ressource][method]["request method"])
+                    self.ressources[self.ressource][self.method]["request method"])
     
             expected_nb_arguments = len(
-                self.ressources[ressource][method]["arguments"])
-            received_nb_arguments = len(arguments)
+                self.ressources[self.ressource][self.method]["arguments"])
+            received_nb_arguments = len(self.arguments)
     
             if expected_nb_arguments != received_nb_arguments:
                 raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (
@@ -144,58 +148,26 @@ class CheckSource(Check):
         self.arguments = query.arguments
         self.sha1check = sha1check
        
-    def check(self):
+    def __call__(self):
          
-          
           try:
             if self.source not in self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
-     
             # Check if IP is authorized
             if self.ip not in self.sources[self.source]["ip"]:
                 raise IPNotAuthorizedError(self.ip)
-             
             # Signature check
             if self.sha1check:
                 arguments_list = sorted(self.arguments)
-         
                 to_hash = self.sources[self.source]["apikey"]
-         
                 for argument in arguments_list:
                     to_hash += (argument + self.arguments[argument])
-         
                 signkey = hashlib.sha1(to_hash.encode("utf-8")).hexdigest()
-         
                 if self.signature != signkey: 
                     raise WrongSignatureError(self.signature)
           except KeyError:
                 raise SourceNotFoundError("key was not found in sources")
           except TypeError:
                 raise SourceNotFoundError("key was not found in sources")
-#     def check(self, source, ip, signature, arguments, sha1check=True):
-#         try:
-#             if source not in self.sources:
-#                 raise SourceNotFoundError("Unknown source %s" % source)
-#     
-#             # Check if IP is authorized
-#             if ip not in self.sources[source]["ip"]:
-#                 raise IPNotAuthorizedError(ip)
-#             
-#             # Signature check
-#             if sha1check:
-#                 arguments_list = sorted(arguments)
-#         
-#                 to_hash = self.sources[source]["apikey"]
-#         
-#                 for argument in arguments_list:
-#                     to_hash += (argument + arguments[argument])
-#         
-#                 signkey = hashlib.sha1(to_hash.encode("utf-8")).hexdigest()
-#         
-#                 if signature != signkey: 
-#                     raise WrongSignatureError(signature)
-#         except KeyError:
-#             raise SourceNotFoundError("key was not found in sources")
-#         except TypeError:
-#             raise SourceNotFoundError("key was not found in sources")
+
             

@@ -45,8 +45,8 @@ class CheckTest(TestCase):
     def test_check_source(self):
         """ test check sources """
         try:
-            check_source = CheckSource(self.query,self.plugin_runner.sources)
-            check_source.check()
+            CheckSource(self.query,self.plugin_runner.sources)()
+           
         except:
             self.fail("Error check source")
 
@@ -62,8 +62,8 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(SourceNotFoundError):
-            check_source = CheckSource(query1,self.plugin_runner.sources)
-            check_source.check()
+            CheckSource(query1,self.plugin_runner.sources)()
+            
 
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
@@ -77,8 +77,8 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(IPNotAuthorizedError):
-            check_source = CheckSource(query2,self.plugin_runner.sources)
-            check_source.check()
+            CheckSource(query2,self.plugin_runner.sources)()
+            
 
     def test_check_source_signature_error(self):
         """ test check sources """
@@ -93,9 +93,7 @@ class CheckTest(TestCase):
         )
        
         with self.assertRaises(WrongSignatureError):
-            check_source = CheckSource(query3,self.plugin_runner.sources)
-            check_source.check()
-
+            CheckSource(query3,self.plugin_runner.sources)()
     """
     Check ACL
     """
@@ -139,53 +137,81 @@ class CheckTest(TestCase):
     def test_check_request(self):
         """ test check request """
         try:
-            check_request = CheckRequest(self.plugin_runner.ressources)
-            check_request.check(self.plugin_runner.query.request_method, self.plugin_runner.query.ressource,
-                                self.plugin_runner.query.method, self.plugin_runner.query.arguments)
+            CheckRequest(self.query,self.plugin_runner.ressources)()
         except:
             self.fail("error check request")
 
     def test_check_request_ressource_not_found(self):
         """ test check request """
-        ressource = "ressourcenull"
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="ressourcenull",
+            method="action1",
+            request_method="GET"
+        )
         with self.assertRaises(RessourceNotFoundError):
-            check_request = CheckRequest(self.plugin_runner.ressources)
-            check_request.check(self.plugin_runner.query.request_method, ressource,
-                                self.plugin_runner.query.method, self.plugin_runner.query.arguments)
+            CheckRequest(query,self.plugin_runner.ressources)()
 
     def test_check_request_method_not_found(self):
         """ test check request """
-        method = "methodnull"
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="methodnull",
+            request_method="GET"
+        )
         with self.assertRaises(MethodNotFoundError):
-            check_request = CheckRequest(self.plugin_runner.ressources)
-            check_request.check(self.plugin_runner.query.request_method,
-                                self.plugin_runner.query.ressource, method, self.plugin_runner.query.arguments)
+            CheckRequest(query,self.plugin_runner.ressources)()
 
     def test_check_request_method_http_error(self):
         """ test check request """
-        request_method = "GETnull"
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GETnull"
+        )
         with self.assertRaises(HTTPMethodError):
-            check_request = CheckRequest(self.plugin_runner.ressources)
-            check_request.check(request_method, self.plugin_runner.query.ressource,
-                                self.plugin_runner.query.method, self.plugin_runner.query.arguments)
+            CheckRequest(query,self.plugin_runner.ressources)()
+           
 
     def test_check_request_args_error(self):
         """ test check request """
-        arguments = "argumentsnull"
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments="argumentsnull",
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+        query2 = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments="argumentsnull",
+            ressource="actions",
+            method="action2",
+            request_method="GET"
+        )
         with self.assertRaises(ArgumentError):
-            check_request = CheckRequest(self.plugin_runner.ressources)
-            check_request.check(self.plugin_runner.query.request_method,
-                                self.plugin_runner.query.ressource, self.plugin_runner.query.method, arguments)
+            CheckRequest(query,self.plugin_runner.ressources)()
 
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressourceswrongcheck.yml", "tests.plugins", self.query)
 
         with self.assertRaises(ArgumentError):
-            check_request = CheckRequest(plugin_runner.ressources)
-            check_request.check(self.plugin_runner.query.request_method,
-                                self.plugin_runner.query.ressource, "action2", arguments)
-
-
+            CheckRequest(query2,plugin_runner.ressources)()
 
     """
     Check arguments
@@ -377,8 +403,8 @@ class CheckTest(TestCase):
         module = import_module('excalibur.exceptions') 
         message = "message sublime"
         def str_caller(e):
+            
             exception_class= getattr(module,e)
-             
             exception_instance = exception_class(message)
             if not exception_instance.__class__.__name__ in ['ExcaliburInternalError','ExcaliburClientError','ExcaliburError']:
                 self.assertEqual ('%s : %s' % (exception_instance.__class__.__name__, message),exception_instance.__str__())
@@ -417,12 +443,8 @@ class CheckTest(TestCase):
             
             #with self.assertRaises(ExcaliburError):
             try:
-                CheckSource(query,plugin_runner.sources).check()
-                CheckRequest(plugin_runner.ressources).check(
-                    plugin_runner.query.request_method,
-                    plugin_runner.query.ressource, 
-                    plugin_runner.query.method, 
-                    plugin_runner.query.arguments)
+                CheckSource(query,plugin_runner.sources)()
+                CheckRequest(query,plugin_runner.ressources)()
                 CheckArguments(plugin_runner.ressources).check(
                     plugin_runner.query.arguments,
                     plugin_runner.query.ressource,
