@@ -23,7 +23,7 @@ class ConfigurationLoaderTest(TestCase):
         self.raw_wrong = {'error': 'error'}
 
     def test_load_content_ok(self):
-        print(c.content)
+        c = ConfigurationLoader(self.file_path_ok)
         self.assertEqual(c.content, self.raw)
 
     def test_load_content_wrong(self):
