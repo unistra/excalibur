@@ -244,10 +244,7 @@ class CheckTest(TestCase):
     def test_check_arguments(self):
         """ test check arguments """
         try:
-            decode_arguments = DecodeArguments(self.plugin_runner.ressources)
-            decode_arguments.decode(
-                self.plugin_runner.query.ressource, self.plugin_runner.query.method, self.plugin_runner.query.arguments)
-
+            decode_arguments = DecodeArguments(self.plugin_runner.query,self.plugin_runner.ressources)()
             CheckArguments(self.query,self.plugin_runner.ressources)()
             
         except:
@@ -266,9 +263,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(ArgumentError):
-            decode_arguments = DecodeArguments(self.plugin_runner.ressources)
-            decode_arguments.decode(
-                self.plugin_runner.query.ressource, self.plugin_runner.query.method, self.query.arguments)
+            DecodeArguments(self.plugin_runner.query,self.plugin_runner.ressources)()
             CheckArguments(query,self.plugin_runner.ressources)()
         
         query2 = Query(
@@ -389,10 +384,7 @@ class CheckTest(TestCase):
         "./tests/data/ressourceswithencodingrequired.yml",
         "tests.plugins",
         query)
-        decode_arguments = DecodeArguments(plugin_runner.ressources)
-        decode_arguments.decode(
-            plugin_runner.query.ressource, plugin_runner.query.method,
-            plugin_runner.query.arguments)
+        DecodeArguments(plugin_runner.query,plugin_runner.ressources)()
         self.assertEqual(query.arguments["login"],"testzombie1")
         
     def test_encode_base64_attribute_error(self):
@@ -412,10 +404,7 @@ class CheckTest(TestCase):
             "./tests/data/ressourceswithundecodableencoding.yml",
             "tests.plugins",
             query)
-            decode_arguments = DecodeArguments(plugin_runner.ressources)
-            decode_arguments.decode(
-                plugin_runner.query.ressource, plugin_runner.query.method,
-                plugin_runner.query.arguments)
+            DecodeArguments(plugin_runner.query,plugin_runner.ressources)()
         
     def test_encode_base64_key_error(self):
         try:
@@ -434,10 +423,7 @@ class CheckTest(TestCase):
             "./tests/data//noargressources.yml",
             "tests.plugins",
             query)
-            decode_arguments = DecodeArguments(plugin_runner.ressources)
-            decode_arguments.decode(
-                plugin_runner.query.ressource, plugin_runner.query.method,
-                plugin_runner.query.arguments)
+            DecodeArguments(plugin_runner.query,plugin_runner.ressources)()
             
         except Exception as e: 
              self.assertTrue(isinstance(e,ExcaliburError))

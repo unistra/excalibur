@@ -17,21 +17,24 @@ class DecodeArguments(object):
     valeur en argument. Et retourner la valeur decodee.
     """
 
-    def __init__(self, ressources):
+    def __init__(self,query, ressources):
         self.ressources = ressources
-
-    def decode(self, ressource, method_name, arguments):
+        self.ressource = query.ressource
+        self.method_name = query.method
+        self.arguments = query.arguments
+        
+    def __call__(self):
         """
         Pour chacun des arguments passes, regarde s'il doit etre decode.
         Et si c'est le cas, appelle la methode correspondante.
         """
         try:
-            for argument_name in arguments:
-                if "encoding" in self.ressources[ressource][method_name]["arguments"][argument_name]:
-                    algo = self.ressources[ressource][method_name][
+            for argument_name in self.arguments:
+                if "encoding" in self.ressources[self.ressource][self.method_name]["arguments"][argument_name]:
+                    algo = self.ressources[self.ressource][self.method_name][
                         "arguments"][argument_name]["encoding"]
                     method = getattr(self, "decode_" + algo)
-                    arguments[argument_name] = method(arguments[argument_name])
+                    self.arguments[argument_name] = method(self.arguments[argument_name])
         except KeyError:
             raise ArgumentError(argument_name)
         except AttributeError:
