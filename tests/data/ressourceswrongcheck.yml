@@ -1,0 +1,11 @@
+actions:
+    action1:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    wrong check: wrong
+
+
+    action2:
+        request method: GET

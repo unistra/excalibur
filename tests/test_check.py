@@ -4,7 +4,7 @@
 from unittest import TestCase, main
 from excalibur.decode import DecodeArguments
 from excalibur.loader import ConfigurationLoader
-from excalibur.check import CheckSource, CheckACL, CheckRequest, CheckArguments
+from excalibur.check import CheckSource, CheckACL, CheckRequest, CheckArguments, Check
 from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError,\
     WrongSignatureError, NoACLMatchedError,RessourceNotFoundError,\
     MethodNotFoundError, HTTPMethodError, ArgumentError, \
@@ -96,6 +96,21 @@ class CheckTest(TestCase):
             check_acl.check(
                 self.plugin_runner.query.source, self.plugin_runner.query.ressource, method)
 
+        with self.assertRaises(NoACLMatchedError):
+            check_acl = CheckACL(self.plugin_runner.acl)
+            check_acl.check(
+                self.plugin_runner.query.source, self.plugin_runner.query.ressource, 
+                self.plugin_runner.query.method, project="keyerror")
+
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query)
+
+        with self.assertRaises(NoACLMatchedError):
+            check_acl = CheckACL(plugin_runner.acl)
+            check_acl.check(
+                self.plugin_runner.query.source, self.plugin_runner.query.ressource, 
+                "wrongmethod", project="project1")
+
     """
     Check Request
     """
@@ -141,6 +156,16 @@ class CheckTest(TestCase):
             check_request.check(self.plugin_runner.query.request_method,
                                 self.plugin_runner.query.ressource, self.plugin_runner.query.method, arguments)
 
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressourceswrongcheck.yml", "tests.plugins", self.query)
+
+        with self.assertRaises(ArgumentError):
+            check_request = CheckRequest(plugin_runner.ressources)
+            check_request.check(self.plugin_runner.query.request_method,
+                                self.plugin_runner.query.ressource, "action2", arguments)
+
+
+
     """
     Check arguments
     """
@@ -169,6 +194,38 @@ class CheckTest(TestCase):
             check_arguments = CheckArguments(self.plugin_runner.ressources)
             check_arguments.check(
                 arguments, self.plugin_runner.query.ressource, self.plugin_runner.query.method)
+
+        with self.assertRaises(ArgumentError):
+            check_arguments.check(
+                arguments, "wrong ressource", self.plugin_runner.query.method)
+
+    def test_check_value_in(self):
+        check_arguments = CheckArguments(self.plugin_runner.ressources)
+        r = check_arguments.check_value_in("yes", ["yes", "no"])
+        self.assertTrue(r)
+
+        r = check_arguments.check_value_in("not", ["yes", "no"])
+        self.assertFalse(r)
+
+
+    def test_check_matches_re(self):
+        check_arguments = CheckArguments(self.plugin_runner.ressources)
+        r = check_arguments.check_matches_re("noreply@noreply.com", 
+            "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,4}$")
+        self.assertTrue(r)
+        r = check_arguments.check_matches_re("wrongmail", 
+            "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,4}$")
+        self.assertFalse(r)
+
+
+    def test_check_not_exist(self):
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressourceswrongcheck.yml", "tests.plugins", self.query)
+        check_arguments = CheckArguments(plugin_runner.ressources)
+        with self.assertRaises(ArgumentCheckMethodNotFoundError):
+            check_arguments.check(
+                plugin_runner.query.arguments, plugin_runner.query.ressource, plugin_runner.query.method)
+
 
     """
     Check all
@@ -370,6 +427,9 @@ class CheckTest(TestCase):
          if attr.startswith("_Query") and not attr in ["_Query__remote_ip"]]
         
 
+    def test_check_notimplemented(self):
+        c = Check()
+        self.assertRaises(NotImplementedError, c.check)
 
 if __name__ == '__main__':
     main()
