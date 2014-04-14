@@ -101,34 +101,54 @@ class CheckTest(TestCase):
     def test_check_acl(self):
         """ test check acl """
         try:
-            check_acl = CheckACL(self.plugin_runner.acl)
-            check_acl.check(self.plugin_runner.query.source,
-                            self.plugin_runner.query.ressource, self.plugin_runner.query.method)
+            CheckACL(self.query,self.plugin_runner.acl)()
         except:
             self.fail("Error check acl")
 
     def test_check_acl_no_matched(self):
         """ test check acl """
-        method = "actionull"
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="actionull",
+            request_method="GET"
+        )
         with self.assertRaises(NoACLMatchedError):
-            check_acl = CheckACL(self.plugin_runner.acl)
-            check_acl.check(
-                self.plugin_runner.query.source, self.plugin_runner.query.ressource, method)
-
+            CheckACL(query,self.plugin_runner.acl)()
+            
+        query2 = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET",
+            project="keyerror"
+        )
         with self.assertRaises(NoACLMatchedError):
-            check_acl = CheckACL(self.plugin_runner.acl)
-            check_acl.check(
-                self.plugin_runner.query.source, self.plugin_runner.query.ressource, 
-                self.plugin_runner.query.method, project="keyerror")
-
+            CheckACL(query2,self.plugin_runner.acl)()
+            
+        
+        
+        query3 = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="wrongmethod",
+            request_method="GET",
+            project="project1"
+        )
         plugin_runner = PluginsRunner(
-            "./tests/data/acl_projects.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query)
-
+            "./tests/data/acl_projects.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", query3)
+        
         with self.assertRaises(NoACLMatchedError):
-            check_acl = CheckACL(plugin_runner.acl)
-            check_acl.check(
-                self.plugin_runner.query.source, self.plugin_runner.query.ressource, 
-                "wrongmethod", project="project1")
+            CheckACL(query3,plugin_runner.acl)()
 
     """
     Check Request
@@ -449,11 +469,7 @@ class CheckTest(TestCase):
                     plugin_runner.query.arguments,
                     plugin_runner.query.ressource,
                     plugin_runner.query.method)
-                CheckACL(plugin_runner.acl).check(
-                    plugin_runner.query.source,
-                    plugin_runner.query.ressource,
-                    plugin_runner.query.method,
-                    project=None)
+                CheckACL(query,plugin_runner.acl)()
                 
             except Exception as e:
                 self.assertTrue(isinstance(e,ExcaliburError))

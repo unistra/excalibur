@@ -64,10 +64,7 @@ class PluginsRunner(object):
 
         CheckSource(self.query,self.sources,sha1check=self.__check_signature)()
        
-
-        check_acl = CheckACL(self.__acl)
-        check_acl.check(self.__query.source, self.__query.ressource,
-                        self.__query.method, self.__query.project)
+        CheckACL(self.query,self.__acl)()
 
         CheckRequest(self.query,self.__ressources)()
 

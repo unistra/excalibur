@@ -82,19 +82,23 @@ class CheckACL(Check):
     le fichier acl.yml.
     """
 
-    def __init__(self, acl):
+    def __init__(self,query, acl):
         self.acl = acl
+        self.source = query.source
+        self.ressource = query.ressource
+        self.method = query.method
+        self.project = query.project
 
-    def check(self, source, ressource, method, project=None):
+    def __call__(self):
         try:
-            if project:
-                if method not in self.acl[project][source][ressource]:
-                    raise NoACLMatchedError("%s/%s" % (ressource, method))
+            if self.project:
+                if self.method not in self.acl[self.project][self.source][self.ressource]:
+                    raise NoACLMatchedError("%s/%s" % (self.ressource, self.method))
             else:
-                if method not in self.acl[source][ressource]:
-                    raise NoACLMatchedError("%s/%s" % (ressource, method))
+                if self.method not in self.acl[self.source][self.ressource]:
+                    raise NoACLMatchedError("%s/%s" % (self.ressource, self.method))
         except KeyError:
-            raise NoACLMatchedError("%s/%s" % (ressource, method))
+            raise NoACLMatchedError("%s/%s" % (self.ressource, self.method))
 
 
 class CheckRequest(Check):
