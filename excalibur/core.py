@@ -72,9 +72,7 @@ class PluginsRunner(object):
         decode_arguments.decode(
             self.__query.ressource, self.__query.method, self.__query.arguments)
 
-        check_arguments = CheckArguments(self.__ressources)
-        check_arguments.check(
-            self.__query.arguments, self.__query.ressource, self.__query.method)
+        CheckArguments(self.__query,self.__ressources)
 
     def run_plugins(self):
         """

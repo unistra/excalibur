@@ -27,16 +27,19 @@ class CheckArguments(Check):
     et une valeur servant au test. La valeur de retour doit etre un booleen.
     """
 
-    def __init__(self, ressources):
+    def __init__(self,query, ressources):
         self.ressources = ressources
-
-    def check(self, arguments, ressource, method):
+        self.arguments = query.arguments
+        self.ressource = query.ressource
+        self.method = query.method
+        
+    def __call__(self):
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
-        for argument_name in arguments:
+        for argument_name in self.arguments:
             # Construction et verification de la batterie de checks
             # (check_list)
             try:
-                check_list = self.ressources[ressource][method][
+                check_list = self.ressources[self.ressource][self.method][
                     "arguments"][argument_name]["checks"]
             except KeyError:
                 raise ArgumentError("unexpected argument %s" % argument_name)
@@ -45,9 +48,9 @@ class CheckArguments(Check):
                 try:
                     check_method_name = "check_" + check.replace(" ", "_")
                     check_method = getattr(self, check_method_name)
-                    check_parameter = self.ressources[ressource][method][
+                    check_parameter = self.ressources[self.ressource][self.method][
                         "arguments"][argument_name]["checks"][check]
-                    value_to_check = arguments[argument_name]
+                    value_to_check = self.arguments[argument_name]
 
                     if not check_method(value_to_check, check_parameter):
                         errors[argument_name] = check

@@ -228,7 +228,11 @@ class CheckTest(TestCase):
             CheckRequest(query,self.plugin_runner.ressources)()
 
         plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressourceswrongcheck.yml", "tests.plugins", self.query)
+            "./tests/data/acl.yml",
+            "./tests/data/sources.yml", 
+            "./tests/data/ressourceswrongcheck.yml",
+            "tests.plugins",
+            self.query)
 
         with self.assertRaises(ArgumentError):
             CheckRequest(query2,plugin_runner.ressources)()
@@ -244,30 +248,44 @@ class CheckTest(TestCase):
             decode_arguments.decode(
                 self.plugin_runner.query.ressource, self.plugin_runner.query.method, self.plugin_runner.query.arguments)
 
-            check_arguments = CheckArguments(self.plugin_runner.ressources)
-            check_arguments.check(self.plugin_runner.query.arguments,
-                                  self.plugin_runner.query.ressource, self.plugin_runner.query.method)
+            CheckArguments(self.query,self.plugin_runner.ressources)()
+            
         except:
             self.fail("error check arguments")
 
     def test_check_arguments_error(self):
         """ test check arguments """
-        arguments = {"login": "a", }
+        
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "a", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
         with self.assertRaises(ArgumentError):
             decode_arguments = DecodeArguments(self.plugin_runner.ressources)
             decode_arguments.decode(
-                self.plugin_runner.query.ressource, self.plugin_runner.query.method, arguments)
-
-            check_arguments = CheckArguments(self.plugin_runner.ressources)
-            check_arguments.check(
-                arguments, self.plugin_runner.query.ressource, self.plugin_runner.query.method)
-
+                self.plugin_runner.query.ressource, self.plugin_runner.query.method, self.query.arguments)
+            CheckArguments(query,self.plugin_runner.ressources)()
+        
+        query2 = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "a", },
+            ressource="wrong ressource",
+            method="action1",
+            request_method="GET"
+        )
         with self.assertRaises(ArgumentError):
-            check_arguments.check(
-                arguments, "wrong ressource", self.plugin_runner.query.method)
+             CheckArguments(query2,self.plugin_runner.ressources)()
 
     def test_check_value_in(self):
-        check_arguments = CheckArguments(self.plugin_runner.ressources)
+        check_arguments = CheckArguments(self.query,
+                                         self.plugin_runner.ressources)
         r = check_arguments.check_value_in("yes", ["yes", "no"])
         self.assertTrue(r)
 
@@ -276,7 +294,8 @@ class CheckTest(TestCase):
 
 
     def test_check_matches_re(self):
-        check_arguments = CheckArguments(self.plugin_runner.ressources)
+        check_arguments = CheckArguments(self.query,
+                                         self.plugin_runner.ressources)
         r = check_arguments.check_matches_re("noreply@noreply.com", 
             "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,4}$")
         self.assertTrue(r)
@@ -286,12 +305,16 @@ class CheckTest(TestCase):
 
 
     def test_check_not_exist(self):
+        
         plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressourceswrongcheck.yml", "tests.plugins", self.query)
-        check_arguments = CheckArguments(plugin_runner.ressources)
+            "./tests/data/acl.yml",
+            "./tests/data/sources.yml",
+            "./tests/data/ressourceswrongcheck.yml",
+            "tests.plugins", 
+            self.query)
+        
         with self.assertRaises(ArgumentCheckMethodNotFoundError):
-            check_arguments.check(
-                plugin_runner.query.arguments, plugin_runner.query.ressource, plugin_runner.query.method)
+            CheckArguments(plugin_runner.query,plugin_runner.ressources)()
 
 
     """
@@ -465,10 +488,7 @@ class CheckTest(TestCase):
             try:
                 CheckSource(query,plugin_runner.sources)()
                 CheckRequest(query,plugin_runner.ressources)()
-                CheckArguments(plugin_runner.ressources).check(
-                    plugin_runner.query.arguments,
-                    plugin_runner.query.ressource,
-                    plugin_runner.query.method)
+                CheckArguments(query,plugin_runner.ressources)()
                 CheckACL(query,plugin_runner.acl)()
                 
             except Exception as e:
