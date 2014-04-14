@@ -5,6 +5,7 @@ from unittest import TestCase, main
 from excalibur.loader import ConfigurationLoader
 from excalibur.core import PluginsRunner
 from excalibur.core import Query
+from excalibur.exceptions import PluginRunnerError 
 
 
 class PluginsTest(TestCase):
@@ -51,6 +52,21 @@ class PluginsTest(TestCase):
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})
 
+    def test_keyerror_plugins(self):
+      plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml", "./tests/data/sourcesnoplugins.yml", "./tests/data/ressources.yml", "tests.plugins", self.query2)
+      with self.assertRaises(PluginRunnerError):
+        plugin_runner.plugins
+
+    def test_plugins_module(self):  
+      self.assertEqual(self.plugin_runner.plugins_module, "tests.plugins")
+
+    def test_query(self):
+      self.assertEqual(self.query.__str__(), 
+        "project:None,source:etab1,ip:127.0.0.1,\
+sign:c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10,args:{'login': 'testzombie1'},\
+ressource:actions,method:action1, request_method:GET")
+
 
 class RunnerTest(TestCase):
 
@@ -87,12 +103,12 @@ class RunnerTest(TestCase):
         self.assertEqual(errors, {})
 
     def test_runner_errors(self):
-
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml", "./tests/data/sources.yml", "./tests/data/ressources.yml", "tests.plugins", self.query2)
         data, errors = plugin_runner()
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})
+
 
 
 class RunnerWithProjectsTest(TestCase):
