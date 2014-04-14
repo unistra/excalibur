@@ -131,7 +131,10 @@ class Query(object):
         self.__request_method = request_method
 
     def __str__(self):
-        return dir(self)
+        return "project:%s,source:%s,ip:%s,sign:%s,args:%s,ressource:%s,\
+method:%s, request_method:%s" % (self.__project, self.__source, 
+            self.__remote_ip, self.__signature, self.__arguments, self.__ressource,
+            self.__method, self.__request_method)
 
     @property
     def project(self):

@@ -12,6 +12,10 @@ etab1:
             -   spore: S3CR3T
                 token: S3CR3T
 
+        Plugin3:
+            -   spore: S3CR3T
+                token: S3CR3T
+
 etab2:
     apikey: S3CR3T2
     ip:
