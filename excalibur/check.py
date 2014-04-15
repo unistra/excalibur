@@ -161,7 +161,12 @@ class CheckSource(Check):
             if self.source not in self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             # Check if IP is authorized
-            if self.ip not in self.sources[self.source]["ip"]:
+            ip_authorized = False
+            for ip_re in self.sources[self.source]["ip"]:
+                if re.match(ip_re, self.ip):
+                    ip_authorized = True
+                    break
+            if not ip_authorized:
                 raise IPNotAuthorizedError(self.ip)
             # Signature check
             if self.sha1check:

@@ -1,0 +1,31 @@
+etab1:
+    apikey: S3CR3T
+    ip:
+            - ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+    plugins:
+
+        Plugin1:
+
+            -   spore: S3CR3T
+                token: S3CR3T
+        Plugin2:
+            -   spore: S3CR3T
+                token: S3CR3T
+
+        Plugin3:
+            -   spore: S3CR3T
+                token: S3CR3T
+
+etab2:
+    apikey: S3CR3T2
+    ip:
+            - ^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$
+    plugins:
+
+        Plugin1:
+
+            -   spore: S3CR3T2
+                token: S3CR3T2
+        Plugin2:
+            -   spore: S3CR3T2
+                token: S3CR3T2
