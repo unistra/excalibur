@@ -11,6 +11,7 @@ from excalibur.exceptions import PluginRunnerError
 
 class PluginsRunner(object):
 
+    #22/04/2014 :checksign defaults to false
     def __init__(self, acl_file, sources_file, ressources_file, plugins_module, query, check_signature=True):
         self.__acl = ConfigurationLoader(acl_file).content
         self.__sources = ConfigurationLoader(sources_file).content

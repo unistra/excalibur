@@ -148,15 +148,35 @@ class CheckSource(Check):
     """
 
     def __init__(self,query, sources,sha1check=True):
+        
         self.sources = sources
         self.source = query.source
         self.ip = query.remote_ip
         self.signature = query.signature
         self.arguments = query.arguments
-        self.sha1check = sha1check
+        self.sha1check=sha1check
+        
+        if isinstance(self.sources,dict) and self.source in sources and "apikey" in sources[self.source]:
+            self.sha1check = True
+       
+            
+        
        
     def __call__(self):
-         
+          
+          #add arguments to main key before encoding
+          def add_args(x,args):
+              for argument in args:
+                    x += (argument + self.arguments[argument])
+              return x
+          
+          #encode full string
+          def encode(x):
+              return hashlib.sha1(x.encode("utf-8")).hexdigest()
+          
+          #package the two above 
+          add_args_then_encode = lambda x : encode(add_args(x[0],x[1]))
+          
           try:
             if self.source not in self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
@@ -165,13 +185,23 @@ class CheckSource(Check):
                 raise IPNotAuthorizedError(self.ip)
             # Signature check
             if self.sha1check:
+                
+                source_api_key = self.sources[self.source]["apikey"]
                 arguments_list = sorted(self.arguments)
-                to_hash = self.sources[self.source]["apikey"]
-                for argument in arguments_list:
-                    to_hash += (argument + self.arguments[argument])
-                signkey = hashlib.sha1(to_hash.encode("utf-8")).hexdigest()
-                if self.signature != signkey: 
-                    raise WrongSignatureError(self.signature)
+                
+                if isinstance(source_api_key,list):
+                    signkeys = [add_args_then_encode([signature,
+                                                      arguments_list])
+                                for signature in source_api_key]
+                    if self.signature not in signkeys:
+                        raise WrongSignatureError(self.signature)
+                else:    
+                    signkey = add_args_then_encode([source_api_key,
+                                                    arguments_list])
+                    if self.signature != signkey: 
+                        raise WrongSignatureError(self.signature)
+                
+                
           except KeyError:
                 raise SourceNotFoundError("key was not found in sources")
           except TypeError:
