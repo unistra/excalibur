@@ -82,7 +82,29 @@ class CheckTest(TestCase):
         )
         with self.assertRaises(IPNotAuthorizedError):
             CheckSource(query2,self.plugin_runner.sources)()
-            
+
+
+    def test_check_source_ip_with_regexp(self):
+        query2 = Query(
+            source="etab1",
+            remote_ip="9.9.9.9",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+        plugin_runner2 = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sourcesipregexp.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",
+            query2)
+        try:
+            CheckSource(query2, plugin_runner2.sources)()
+        except:
+            self.fail("Error test_check_source_ip_with_regexp")
+
 
     def test_check_source_signature_error(self):
         """ test check sources """
