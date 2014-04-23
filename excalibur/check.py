@@ -27,12 +27,12 @@ class CheckArguments(Check):
     et une valeur servant au test. La valeur de retour doit etre un booleen.
     """
 
-    def __init__(self,query, ressources):
+    def __init__(self, query, ressources):
         self.ressources = ressources
         self.arguments = query.arguments
         self.ressource = query.ressource
         self.method = query.method
-        
+
     def __call__(self):
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
         for argument_name in self.arguments:
@@ -85,7 +85,7 @@ class CheckACL(Check):
     le fichier acl.yml.
     """
 
-    def __init__(self,query, acl):
+    def __init__(self, query, acl):
         self.acl = acl
         self.source = query.source
         self.ressource = query.ressource
@@ -96,10 +96,12 @@ class CheckACL(Check):
         try:
             if self.project:
                 if self.method not in self.acl[self.project][self.source][self.ressource]:
-                    raise NoACLMatchedError("%s/%s" % (self.ressource, self.method))
+                    raise NoACLMatchedError(
+                        "%s/%s" % (self.ressource, self.method))
             else:
                 if self.method not in self.acl[self.source][self.ressource]:
-                    raise NoACLMatchedError("%s/%s" % (self.ressource, self.method))
+                    raise NoACLMatchedError(
+                        "%s/%s" % (self.ressource, self.method))
         except KeyError:
             raise NoACLMatchedError("%s/%s" % (self.ressource, self.method))
 
@@ -113,13 +115,13 @@ class CheckRequest(Check):
     Les criteres attendus sont definis dans le fichier ressources.yml.
     """
 
-    def __init__(self,query, ressources):
+    def __init__(self, query, ressources):
         self.ressources = ressources
         self.http_method = query.request_method
-        self.method= query.method
+        self.method = query.method
         self.arguments = query.arguments
         self.ressource = query.ressource
-        
+
     def __call__(self):
         try:
             if self.ressource not in self.ressources:
@@ -129,11 +131,11 @@ class CheckRequest(Check):
             if self.http_method != self.ressources[self.ressource][self.method]["request method"]:
                 raise HTTPMethodError(
                     self.ressources[self.ressource][self.method]["request method"])
-    
+
             expected_nb_arguments = len(
                 self.ressources[self.ressource][self.method]["arguments"])
             received_nb_arguments = len(self.arguments)
-    
+
             if expected_nb_arguments != received_nb_arguments:
                 raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (
                     received_nb_arguments, expected_nb_arguments))
@@ -147,37 +149,36 @@ class CheckSource(Check):
     Ensures source legitimacy according to sources.yml file
     """
 
-    def __init__(self,query, sources,sha1check=True):
-        
+    def __init__(self, query, sources, sha1check=True):
+
         self.sources = sources
         self.source = query.source
         self.ip = query.remote_ip
         self.signature = query.signature
         self.arguments = query.arguments
-        self.sha1check=sha1check
-        
-        if isinstance(self.sources,dict) and self.source in sources and "apikey" in sources[self.source]:
-            self.sha1check = True
-       
-            
-        
-       
+        self.sha1check = sha1check
+
+        # doesn't check if apikey is not present in the source
+        if self.sha1check and isinstance(self.sources, dict) and \
+           self.source in sources and "apikey" not in sources[self.source]:
+            self.sha1check = False
+
     def __call__(self):
-          
-          #add arguments to main key before encoding
-          def add_args(x,args):
-              for argument in args:
-                    x += (argument + self.arguments[argument])
-              return x
-          
-          #encode full string
-          def encode(x):
-              return hashlib.sha1(x.encode("utf-8")).hexdigest()
-          
-          #package the two above 
-          add_args_then_encode = lambda x : encode(add_args(x[0],x[1]))
-          
-          try:
+
+        # add arguments to main key before encoding
+        def add_args(x, args):
+            for argument in args:
+                x += (argument + self.arguments[argument])
+            return x
+
+        # encode full string
+        def encode(x):
+            return hashlib.sha1(x.encode("utf-8")).hexdigest()
+
+        # package the two above
+        add_args_then_encode = lambda x: encode(add_args(x[0], x[1]))
+
+        try:
             if self.source not in self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             # Check if IP is authorized
@@ -190,26 +191,23 @@ class CheckSource(Check):
                 raise IPNotAuthorizedError(self.ip)
             # Signature check
             if self.sha1check:
-                
+
                 source_api_key = self.sources[self.source]["apikey"]
                 arguments_list = sorted(self.arguments)
-                
-                if isinstance(source_api_key,list):
+
+                if isinstance(source_api_key, list):
                     signkeys = [add_args_then_encode([signature,
                                                       arguments_list])
                                 for signature in source_api_key]
                     if self.signature not in signkeys:
                         raise WrongSignatureError(self.signature)
-                else:    
+                else:
                     signkey = add_args_then_encode([source_api_key,
                                                     arguments_list])
-                    if self.signature != signkey: 
+                    if self.signature != signkey:
                         raise WrongSignatureError(self.signature)
-                
-                
-          except KeyError:
-                raise SourceNotFoundError("key was not found in sources")
-          except TypeError:
-                raise SourceNotFoundError("key was not found in sources")
 
-            
+        except KeyError:
+            raise SourceNotFoundError("key was not found in sources")
+        except TypeError:
+            raise SourceNotFoundError("key was not found in sources")
