@@ -149,7 +149,7 @@ class CheckSource(Check):
     Ensures source legitimacy according to sources.yml file
     """
 
-    def __init__(self, query, sources, sha1check=True):
+    def __init__(self, query, sources, sha1check=True, ipcheck=True):
 
         self.sources = sources
         self.source = query.source
@@ -157,11 +157,17 @@ class CheckSource(Check):
         self.signature = query.signature
         self.arguments = query.arguments
         self.sha1check = sha1check
+        self.ipcheck=ipcheck
 
         # doesn't check if apikey is not present in the source
         if self.sha1check and isinstance(self.sources, dict) and \
            self.source in sources and "apikey" not in sources[self.source]:
             self.sha1check = False
+            
+         # doesn't check if apikey is not present in the source
+        if self.ipcheck and isinstance(self.sources, dict) and \
+           self.source in sources and "ip" not in sources[self.source]:
+            self.ipcheck = False
 
     def __call__(self):
 
@@ -181,12 +187,14 @@ class CheckSource(Check):
         try:
             if self.source not in self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
-            # Check if IP is authorized
-            ip_authorized = False
-            for ip_re in self.sources[self.source]["ip"]:
-                if re.match(ip_re, self.ip):
-                    ip_authorized = True
-                    break
+            ip_authorized = True
+            if self.ipcheck:
+                # Check if IP is authorized
+                ip_authorized = False
+                for ip_re in self.sources[self.source]["ip"]:
+                    if re.match(ip_re, self.ip):
+                        ip_authorized = True
+                        break
             if not ip_authorized:
                 raise IPNotAuthorizedError(self.ip)
             # Signature check

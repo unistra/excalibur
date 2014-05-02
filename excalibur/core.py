@@ -12,13 +12,14 @@ from excalibur.exceptions import PluginRunnerError
 class PluginsRunner(object):
 
     # 22/04/2014 :checksign defaults to false
-    def __init__(self, acl_file, sources_file, ressources_file, plugins_module, query, check_signature=True):
+    def __init__(self, acl_file, sources_file, ressources_file, plugins_module, query, check_signature=True,check_ip=True):
         self.__acl = ConfigurationLoader(acl_file).content
         self.__sources = ConfigurationLoader(sources_file).content
         self.__ressources = ConfigurationLoader(ressources_file).content
         self.__plugins_module = plugins_module
         self.__query = query
         self.__check_signature = check_signature
+        self.__check_ip = check_ip
 
     @property
     def plugins(self):
@@ -63,7 +64,8 @@ class PluginsRunner(object):
         check all yml
         """
         CheckSource(self.query, self.sources,
-                    sha1check=self.__check_signature)()
+                    sha1check=self.__check_signature,
+                    ipcheck=self.__check_ip)()
 
         CheckACL(self.query, self.__acl)()
 
@@ -127,7 +129,8 @@ class Query(object):
     def __str__(self):
         return "project:%s,source:%s,ip:%s,sign:%s,args:%s,ressource:%s,\
 method:%s, request_method:%s" % (self.__project, self.__source,
-                                 self.__remote_ip, self.__signature, self.__arguments, self.__ressource,
+                                 self.__remote_ip, self.__signature,
+                                 self.__arguments, self.__ressource,
                                  self.__method, self.__request_method)
 
     @property
