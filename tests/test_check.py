@@ -599,6 +599,27 @@ class CheckTest(TestCase):
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
+    def test_signature_not_in_generated_signatures(self):
+        error = "no_error_yet"
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="azertyuiop12345",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sourceswithmultipleapikeys.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",
+            query
+            )
+        with self.assertRaises(WrongSignatureError):
+            plugin_runner()
+        
             
 
 if __name__ == '__main__':
