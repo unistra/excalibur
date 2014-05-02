@@ -551,6 +551,7 @@ class CheckTest(TestCase):
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
+        
     def test_no_apikey_specified(self):
         error = "no_error_yet"
         query = Query(
@@ -574,7 +575,33 @@ class CheckTest(TestCase):
             plugin_runner()
         except Exception as e:
             error="error"
-        self.assertTrue(error == "no_error_yet")    
+        self.assertTrue(error == "no_error_yet")
+        
+    def test_no_ip_required(self):  
+        error = "no_error_yet"
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+           
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sourceswithnoip.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",
+            query
+            )
+        try:
+            plugin_runner()
+        except Exception as e:
+            error="error"
+        self.assertTrue(error == "no_error_yet")
+        
     def test_no_ip_specified(self):
         error = "no_error_yet"
         query = Query(
@@ -599,6 +626,7 @@ class CheckTest(TestCase):
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
+        
     def test_signature_not_in_generated_signatures(self):
         error = "no_error_yet"
         query = Query(
