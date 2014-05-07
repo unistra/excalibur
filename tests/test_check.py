@@ -39,8 +39,7 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sources.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            self.query)
+            "tests.plugins",)
 
     """
     Check Source
@@ -49,7 +48,7 @@ class CheckTest(TestCase):
     def test_check_source(self):
         """ test check sources """
         try:
-            CheckSource(self.query,self.plugin_runner.sources)()
+            CheckSource(self.query,self.plugin_runner.sources(self.query.project))()
            
         except:
             self.fail("Error check source")
@@ -66,7 +65,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(SourceNotFoundError):
-            CheckSource(query1,self.plugin_runner.sources)()
+            CheckSource(query1,self.plugin_runner.sources(query1.project))()
             
 
     def test_check_source_ip_not_authorized(self):
@@ -81,7 +80,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(IPNotAuthorizedError):
-            CheckSource(query2,self.plugin_runner.sources)()
+            CheckSource(query2,self.plugin_runner.sources(query2.project))()
 
 
     def test_check_source_ip_with_regexp(self):
@@ -98,10 +97,9 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sourcesipregexp.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            query2)
+            "tests.plugins")
         try:
-            CheckSource(query2, plugin_runner2.sources)()
+            CheckSource(query2, plugin_runner2.sources(query2.project))()
         except:
             self.fail("Error test_check_source_ip_with_regexp")
 
@@ -119,7 +117,7 @@ class CheckTest(TestCase):
         )
        
         with self.assertRaises(WrongSignatureError):
-            CheckSource(query3,self.plugin_runner.sources)()
+            CheckSource(query3,self.plugin_runner.sources(query3.project))()
     """
     Check ACL
     """
@@ -274,7 +272,7 @@ class CheckTest(TestCase):
     def test_check_arguments(self):
         """ test check arguments """
         try:
-            DecodeArguments(self.plugin_runner.query,
+            DecodeArguments(self.query,
                             self.plugin_runner.ressources)()
             CheckArguments(self.query,self.plugin_runner.ressources)()
             
@@ -294,7 +292,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(ArgumentError):
-            DecodeArguments(self.plugin_runner.query,
+            DecodeArguments(self.query,
                             self.plugin_runner.ressources)()
             CheckArguments(query,self.plugin_runner.ressources)()
         
@@ -337,11 +335,10 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sources.yml",
             "./tests/data/ressourceswrongcheck.yml",
-            "tests.plugins", 
-            self.query)
+            "tests.plugins", )
         
         with self.assertRaises(ArgumentCheckMethodNotFoundError):
-            CheckArguments(plugin_runner.query,plugin_runner.ressources)()
+            CheckArguments(self.query,plugin_runner.ressources)()
 
 
     """
@@ -350,7 +347,7 @@ class CheckTest(TestCase):
 
     def test_check_all(self):
         try:
-            self.plugin_runner.check_all()
+            self.plugin_runner.check_all(self.query)
         except:
             self.fail("error check all")
             
@@ -370,7 +367,6 @@ class CheckTest(TestCase):
                 "./tests/data/sources.yml", 
                 "./tests/data/ressources.yml",
                 "tests.plugins",
-                query,
                 check_signature=False)
          except Exception as e:
              error = "error"
@@ -393,7 +389,6 @@ class CheckTest(TestCase):
                 "./tests/data/sources.yml", 
                 "./tests/data/ressources.yml",
                 "tests.plugins",
-                query,
                 check_signature=True)
          except Exception as e:
              error = "error"
@@ -414,9 +409,8 @@ class CheckTest(TestCase):
         "./tests/data/acl.yml",
         "./tests/data/sources.yml",
         "./tests/data/ressourceswithencodingrequired.yml",
-        "tests.plugins",
-        query)
-        DecodeArguments(plugin_runner.query,plugin_runner.ressources)()
+        "tests.plugins")
+        DecodeArguments(query,plugin_runner.ressources)()
         self.assertEqual(query.arguments["login"],"testzombie1")
         
     def test_encode_base64_attribute_error(self):
@@ -434,9 +428,8 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sources.yml",
             "./tests/data/ressourceswithundecodableencoding.yml",
-            "tests.plugins",
-            query)
-            DecodeArguments(plugin_runner.query,plugin_runner.ressources)()
+            "tests.plugins")
+            DecodeArguments(query,plugin_runner.ressources)()
         
     def test_encode_base64_key_error(self):
         try:
@@ -453,9 +446,8 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sources.yml",
             "./tests/data//noargressources.yml",
-            "tests.plugins",
-            query)
-            DecodeArguments(plugin_runner.query,plugin_runner.ressources)()
+            "tests.plugins")
+            DecodeArguments(query,plugin_runner.ressources)()
             
         except Exception as e: 
              self.assertTrue(isinstance(e,ExcaliburError))
@@ -543,11 +535,10 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sourceswithmultipleapikeys.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            query
+            "tests.plugins"
             )
         try:
-            plugin_runner()
+            plugin_runner(query)
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
@@ -568,11 +559,10 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sourceswithnoapikey.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            query
+            "tests.plugins"
             )
         try:
-            plugin_runner()
+            plugin_runner(query)
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
@@ -593,11 +583,10 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sourceswithnoip.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            query
+            "tests.plugins"
             )
         try:
-            plugin_runner()
+            plugin_runner(query)
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
@@ -618,11 +607,10 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sourceswithnoip.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            query
+            "tests.plugins"
             )
         try:
-            plugin_runner()
+            plugin_runner(query)
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
@@ -642,11 +630,10 @@ class CheckTest(TestCase):
             "./tests/data/acl.yml",
             "./tests/data/sourceswithmultipleapikeys.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            query
+            "tests.plugins"
             )
         with self.assertRaises(WrongSignatureError):
-            plugin_runner()
+            plugin_runner(query)
         
             
 

@@ -12,35 +12,17 @@ from excalibur.exceptions import PluginRunnerError
 class PluginsRunner(object):
 
     # 22/04/2014 :checksign defaults to false
-    def __init__(self, acl_file, sources_file, ressources_file, plugins_module, query, check_signature=True,check_ip=True):
+    def __init__(self, acl_file, sources_file, ressources_file, plugins_module, check_signature=True,check_ip=True):
         self.__acl = ConfigurationLoader(acl_file).content
         self.__sources = ConfigurationLoader(sources_file).content
         self.__ressources = ConfigurationLoader(ressources_file).content
         self.__plugins_module = plugins_module
-        self.__query = query
         self.__check_signature = check_signature
         self.__check_ip = check_ip
 
     @property
-    def plugins(self):
-        try:
-            return self.sources[self.__query.source]["plugins"]
-        except KeyError:
-            raise PluginRunnerError("no such plugin found")
-
-    @property
     def acl(self):
         return self.__acl
-
-    @property
-    def sources(self):
-        if self.__query.project:
-            try:
-                return self.__sources[self.__query.project]["sources"]
-            except KeyError:
-                raise PluginRunnerError("no such source found")
-        else:
-            return self.__sources
 
     @property
     def ressources(self):
@@ -50,32 +32,43 @@ class PluginsRunner(object):
     def plugins_module(self):
         return self.__plugins_module
 
-    @property
-    def query(self):
-        return self.__query
+    def plugins(self, project, source):
+        try:
+            return self.sources(project)[source]["plugins"]
+        except KeyError:
+            raise PluginRunnerError("no such plugin found")
 
-    def __call__(self):
-        self.check_all()
-        data, errors = self.run_plugins()
+    def sources(self, project):
+        if project:
+            try:
+                return self.__sources[project]["sources"]
+            except KeyError:
+                raise PluginRunnerError("no such source found")
+        else:
+            return self.__sources
+
+    def __call__(self, query):
+        self.check_all(query)
+        data, errors = self.run_plugins(query)
         return data, errors
 
-    def check_all(self):
+    def check_all(self, query):
         """
         check all yml
         """
-        CheckSource(self.query, self.sources,
+        CheckSource(query, self.sources(query.project),
                     sha1check=self.__check_signature,
                     ipcheck=self.__check_ip)()
 
-        CheckACL(self.query, self.__acl)()
+        CheckACL(query, self.__acl)()
 
-        CheckRequest(self.query, self.__ressources)()
+        CheckRequest(query, self.__ressources)()
 
-        DecodeArguments(self.__query, self.__ressources)()
+        DecodeArguments(query, self.__ressources)()
 
-        CheckArguments(self.__query, self.__ressources)()
+        CheckArguments(query, self.__ressources)()
 
-    def run_plugins(self):
+    def run_plugins(self, query):
         """
         Parcours les plugins et execute la méthode demandée
         """
@@ -84,23 +77,23 @@ class PluginsRunner(object):
         errors = {}
         plugin_loader = PluginLoader(self.__plugins_module)
 
-        for plugin_name, parameters_sets in self.plugins.items():
+        for plugin_name, parameters_sets in self.plugins(query.project, query.source).items():
             for parameters_index, parameters in enumerate(parameters_sets):
                 plugin = plugin_loader.get_plugin(plugin_name)
                 plugin_data = None
                 # Name of the function to run
                 f_name = "%s_%s" % (
-                    self.__query.ressource, self.__query.method)
+                    query.ressource, query.method)
                 if not hasattr(plugin, f_name):
                     continue  # Ressource/method not implemented in plugin
                 try:
                     f = getattr(plugin, f_name)
-                    plugin_data = f(parameters, self.__query.arguments)
+                    plugin_data = f(parameters, query.arguments)
                 except Exception as e:
-                    errors[plugin_name] = {'source': self.__query.source,
-                                           'ressource': self.__query.ressource,
-                                           'method': self.__query.method,
-                                           'arguments': self.__query.arguments,
+                    errors[plugin_name] = {'source': query.source,
+                                           'ressource': query.ressource,
+                                           'method': query.method,
+                                           'arguments': query.arguments,
                                            'parameters_index': parameters_index,
                                            'error': e.__class__.__name__
                                            }
