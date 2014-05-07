@@ -32,13 +32,13 @@ class PluginsRunner(object):
     def plugins_module(self):
         return self.__plugins_module
 
-    def plugins(self, project, source):
+    def plugins(self, source, project=None):
         try:
             return self.sources(project)[source]["plugins"]
         except KeyError:
             raise PluginRunnerError("no such plugin found")
 
-    def sources(self, project):
+    def sources(self, project=None):
         if project:
             try:
                 return self.__sources[project]["sources"]
@@ -46,6 +46,13 @@ class PluginsRunner(object):
                 raise PluginRunnerError("no such source found")
         else:
             return self.__sources
+
+    def sources_names(self, project=None):
+        """
+        return all sources' names
+        """
+        #TODO
+        return None
 
     def __call__(self, query):
         self.check_all(query)
@@ -76,8 +83,12 @@ class PluginsRunner(object):
         data = {}
         errors = {}
         plugin_loader = PluginLoader(self.__plugins_module)
+        if query.project:
+            plugins = self.plugins(query.source, query.project)
+        else:
+            plugins = self.plugins(query.source)
 
-        for plugin_name, parameters_sets in self.plugins(query.project, query.source).items():
+        for plugin_name, parameters_sets in plugins.items():
             for parameters_index, parameters in enumerate(parameters_sets):
                 plugin = plugin_loader.get_plugin(plugin_name)
                 plugin_data = None

@@ -78,7 +78,7 @@ class PluginsTest(TestCase):
             "./tests/data/ressources.yml", 
             "tests.plugins")
       with self.assertRaises(PluginRunnerError):
-        plugin_runner.plugins(self.query.project, self.query.source)
+        plugin_runner.plugins(self.query.source, self.query.project)
 
     def test_plugins_module(self):  
       self.assertEqual(self.plugin_runner.plugins_module, "tests.plugins")
