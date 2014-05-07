@@ -78,6 +78,9 @@ The PluginsRunner constructor signature takes for arguments the yml configuratio
 - sources_file : the sources file path.
 - ressources_file : the ressources file path.
 - plugins_module : the plugins module's name.
+
+The callable method need the following argument:
+
 - query : the query object.
 
 How to
@@ -99,10 +102,9 @@ In your code you could, for instance, write : ::
 	plugin_runner = PluginsRunner(acl_file,
                               sources_file,
                               ressources_file,
-                              plugins_module, 
-                              query)
+                              plugins_module)
     
-    data, errors = plugin_runner()
+    data, errors = plugin_runner(query)
     
 - data is a dict which contains all plugins's data
 - errors is a dict which contains all plugins's errors
@@ -116,9 +118,12 @@ In a Django project it would differ a bit in that way : ::
 	plugin_runner = PluginsRunner(settings.EXCALIBUR_ACL_FILE,
                               settings.EXCALIBUR_SOURCES_FILE,
                               settings.EXCALIBUR_RESSOURCES_FILE,
-                              settings.EXCALIBUR_PLUGINS_MODULE, 
-                              query)
+                              settings.EXCALIBUR_PLUGINS_MODULE)
     ...
 
 
-You can now use the collected data and/or errors as you see fit.                  
+You can now use the collected data and/or errors as you see fit.
+
+Tips
+----
+- You can use the sources_names method of the PluginsRunner to get all sources names by project. It can be useful to loop over it to make multiple queries.
