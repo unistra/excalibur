@@ -49,10 +49,16 @@ class PluginsRunner(object):
 
     def sources_names(self, project=None):
         """
-        return all sources' names
+        return all sources' names of a project
         """
-        #TODO
-        return None
+
+        if project:
+            try:
+                return sorted(self.__sources[project]["sources"].keys())
+            except KeyError:
+                raise PluginRunnerError("no such source found")
+        else:
+            return sorted(self.__sources.keys())
 
     def __call__(self, query):
         self.check_all(query)
