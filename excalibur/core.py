@@ -112,7 +112,8 @@ class PluginsRunner(object):
                                            'method': query.method,
                                            'arguments': query.arguments,
                                            'parameters_index': parameters_index,
-                                           'error': e.__class__.__name__
+                                           'error': e.__class__.__name__,
+                                           'error_message':str(e)
                                            }
 
                 if plugin_data is not None:

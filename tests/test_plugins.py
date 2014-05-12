@@ -39,14 +39,16 @@ class PluginsTest(TestCase):
 
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
         self.errors_raw = {'Plugin1':
-                           {'method': 'action2',
+                           {'error_message': 'error plugin 1 action 2 !',
+                            'method': 'action2',
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
                             'ressource': 'actions',
                             'parameters_index': 0},
                            'Plugin2':
-                          {'method': 'action2',
+                          {'error_message': 'error plugin 2 action 2 !',
+                           'method': 'action2',
                            'source': 'etab1',
                            'arguments': {'login': 'testzombie1'},
                            'error': 'Exception', 'ressource':
@@ -124,6 +126,7 @@ class RunnerTest(TestCase):
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
+                            'error_message': 'error plugin 1 action 2 !',
                             'ressource': 'actions',
                             'parameters_index': 0},
                            'Plugin2':
@@ -131,6 +134,7 @@ class RunnerTest(TestCase):
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
+                            'error_message': 'error plugin 2 action 2 !',
                             'ressource': 'actions',
                             'parameters_index': 0}
                            }
@@ -191,6 +195,7 @@ class RunnerWithProjectsTest(TestCase):
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
+                            'error_message': 'error plugin 1 action 2 !',
                             'ressource': 'actions',
                             'parameters_index': 0},
                            'Plugin2':
@@ -198,6 +203,7 @@ class RunnerWithProjectsTest(TestCase):
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
+                            'error_message': 'error plugin 2 action 2 !',
                             'ressource': 'actions',
                             'parameters_index': 0}}
 
