@@ -12,10 +12,12 @@ from excalibur.exceptions import PluginRunnerError
 class PluginsRunner(object):
 
     # 22/04/2014 :checksign defaults to false
-    def __init__(self, acl_file, sources_file, ressources_file, plugins_module, check_signature=True,check_ip=True):
-        self.__acl = ConfigurationLoader(acl_file).content
-        self.__sources = ConfigurationLoader(sources_file).content
-        self.__ressources = ConfigurationLoader(ressources_file).content
+    def __init__(self, acl_file, sources_file, ressources_file,
+                 plugins_module, check_signature=True, check_ip=True,
+                 raw_yaml_content=False):
+        self.__acl = ConfigurationLoader(acl_file, raw_yaml_content).content
+        self.__sources = ConfigurationLoader(sources_file, raw_yaml_content).content
+        self.__ressources = ConfigurationLoader(ressources_file, raw_yaml_content).content
         self.__plugins_module = plugins_module
         self.__check_signature = check_signature
         self.__check_ip = check_ip

@@ -9,6 +9,9 @@ from tests.plugins.Plugin2 import Plugin2
 
 
 class ConfigurationLoaderTest(TestCase):
+    """ 
+    test with files
+    """
 
     def setUp(self):
         self.file_path_ok = "./tests/data/sources.yml"
@@ -33,6 +36,30 @@ class ConfigurationLoaderTest(TestCase):
     def test_load_content_doesntexist(self):
         with self.assertRaises(ConfigurationLoaderError):
             ConfigurationLoader(self.file_path_wrong)
+
+
+class ConfigurationLoaderRawTest(TestCase):
+    """
+    test with raw content
+    """
+
+    def setUp(self):
+        self.content_ok = "test: ['salut','hello']"
+        self.content_wrong = "test:\t['salut','hello']"
+        self.raw = {'test': ['salut', 'hello']}
+        self.raw_wrong = {'error': 'error'}
+
+    def test_load_content_ok(self):
+        c = ConfigurationLoader(self.content_ok, raw_yaml_content=True)
+        self.assertEqual(c.content, self.raw)
+
+    def test_load_content_wrong(self):
+        c = ConfigurationLoader(self.content_ok, raw_yaml_content=True)
+        self.assertNotEqual(c.content, self.raw_wrong)
+
+    def test_load_content_doesntexist(self):
+        with self.assertRaises(ConfigurationLoaderError):
+            ConfigurationLoader(self.content_wrong, raw_yaml_content=True)
 
 
 class PluginLoaderTest(TestCase):

@@ -22,7 +22,7 @@ class DecodeArguments(object):
         self.ressource = query.ressource
         self.method_name = query.method
         self.arguments = query.arguments
-        
+
     def __call__(self):
         """
         Pour chacun des arguments passes, regarde s'il doit etre decode.

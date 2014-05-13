@@ -138,6 +138,69 @@ class RunnerTest(TestCase):
                             'ressource': 'actions',
                             'parameters_index': 0}
                            }
+        self.raw_acl = """
+etab1:
+    actions:
+        - action1
+        - action2
+
+etab2:
+    actions:
+        - action1
+
+"""
+        self.raw_sources = """
+etab1:
+    apikey: S3CR3T
+    ip:
+            - 127.0.0.1
+    plugins:
+
+        Plugin1:
+
+            -   spore: S3CR3T
+                token: S3CR3T
+        Plugin2:
+            -   spore: S3CR3T
+                token: S3CR3T
+
+        Plugin3:
+            -   spore: S3CR3T
+                token: S3CR3T
+
+etab2:
+    apikey: S3CR3T2
+    ip:
+            - 127.0.0.1
+    plugins:
+
+        Plugin1:
+
+            -   spore: S3CR3T2
+                token: S3CR3T2
+        Plugin2:
+            -   spore: S3CR3T2
+                token: S3CR3T2
+"""
+        self.raw_ressources ="""
+actions:
+    action1:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
+
+    action2:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
+"""
+
 
     def test_runner(self):
         data, errors = self.plugin_runner(self.query)
@@ -157,6 +220,30 @@ class RunnerTest(TestCase):
     def test_sources_names(self):
         self.assertEqual(
             self.plugin_runner.sources_names(), ['etab1', 'etab2'])
+
+    def test_runner_with_raw_yaml(self):
+      plugin_runner = PluginsRunner(
+          self.raw_acl,
+          self.raw_sources,
+          self.raw_ressources,
+          "tests.plugins",
+          raw_yaml_content=True)
+
+      data, errors = plugin_runner(self.query)
+      self.assertEqual(data, self.data_ok)
+      self.assertEqual(errors, {})
+
+    def test_runner_with_raw_yaml_errors(self):
+      plugin_runner = PluginsRunner(
+          self.raw_acl,
+          self.raw_sources,
+          self.raw_ressources,
+          "tests.plugins",
+          raw_yaml_content=True)
+
+      data, errors = plugin_runner(self.query2)
+      self.assertEqual(errors, self.errors_raw)
+      self.assertEqual(data, {})
 
 
 class RunnerWithProjectsTest(TestCase):
@@ -207,6 +294,91 @@ class RunnerWithProjectsTest(TestCase):
                             'ressource': 'actions',
                             'parameters_index': 0}}
 
+        self.raw_acl = """
+project1:
+    etab1:
+        actions:
+            - action1
+            - action2
+
+    etab2:
+        actions:
+            - action1
+
+project2:
+    etab1:
+        actions:
+            - action1
+            - action2
+
+"""
+        self.raw_sources = """
+project1:
+     sources:
+        etab1:
+            apikey: S3CR3T
+            ip:
+                    - 127.0.0.1
+            plugins:
+
+                Plugin1:
+
+                    -   spore: S3CR3T
+                        token: S3CR3T
+                Plugin2:
+                    -   spore: S3CR3T
+                        token: S3CR3T
+
+        etab2:
+            apikey: S3CR3T2
+            ip:
+                    - 127.0.0.1
+            plugins:
+
+                Plugin1:
+
+                    -   spore: S3CR3T2
+                        token: S3CR3T2
+                Plugin2:
+                    -   spore: S3CR3T2
+                        token: S3CR3T2
+
+
+project2:
+    sources:
+        etab1:
+            apikey: S3CR3T
+            ip:
+                    - 127.0.0.1
+            plugins:
+
+                Plugin1:
+
+                    -   spore: S3CR3T
+                        token: S3CR3T
+                Plugin2:
+                    -   spore: S3CR3T
+                        token: S3CR3T
+"""
+        self.raw_ressources ="""
+actions:
+    action1:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
+
+    action2:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
+"""
+
     def test_runner(self):
         data, errors = self.plugin_runner(self.query)
         self.assertEqual(data, self.data_ok)
@@ -228,6 +400,30 @@ class RunnerWithProjectsTest(TestCase):
                          ['etab1', 'etab2'])
         self.assertEqual(self.plugin_runner.sources_names("project2"),
                          ['etab1'])
+
+    def test_runner_with_raw_yaml(self):
+      plugin_runner = PluginsRunner(
+          self.raw_acl,
+          self.raw_sources,
+          self.raw_ressources,
+          "tests.plugins",
+          raw_yaml_content=True)
+
+      data, errors = plugin_runner(self.query)
+      self.assertEqual(data, self.data_ok)
+      self.assertEqual(errors, {})
+
+    def test_runner_with_raw_yaml_errors(self):
+      plugin_runner = PluginsRunner(
+          self.raw_acl,
+          self.raw_sources,
+          self.raw_ressources,
+          "tests.plugins",
+          raw_yaml_content=True)
+
+      data, errors = plugin_runner(self.query2)
+      self.assertEqual(errors, self.errors_raw)
+      self.assertEqual(data, {})
 
 if __name__ == '__main__':
     main()

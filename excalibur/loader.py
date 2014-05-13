@@ -14,13 +14,19 @@ class ConfigurationLoader(object):
     load config from yaml
     """
 
-    def __init__(self, file_path):
+    def __init__(self, myyaml, raw_yaml_content=False):
+        """
+        Load yaml file, or raw yaml if raw_yaml_content is True
+        """
         try:
-            with open(file_path, "r") as configuration_file:
-                self.__content = yaml.load(configuration_file)
+            if not raw_yaml_content:
+                with open(myyaml, "r") as configuration_file:
+                    self.__content = yaml.load(configuration_file)
+            else:
+                self.__content = yaml.load(myyaml)
         except Exception:
             raise ConfigurationLoaderError(
-                "error with the configuration loader: %s" % file_path)
+                "error with the configuration loader: %s" % myyaml)
 
     @property
     def content(self):
