@@ -127,3 +127,4 @@ You can now use the collected data and/or errors as you see fit.
 Tips
 ----
 - You can use the sources_names method of the PluginsRunner to get all sources names by project. It can be useful to loop over it to make multiple queries.
+- You can use the "raw_yaml_content=True" parameter for the PluginsRunner to pass a raw string instead of a file
