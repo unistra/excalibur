@@ -35,32 +35,37 @@ class CheckArguments(Check):
 
     def __call__(self):
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
-        for argument_name in self.arguments:
-            # Construction et verification de la batterie de checks
-            # (check_list)
-            try:
-                check_list = self.ressources[self.ressource][self.method][
-                    "arguments"][argument_name]["checks"]
-            except KeyError:
-                raise ArgumentError("unexpected argument %s" % argument_name)
-
-            for check in check_list:
+        targeted_ressource = self.ressources[self.ressource] if self.ressource in self.ressources.keys() else None
+        if targeted_ressource == None:
+            raise ArgumentError("unexpected argument")
+        
+        if targeted_ressource and "arguments" in targeted_ressource[self.method].keys():
+            for argument_name in self.arguments:
+                # Construction et verification de la batterie de checks
+                # (check_list)
                 try:
-                    check_method_name = "check_" + check.replace(" ", "_")
-                    check_method = getattr(self, check_method_name)
-                    check_parameter = self.ressources[self.ressource][self.method][
-                        "arguments"][argument_name]["checks"][check]
-                    value_to_check = self.arguments[argument_name]
-
-                    if not check_method(value_to_check, check_parameter):
-                        errors[argument_name] = check
-                except AttributeError:
-                    raise ArgumentCheckMethodNotFoundError(check_method_name)
-                except Exception as e:
-                    # Erreur dans la 'check method'
-                    raise CheckMethodError(e)
+                    check_list = targeted_ressource[self.method][
+                        "arguments"][argument_name]["checks"]
+                except KeyError as k:
+                    raise ArgumentError("unexpected argument %s" % argument_name)
+                for check in check_list:
+                    try:
+                        check_method_name = "check_" + check.replace(" ", "_")
+                        check_method = getattr(self, check_method_name)
+                        check_parameter = targeted_ressource[self.method][
+                            "arguments"][argument_name]["checks"][check]
+                        value_to_check = self.arguments[argument_name]
+    
+                        if not check_method(value_to_check, check_parameter):
+                            errors[argument_name] = check
+                    except AttributeError:
+                        raise ArgumentCheckMethodNotFoundError(check_method_name)
+                    except Exception as e:
+                        # Erreur dans la 'check method'
+                        raise CheckMethodError(e)
 
         if errors:
+    
             raise ArgumentError("The check list did not pass", errors)
 
     def check_min_length(self, argument_value, length):
@@ -131,15 +136,15 @@ class CheckRequest(Check):
             if self.http_method != self.ressources[self.ressource][self.method]["request method"]:
                 raise HTTPMethodError(
                     self.ressources[self.ressource][self.method]["request method"])
-
-            expected_nb_arguments = len(
-                self.ressources[self.ressource][self.method]["arguments"])
-            received_nb_arguments = len(self.arguments)
-
-            if expected_nb_arguments != received_nb_arguments:
-                raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (
-                    received_nb_arguments, expected_nb_arguments))
-        except KeyError:
+            if "arguments" in self.ressources[self.ressource][self.method].keys():
+                expected_nb_arguments = len(
+                    self.ressources[self.ressource][self.method]["arguments"])
+                received_nb_arguments = len(self.arguments)
+    
+                if expected_nb_arguments != received_nb_arguments:
+                    raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (
+                        received_nb_arguments, expected_nb_arguments))
+        except KeyError as k:
             raise ArgumentError("key not found in sources")
 
 

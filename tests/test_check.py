@@ -254,16 +254,17 @@ class CheckTest(TestCase):
         )
         with self.assertRaises(ArgumentError):
             CheckRequest(query,self.plugin_runner.ressources)()
-
-        plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml",
-            "./tests/data/sources.yml", 
-            "./tests/data/ressourceswrongcheck.yml",
-            "tests.plugins",
-            self.query)
-
-        with self.assertRaises(ArgumentError):
-            CheckRequest(query2,plugin_runner.ressources)()
+#Not required anymore, when there is no arguments entry,
+#no checks are made
+#         plugin_runner = PluginsRunner(
+#             "./tests/data/acl.yml",
+#             "./tests/data/sources.yml", 
+#             "./tests/data/ressourceswrongcheck.yml",
+#             "tests.plugins",
+#             self.query)
+# 
+#         with self.assertRaises(ArgumentError):
+#             CheckRequest(query2,plugin_runner.ressources)()
 
     """
     Check arguments
@@ -614,6 +615,20 @@ class CheckTest(TestCase):
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
+        
+    def test_ressources_arguments_empty(self):  
+        error = None  
+        try:
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml", 
+                "./tests/data/sources.yml", 
+                "./tests/data/ressourceswithnoarguments.yml",
+                "tests.plugins",
+                check_signature=False)
+            plugin_runner(self.query)
+        except Exception as e:
+             error = e
+        self.assertTrue(error == None)
         
     def test_signature_not_in_generated_signatures(self):
         error = "no_error_yet"

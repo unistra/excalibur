@@ -28,17 +28,17 @@ class DecodeArguments(object):
         Pour chacun des arguments passes, regarde s'il doit etre decode.
         Et si c'est le cas, appelle la methode correspondante.
         """
-        try:
-            for argument_name in self.arguments:
-                if "encoding" in self.ressources[self.ressource][self.method_name]["arguments"][argument_name]:
-                    algo = self.ressources[self.ressource][self.method_name][
-                        "arguments"][argument_name]["encoding"]
-                    method = getattr(self, "decode_" + algo)
-                    self.arguments[argument_name] = method(self.arguments[argument_name])
-        except KeyError:
-            raise ArgumentError(argument_name)
-        except AttributeError:
-            raise DecodeAlgorithmNotFoundError(algo)
+        #the check is optionnal, it occurs only if there is an entry "arguments
+        if "arguments" in self.ressources[self.ressource][self.method_name].keys():
+            try:
+                arguments = self.ressources[self.ressource][self.method_name]["arguments"] 
+                for argument_name in self.arguments:
+                    if "encoding" in arguments[argument_name]:
+                        algo = arguments[argument_name]["encoding"]
+                        method = getattr(self, "decode_" + algo)
+                        self.arguments[argument_name] = method(self.arguments[argument_name])
+            except AttributeError:
+                raise DecodeAlgorithmNotFoundError(algo)
 
     def decode_base64(self, value):
         """
