@@ -216,6 +216,31 @@ class CheckTest(TestCase):
         )
         with self.assertRaises(MethodNotFoundError):
             CheckRequest(query,self.plugin_runner.ressources)()
+            
+    def test_check_request_method_not_specified(self):
+        """ test check request """
+        error=None
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="POST"
+        )
+        plugin_runner = PluginsRunner(
+        "./tests/data/acl_projects.yml", 
+        "./tests/data/sources.yml", 
+        "./tests/data/ressourcewithoutrequestmethod.yml", 
+        "tests.plugins", 
+        query)
+        try:
+            CheckRequest(query,plugin_runner.ressources)()
+        except Exception as e:
+            error = e
+        self.assertTrue(error == None)
+        
 
     def test_check_request_method_http_error(self):
         """ test check request """

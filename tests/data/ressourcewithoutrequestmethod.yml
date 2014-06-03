@@ -1,0 +1,14 @@
+actions:
+    action1:
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
+
+    action2:
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50

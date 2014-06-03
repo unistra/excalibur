@@ -35,7 +35,8 @@ class CheckArguments(Check):
 
     def __call__(self):
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
-        targeted_ressource = self.ressources[self.ressource] if self.ressource in self.ressources.keys() else None
+        targeted_ressource = self.ressources[self.ressource]\
+            if self.ressource in self.ressources.keys() else None
         if targeted_ressource == None:
             raise ArgumentError("unexpected argument")
         
@@ -133,7 +134,10 @@ class CheckRequest(Check):
                 raise RessourceNotFoundError(self.ressource)
             if self.method not in self.ressources[self.ressource]:
                 raise MethodNotFoundError(self.method)
-            if self.http_method != self.ressources[self.ressource][self.method]["request method"]:
+            if "request method" in\
+                self.ressources[self.ressource][self.method].keys()\
+            and self.http_method !=\
+                self.ressources[self.ressource][self.method]["request method"]:
                 raise HTTPMethodError(
                     self.ressources[self.ressource][self.method]["request method"])
             if "arguments" in self.ressources[self.ressource][self.method].keys():
