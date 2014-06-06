@@ -1,0 +1,27 @@
+actions:
+    action1:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
+        uselessarg:
+                checks:
+                    min length: 2
+                    max length: 5
+                optional: true
+
+    action2:
+        request method: GET
+        arguments:
+            login:
+                checks:
+                    min length: 2
+                    max length: 50
+            uselessarg:
+                checks:
+                    min length: 2
+                    max length: 5
+                optional: true
+                

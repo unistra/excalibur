@@ -34,6 +34,7 @@ class CheckArguments(Check):
         self.method = query.method
 
     def __call__(self):
+        print(self.arguments)
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None
@@ -42,21 +43,25 @@ class CheckArguments(Check):
         
         if targeted_ressource and "arguments" in targeted_ressource[self.method].keys():
             for argument_name in self.arguments:
-                # Construction et verification de la batterie de checks
-                # (check_list)
                 try:
                     check_list = targeted_ressource[self.method][
-                        "arguments"][argument_name]["checks"]
+                        "arguments"][argument_name]["checks"]\
+                        if targeted_ressource[self.method][
+                        "arguments"]is not None else []
+                        
                 except KeyError as k:
                     raise ArgumentError("unexpected argument %s" % argument_name)
                 for check in check_list:
+                    print(check)
                     try:
-                        check_method_name = "check_" + check.replace(" ", "_")
+                        
+                        check_method_name = self.format(check)
                         check_method = getattr(self, check_method_name)
                         check_parameter = targeted_ressource[self.method][
                             "arguments"][argument_name]["checks"][check]
+                            
                         value_to_check = self.arguments[argument_name]
-    
+                        print(value_to_check)
                         if not check_method(value_to_check, check_parameter):
                             errors[argument_name] = check
                     except AttributeError:
@@ -68,7 +73,7 @@ class CheckArguments(Check):
         if errors:
     
             raise ArgumentError("The check list did not pass", errors)
-
+   
     def check_min_length(self, argument_value, length):
         return len(argument_value) >= length
 
@@ -82,6 +87,10 @@ class CheckArguments(Check):
         regex = re.compile(re_string)
 
         return regex.match(argument_value) is not None
+    
+    @staticmethod
+    def format(x):
+        return "check_" + x.replace(" ", "_")
 
 
 class CheckACL(Check):
@@ -130,26 +139,61 @@ class CheckRequest(Check):
 
     def __call__(self):
         try:
+            
             if self.ressource not in self.ressources:
                 raise RessourceNotFoundError(self.ressource)
             if self.method not in self.ressources[self.ressource]:
                 raise MethodNotFoundError(self.method)
+            targeted_method = self.ressources[self.ressource][self.method]
             if "request method" in\
-                self.ressources[self.ressource][self.method].keys()\
+                targeted_method.keys()\
             and self.http_method !=\
-                self.ressources[self.ressource][self.method]["request method"]:
+                targeted_method["request method"]:
                 raise HTTPMethodError(
-                    self.ressources[self.ressource][self.method]["request method"])
-            if "arguments" in self.ressources[self.ressource][self.method].keys():
-                expected_nb_arguments = len(
-                    self.ressources[self.ressource][self.method]["arguments"])
-                received_nb_arguments = len(self.arguments)
-    
-                if expected_nb_arguments != received_nb_arguments:
-                    raise ArgumentError("Unexpected number of arguments: %i (expected %i)" % (
-                        received_nb_arguments, expected_nb_arguments))
+                    targeted_method["request method"])
+            
+            if "arguments" in targeted_method.keys():
+                
+                #method requires strictly no arguments and received arguments
+                #contained parameters
+                if not targeted_method['arguments']\
+                and self.arguments != {}:
+                    raise ArgumentError("%s only supports no arguments requests, received : %s" % (
+                        self.method, self.arguments))
+                    
+                #wrong format in arguments received from the request 
+                if not isinstance(self.arguments, dict):
+                    raise ArgumentError("%s is not a supported format" % (
+                        targeted_method))
+                    
+                #required args are missing   
+                if not self.all_required_args_found(targeted_method["arguments"]):
+                    raise ArgumentError("received arguments do no match : %s required arguments : %s)" % (
+                        self.arguments, targeted_method["arguments"]))
+                    
+                #args found neither in required nor optional args found
+                if not set(self.arguments.keys()).issubset(\
+                                                           set(targeted_method['arguments'].keys()if targeted_method['arguments']!=None else[])):
+                    raise ArgumentError("exceeding parameters")
+                    
+                
+                    
         except KeyError as k:
             raise ArgumentError("key not found in sources")
+        
+   
+    def all_required_args_found(self,required): 
+        return set(self.required_received_params(required).keys())== set(self.required_params(required).keys())
+    
+    def required_params(self,args):
+        
+       
+          
+        return {k:v for k,v in args.items() if "optional" not in v.keys() or v['optional']!=True }\
+             if args!=None else{}
+    
+    def required_received_params(self,args):
+        return {k:v for k,v in self.arguments.items() if k in self.required_params(args).keys()}
 
 
 class CheckSource(Check):
@@ -179,6 +223,9 @@ class CheckSource(Check):
             self.ipcheck = False
 
     def __call__(self):
+        """
+        
+        """
 
         # add arguments to main key before encoding
         def add_args(x, args):
@@ -191,8 +238,8 @@ class CheckSource(Check):
             return hashlib.sha1(x.encode("utf-8")).hexdigest()
 
         # package the two above
-        add_args_then_encode = lambda x: encode(add_args(x[0], x[1]))
-
+        add_args_then_encode = lambda x,y: encode(add_args(x, y))
+        
         try:
             if self.source not in self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
@@ -213,14 +260,14 @@ class CheckSource(Check):
                 arguments_list = sorted(self.arguments)
 
                 if isinstance(source_api_key, list):
-                    signkeys = [add_args_then_encode([signature,
-                                                      arguments_list])
+                    signkeys = [add_args_then_encode(signature,
+                                                      arguments_list)
                                 for signature in source_api_key]
                     if self.signature not in signkeys:
                         raise WrongSignatureError(self.signature)
                 else:
-                    signkey = add_args_then_encode([source_api_key,
-                                                    arguments_list])
+                    signkey = add_args_then_encode(source_api_key,
+                                                    arguments_list)
                     if self.signature != signkey:
                         raise WrongSignatureError(self.signature)
 

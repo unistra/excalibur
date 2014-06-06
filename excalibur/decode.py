@@ -31,12 +31,13 @@ class DecodeArguments(object):
         #the check is optionnal, it occurs only if there is an entry "arguments
         if "arguments" in self.ressources[self.ressource][self.method_name].keys():
             try:
-                arguments = self.ressources[self.ressource][self.method_name]["arguments"] 
-                for argument_name in self.arguments:
-                    if "encoding" in arguments[argument_name]:
-                        algo = arguments[argument_name]["encoding"]
-                        method = getattr(self, "decode_" + algo)
-                        self.arguments[argument_name] = method(self.arguments[argument_name])
+                arguments = self.ressources[self.ressource][self.method_name]["arguments"]
+                if arguments: 
+                    for argument_name in self.arguments:
+                        if "encoding" in arguments[argument_name]:
+                            algo = arguments[argument_name]["encoding"]
+                            method = getattr(self, "decode_" + algo)
+                            self.arguments[argument_name] = method(self.arguments[argument_name])
             except AttributeError:
                 raise DecodeAlgorithmNotFoundError(algo)
 

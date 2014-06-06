@@ -44,6 +44,7 @@ class PluginsRunner(object):
         if project:
             try:
                 return self.__sources[project]["sources"]
+               
             except KeyError:
                 raise PluginRunnerError("no such source found")
         else:
@@ -53,7 +54,6 @@ class PluginsRunner(object):
         """
         return all sources' names of a project
         """
-
         if project:
             try:
                 return sorted(self.__sources[project]["sources"].keys())
