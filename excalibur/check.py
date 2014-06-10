@@ -34,7 +34,6 @@ class CheckArguments(Check):
         self.method = query.method
 
     def __call__(self):
-        print(self.arguments)
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None
@@ -52,7 +51,6 @@ class CheckArguments(Check):
                 except KeyError as k:
                     raise ArgumentError("unexpected argument %s" % argument_name)
                 for check in check_list:
-                    print(check)
                     try:
                         
                         check_method_name = self.format(check)
@@ -61,7 +59,6 @@ class CheckArguments(Check):
                             "arguments"][argument_name]["checks"][check]
                             
                         value_to_check = self.arguments[argument_name]
-                        print(value_to_check)
                         if not check_method(value_to_check, check_parameter):
                             errors[argument_name] = check
                     except AttributeError:
