@@ -34,6 +34,25 @@ class CheckTest(TestCase):
             method="action1",
             request_method="GET"
         )
+        
+        self.query2 = Query(
+            source="etab1",
+            remote_ip="9.9.9.9",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET"
+        )
+        encodedzombie = base64.b64encode(b"testzombie1")
+        self.query3 = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                arguments={"login": encodedzombie, },
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                ressource="actions",
+                method="action1",
+                request_method="GET")
         # Files
         self.plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
@@ -70,36 +89,19 @@ class CheckTest(TestCase):
 
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
-        query2 = Query(
-            source="etab1",
-            remote_ip="9.9.9.9",
-            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-            arguments={"login": "testzombie1", },
-            ressource="actions",
-            method="action1",
-            request_method="GET"
-        )
+        
         with self.assertRaises(IPNotAuthorizedError):
-            CheckSource(query2,self.plugin_runner.sources(query2.project))()
+            CheckSource(self.query2,self.plugin_runner.sources(self.query2.project))()
 
 
     def test_check_source_ip_with_regexp(self):
-        query2 = Query(
-            source="etab1",
-            remote_ip="9.9.9.9",
-            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-            arguments={"login": "testzombie1", },
-            ressource="actions",
-            method="action1",
-            request_method="GET"
-        )
         plugin_runner2 = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sourcesipregexp.yml",
             "./tests/data/ressources.yml",
             "tests.plugins")
         try:
-            CheckSource(query2, plugin_runner2.sources(query2.project))()
+            CheckSource(self.query2, plugin_runner2.sources(self.query2.project))()
         except:
             self.fail("Error test_check_source_ip_with_regexp")
 
@@ -422,40 +424,23 @@ class CheckTest(TestCase):
          
     def test_encode_base64(self):
         
-        encodedzombie = base64.b64encode(b"testzombie1")
-        query = Query(
-            source="etab1",
-            remote_ip="127.0.0.1",
-            arguments={"login": encodedzombie, },
-            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-            ressource="actions",
-            method="action1",
-            request_method="GET")
         plugin_runner = PluginsRunner(
         "./tests/data/acl.yml",
         "./tests/data/sources.yml",
         "./tests/data/ressourceswithencodingrequired.yml",
         "tests.plugins")
-        DecodeArguments(query,plugin_runner.ressources)()
-        self.assertEqual(query.arguments["login"],"testzombie1")
+        DecodeArguments(self.query3,plugin_runner.ressources)()
+        self.assertEqual(self.query3.arguments["login"],"testzombie1")
         
     def test_encode_base64_attribute_error(self):
         with self.assertRaises(DecodeAlgorithmNotFoundError):
-            encodedzombie = base64.b64encode(b"testzombie1")
-            query = Query(
-                source="etab1",
-                remote_ip="127.0.0.1",
-                arguments={"login": encodedzombie, },
-                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-                ressource="actions",
-                method="action1",
-                request_method="GET")
+            
             plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sources.yml",
             "./tests/data/ressourceswithundecodableencoding.yml",
             "tests.plugins")
-            DecodeArguments(query,plugin_runner.ressources)()
+            DecodeArguments(self.query3,plugin_runner.ressources)()
         
     def test_encode_base64_key_error(self):
         try:
@@ -548,15 +533,7 @@ class CheckTest(TestCase):
         
     def test_multiple_api_keys(self):
         error = "no_error_yet"
-        query = Query(
-            source="etab1",
-            remote_ip="127.0.0.1",
-            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-            arguments={"login": "testzombie1", },
-            ressource="actions",
-            method="action1",
-            request_method="GET"
-        )
+        
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sourceswithmultipleapikeys.yml",
@@ -564,22 +541,13 @@ class CheckTest(TestCase):
             "tests.plugins"
             )
         try:
-            plugin_runner(query)
+            plugin_runner(self.query)
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
         
     def test_no_apikey_specified(self):
         error = "no_error_yet"
-        query = Query(
-            source="etab1",
-            remote_ip="127.0.0.1",
-            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-            arguments={"login": "testzombie1", },
-            ressource="actions",
-            method="action1",
-            request_method="GET"
-        )
            
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
@@ -588,22 +556,14 @@ class CheckTest(TestCase):
             "tests.plugins"
             )
         try:
-            plugin_runner(query)
+            plugin_runner(self.query)
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
         
     def test_no_ip_required(self):  
         error = "no_error_yet"
-        query = Query(
-            source="etab1",
-            remote_ip="127.0.0.1",
-            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-            arguments={"login": "testzombie1", },
-            ressource="actions",
-            method="action1",
-            request_method="GET"
-        )
+     
            
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
@@ -612,22 +572,13 @@ class CheckTest(TestCase):
             "tests.plugins"
             )
         try:
-            plugin_runner(query)
+            plugin_runner(self.query)
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
         
     def test_no_ip_specified(self):
         error = "no_error_yet"
-        query = Query(
-            source="etab1",
-            remote_ip="127.0.0.1",
-            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-            arguments={"login": "testzombie1", },
-            ressource="actions",
-            method="action1",
-            request_method="GET"
-        )
            
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
@@ -636,7 +587,7 @@ class CheckTest(TestCase):
             "tests.plugins"
             )
         try:
-            plugin_runner(query)
+            plugin_runner(self.query)
         except Exception as e:
             error="error"
         self.assertTrue(error == "no_error_yet")
