@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 Module qui permet de gerer l'encodage de certains arguments. Comme par exemple,
-l'encodage en base64 pour palier au probleme de caracteres speciaux non geres par
+l'encodage en base64 pour palier au probleme de
+caracteres speciaux non geres par
 les urls.
 """
 from excalibur.exceptions import ArgumentError, DecodeAlgorithmNotFoundError
 import base64
+
 
 class DecodeArguments(object):
 
@@ -17,7 +19,7 @@ class DecodeArguments(object):
     valeur en argument. Et retourner la valeur decodee.
     """
 
-    def __init__(self,query, ressources):
+    def __init__(self, query, ressources):
         self.ressources = ressources
         self.ressource = query.ressource
         self.method_name = query.method
@@ -28,16 +30,18 @@ class DecodeArguments(object):
         Pour chacun des arguments passes, regarde s'il doit etre decode.
         Et si c'est le cas, appelle la methode correspondante.
         """
+        ressource = self.ressources[self.ressource]
         #the check is optionnal, it occurs only if there is an entry "arguments
-        if "arguments" in self.ressources[self.ressource][self.method_name].keys():
+        if "arguments" in ressource[self.method_name].keys():
             try:
-                arguments = self.ressources[self.ressource][self.method_name]["arguments"]
-                if arguments: 
+                arguments = ressource[self.method_name]["arguments"]
+                if arguments:
                     for argument_name in self.arguments:
                         if "encoding" in arguments[argument_name]:
                             algo = arguments[argument_name]["encoding"]
                             method = getattr(self, "decode_" + algo)
-                            self.arguments[argument_name] = method(self.arguments[argument_name])
+                            self.arguments[argument_name] = method(
+                                self.arguments[argument_name])
             except AttributeError:
                 raise DecodeAlgorithmNotFoundError(algo)
 
