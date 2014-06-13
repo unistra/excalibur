@@ -16,8 +16,10 @@ class PluginsRunner(object):
                  plugins_module, check_signature=True, check_ip=True,
                  raw_yaml_content=False):
         self.__acl = ConfigurationLoader(acl_file, raw_yaml_content).content
-        self.__sources = ConfigurationLoader(sources_file, raw_yaml_content).content
-        self.__ressources = ConfigurationLoader(ressources_file, raw_yaml_content).content
+        self.__sources = ConfigurationLoader(
+            sources_file, raw_yaml_content).content
+        self.__ressources = ConfigurationLoader(
+            ressources_file, raw_yaml_content).content
         self.__plugins_module = plugins_module
         self.__check_signature = check_signature
         self.__check_ip = check_ip
@@ -44,7 +46,7 @@ class PluginsRunner(object):
         if project:
             try:
                 return self.__sources[project]["sources"]
-               
+
             except KeyError:
                 raise PluginRunnerError("no such source found")
         else:
@@ -109,14 +111,15 @@ class PluginsRunner(object):
                     f = getattr(plugin, f_name)
                     plugin_data = f(parameters, query.arguments)
                 except Exception as e:
-                    errors[plugin_name] = {'source': query.source,
-                                           'ressource': query.ressource,
-                                           'method': query.method,
-                                           'arguments': query.arguments,
-                                           'parameters_index': parameters_index,
-                                           'error': e.__class__.__name__,
-                                           'error_message':str(e)
-                                           }
+                    errors[plugin_name] = {
+                        'source': query.source,
+                        'ressource': query.ressource,
+                        'method': query.method,
+                        'arguments': query.arguments,
+                        'parameters_index': parameters_index,
+                        'error': e.__class__.__name__,
+                        'error_message': str(e)
+                        }
 
                 if plugin_data is not None:
                     data[plugin_name] = plugin_data
@@ -129,7 +132,14 @@ class Query(object):
     """
     """
 
-    def __init__(self, source, remote_ip, ressource, method, request_method, signature=None, project=None, arguments=None):
+    def __init__(self, source,
+                 remote_ip,
+                 ressource,
+                 method,
+                 request_method,
+                 signature=None,
+                 project=None,
+                 arguments=None):
         self.__project = project
         self.__source = source
         self.__remote_ip = remote_ip
