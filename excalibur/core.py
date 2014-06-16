@@ -64,32 +64,38 @@ class PluginsRunner(object):
         else:
             return sorted(self.__sources.keys())
 
-    def __call__(self, query):
-        self.check_all(query)
-        data, errors = self.run_plugins(query)
-        return data, errors
-
-    def check_all(self, query):
+    def check_all(foo):
         """
         check all yml
         """
-        CheckSource(query, self.sources(query.project),
-                    sha1check=self.__check_signature,
-                    ipcheck=self.__check_ip)()
+        def checks(self, query):
 
-        CheckACL(query, self.__acl)()
+            CheckSource(query, self.sources(query.project),
+                        sha1check=self.__check_signature,
+                        ipcheck=self.__check_ip)()
 
-        CheckRequest(query, self.__ressources)()
+            CheckACL(query, self.__acl)()
 
-        DecodeArguments(query, self.__ressources)()
+            CheckRequest(query, self.__ressources)()
 
-        CheckArguments(query, self.__ressources)()
+            DecodeArguments(query, self.__ressources)()
+
+            CheckArguments(query, self.__ressources)()
+
+            return foo(self, query)
+
+        return checks
+
+    @check_all
+    def __call__(self, query):
+
+        data, errors = self.run_plugins(query)
+        return data, errors
 
     def run_plugins(self, query):
         """
         Parcours les plugins et execute la méthode demandée
         """
-
         data = {}
         errors = {}
         plugin_loader = PluginLoader(self.__plugins_module)

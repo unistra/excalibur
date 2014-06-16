@@ -4,15 +4,16 @@
 from unittest import TestCase, main
 from excalibur.decode import DecodeArguments
 from excalibur.loader import ConfigurationLoader
-from excalibur.check import CheckSource, CheckACL, CheckRequest, CheckArguments, Check
+from excalibur.check import CheckSource, CheckACL, CheckRequest, \
+    CheckArguments, Check
 from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError,\
-    WrongSignatureError, NoACLMatchedError,RessourceNotFoundError,\
+    WrongSignatureError, NoACLMatchedError, RessourceNotFoundError,\
     MethodNotFoundError, HTTPMethodError, ArgumentError, \
-    ArgumentCheckMethodNotFoundError,ExcaliburError,DecodeAlgorithmNotFoundError
+    ArgumentCheckMethodNotFoundError, ExcaliburError, \
+    DecodeAlgorithmNotFoundError
 from excalibur.core import PluginsRunner, Query
 import base64
 from importlib import import_module
-
 
 
 class CheckTest(TestCase):
@@ -34,7 +35,7 @@ class CheckTest(TestCase):
             method="action1",
             request_method="GET"
         )
-        
+
         self.query2 = Query(
             source="etab1",
             remote_ip="9.9.9.9",
@@ -46,13 +47,13 @@ class CheckTest(TestCase):
         )
         encodedzombie = base64.b64encode(b"testzombie1")
         self.query3 = Query(
-                source="etab1",
-                remote_ip="127.0.0.1",
-                arguments={"login": encodedzombie, },
-                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-                ressource="actions",
-                method="action1",
-                request_method="GET")
+            source="etab1",
+            remote_ip="127.0.0.1",
+            arguments={"login": encodedzombie, },
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            ressource="actions",
+            method="action1",
+            request_method="GET")
         # Files
         self.plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
@@ -67,8 +68,9 @@ class CheckTest(TestCase):
     def test_check_source(self):
         """ test check sources """
         try:
-            CheckSource(self.query,self.plugin_runner.sources(self.query.project))()
-           
+            CheckSource(
+                self.query, self.plugin_runner.sources(self.query.project))()
+
         except:
             self.fail("Error check source")
 
@@ -84,15 +86,14 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(SourceNotFoundError):
-            CheckSource(query1,self.plugin_runner.sources(query1.project))()
-            
+            CheckSource(query1, self.plugin_runner.sources(query1.project))()
 
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
-        
-        with self.assertRaises(IPNotAuthorizedError):
-            CheckSource(self.query2,self.plugin_runner.sources(self.query2.project))()
 
+        with self.assertRaises(IPNotAuthorizedError):
+            CheckSource(
+                self.query2, self.plugin_runner.sources(self.query2.project))()
 
     def test_check_source_ip_with_regexp(self):
         plugin_runner2 = PluginsRunner(
@@ -101,10 +102,10 @@ class CheckTest(TestCase):
             "./tests/data/ressources.yml",
             "tests.plugins")
         try:
-            CheckSource(self.query2, plugin_runner2.sources(self.query2.project))()
+            CheckSource(
+                self.query2, plugin_runner2.sources(self.query2.project))()
         except:
             self.fail("Error test_check_source_ip_with_regexp")
-
 
     def test_check_source_signature_error(self):
         """ test check sources """
@@ -117,9 +118,9 @@ class CheckTest(TestCase):
             method="action1",
             request_method="GET"
         )
-       
+
         with self.assertRaises(WrongSignatureError):
-            CheckSource(query3,self.plugin_runner.sources(query3.project))()
+            CheckSource(query3, self.plugin_runner.sources(query3.project))()
     """
     Check ACL
     """
@@ -127,7 +128,7 @@ class CheckTest(TestCase):
     def test_check_acl(self):
         """ test check acl """
         try:
-            CheckACL(self.query,self.plugin_runner.acl)()
+            CheckACL(self.query, self.plugin_runner.acl)()
         except:
             self.fail("Error check acl")
 
@@ -143,8 +144,8 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(NoACLMatchedError):
-            CheckACL(query,self.plugin_runner.acl)()
-            
+            CheckACL(query, self.plugin_runner.acl)()
+
         query2 = Query(
             source="etab1",
             remote_ip="127.0.0.1",
@@ -156,10 +157,8 @@ class CheckTest(TestCase):
             project="keyerror"
         )
         with self.assertRaises(NoACLMatchedError):
-            CheckACL(query2,self.plugin_runner.acl)()
-            
-        
-        
+            CheckACL(query2, self.plugin_runner.acl)()
+
         query3 = Query(
             source="etab1",
             remote_ip="127.0.0.1",
@@ -171,14 +170,14 @@ class CheckTest(TestCase):
             project="project1"
         )
         plugin_runner = PluginsRunner(
-            "./tests/data/acl_projects.yml", 
-            "./tests/data/sources.yml", 
-            "./tests/data/ressources.yml", 
-            "tests.plugins", 
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sources.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",
             query3)
-        
+
         with self.assertRaises(NoACLMatchedError):
-            CheckACL(query3,plugin_runner.acl)()
+            CheckACL(query3, plugin_runner.acl)()
 
     """
     Check Request
@@ -187,7 +186,7 @@ class CheckTest(TestCase):
     def test_check_request(self):
         """ test check request """
         try:
-            CheckRequest(self.query,self.plugin_runner.ressources)()
+            CheckRequest(self.query, self.plugin_runner.ressources)()
         except:
             self.fail("error check request")
 
@@ -203,7 +202,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(RessourceNotFoundError):
-            CheckRequest(query,self.plugin_runner.ressources)()
+            CheckRequest(query, self.plugin_runner.ressources)()
 
     def test_check_request_method_not_found(self):
         """ test check request """
@@ -217,11 +216,11 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(MethodNotFoundError):
-            CheckRequest(query,self.plugin_runner.ressources)()
-            
+            CheckRequest(query, self.plugin_runner.ressources)()
+
     def test_check_request_method_not_specified(self):
         """ test check request """
-        error=None
+        error = None
         query = Query(
             source="etab1",
             remote_ip="127.0.0.1",
@@ -232,17 +231,16 @@ class CheckTest(TestCase):
             request_method="POST"
         )
         plugin_runner = PluginsRunner(
-        "./tests/data/acl_projects.yml", 
-        "./tests/data/sources.yml", 
-        "./tests/data/ressourcewithoutrequestmethod.yml", 
-        "tests.plugins", 
-        query)
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sources.yml",
+            "./tests/data/ressourcewithoutrequestmethod.yml",
+            "tests.plugins",
+            query)
         try:
-            CheckRequest(query,plugin_runner.ressources)()
+            CheckRequest(query, plugin_runner.ressources)()
         except Exception as e:
             error = e
-        self.assertTrue(error == None)
-        
+        self.assertTrue(not error)
 
     def test_check_request_method_http_error(self):
         """ test check request """
@@ -256,8 +254,7 @@ class CheckTest(TestCase):
             request_method="GETnull"
         )
         with self.assertRaises(HTTPMethodError):
-            CheckRequest(query,self.plugin_runner.ressources)()
-           
+            CheckRequest(query, self.plugin_runner.ressources)()
 
     def test_check_request_args_error(self):
         """ test check request """
@@ -280,16 +277,16 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(ArgumentError):
-            CheckRequest(query,self.plugin_runner.ressources)()
-#Not required anymore, when there is no arguments entry,
-#no checks are made
+            CheckRequest(query, self.plugin_runner.ressources)()
+# Not required anymore, when there is no arguments entry,
+# no checks are made
 #         plugin_runner = PluginsRunner(
 #             "./tests/data/acl.yml",
-#             "./tests/data/sources.yml", 
+#             "./tests/data/sources.yml",
 #             "./tests/data/ressourceswrongcheck.yml",
 #             "tests.plugins",
 #             self.query)
-# 
+#
 #         with self.assertRaises(ArgumentError):
 #             CheckRequest(query2,plugin_runner.ressources)()
 
@@ -302,14 +299,14 @@ class CheckTest(TestCase):
         try:
             DecodeArguments(self.query,
                             self.plugin_runner.ressources)()
-            CheckArguments(self.query,self.plugin_runner.ressources)()
-            
+            CheckArguments(self.query, self.plugin_runner.ressources)()
+
         except:
             self.fail("error check arguments")
 
     def test_check_arguments_error(self):
         """ test check arguments """
-        
+
         query = Query(
             source="etab1",
             remote_ip="127.0.0.1",
@@ -322,8 +319,8 @@ class CheckTest(TestCase):
         with self.assertRaises(ArgumentError):
             DecodeArguments(self.query,
                             self.plugin_runner.ressources)()
-            CheckArguments(query,self.plugin_runner.ressources)()
-        
+            CheckArguments(query, self.plugin_runner.ressources)()
+
         query2 = Query(
             source="etab1",
             remote_ip="127.0.0.1",
@@ -334,7 +331,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(ArgumentError):
-             CheckArguments(query2,self.plugin_runner.ressources)()
+            CheckArguments(query2, self.plugin_runner.ressources)()
 
     def test_check_value_in(self):
         check_arguments = CheckArguments(self.query,
@@ -345,29 +342,28 @@ class CheckTest(TestCase):
         r = check_arguments.check_value_in("not", ["yes", "no"])
         self.assertFalse(r)
 
-
     def test_check_matches_re(self):
         check_arguments = CheckArguments(self.query,
                                          self.plugin_runner.ressources)
-        r = check_arguments.check_matches_re("noreply@noreply.com", 
-            "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,4}$")
+        regex = "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,4}$"
+        r = check_arguments.check_matches_re("noreply@noreply.com",
+                                             regex)
         self.assertTrue(r)
-        r = check_arguments.check_matches_re("wrongmail", 
-            "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,4}$")
+        regex2 = "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,4}$"
+        r = check_arguments.check_matches_re("wrongmail",
+                                             regex2)
         self.assertFalse(r)
 
-
     def test_check_not_exist(self):
-        
+
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sources.yml",
             "./tests/data/ressourceswrongcheck.yml",
             "tests.plugins", )
-        
-        with self.assertRaises(ArgumentCheckMethodNotFoundError):
-            CheckArguments(self.query,plugin_runner.ressources)()
 
+        with self.assertRaises(ArgumentCheckMethodNotFoundError):
+            CheckArguments(self.query, plugin_runner.ressources)()
 
     """
     Check all
@@ -375,12 +371,12 @@ class CheckTest(TestCase):
 
     def test_check_all(self):
         try:
-            self.plugin_runner.check_all(self.query)
+            self.plugin_runner(self.query)
         except:
             self.fail("error check all")
-            
+
     def test_signature_not_required(self):
-         query = Query(
+        query = Query(
             source="etab1",
             remote_ip="127.0.0.1",
             arguments={"login": "testzombie1", },
@@ -388,20 +384,20 @@ class CheckTest(TestCase):
             method="action1",
             request_method="GET"
         )
-         error = None
-         try:
-             plugin_runner = PluginsRunner(
-                "./tests/data/acl.yml", 
-                "./tests/data/sources.yml", 
+        error = None
+        try:
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
                 "./tests/data/ressources.yml",
                 "tests.plugins",
                 check_signature=False)
-         except Exception as e:
-             error = "error"
-         self.assertTrue(error == None)
-         
+        except Exception as e:
+            error = "error"
+        self.assertTrue(not error)
+
     def test_signature_explicitely_required(self):
-         query = Query(
+        query = Query(
             source="etab1",
             remote_ip="127.0.0.1",
             arguments={"login": "testzombie1", },
@@ -410,38 +406,38 @@ class CheckTest(TestCase):
             method="action1",
             request_method="GET"
         )
-         error = None
-         try:
-             plugin_runner = PluginsRunner(
-                "./tests/data/acl.yml", 
-                "./tests/data/sources.yml", 
+        error = None
+        try:
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
                 "./tests/data/ressources.yml",
                 "tests.plugins",
                 check_signature=True)
-         except Exception as e:
-             error = "error"
-         self.assertTrue(error == None)
-         
+        except Exception as e:
+            error = "error"
+        self.assertTrue(not error)
+
     def test_encode_base64(self):
-        
+
         plugin_runner = PluginsRunner(
-        "./tests/data/acl.yml",
-        "./tests/data/sources.yml",
-        "./tests/data/ressourceswithencodingrequired.yml",
-        "tests.plugins")
-        DecodeArguments(self.query3,plugin_runner.ressources)()
-        self.assertEqual(self.query3.arguments["login"],"testzombie1")
-        
-    def test_encode_base64_attribute_error(self):
-        with self.assertRaises(DecodeAlgorithmNotFoundError):
-            
-            plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sources.yml",
-            "./tests/data/ressourceswithundecodableencoding.yml",
+            "./tests/data/ressourceswithencodingrequired.yml",
             "tests.plugins")
-            DecodeArguments(self.query3,plugin_runner.ressources)()
-        
+        DecodeArguments(self.query3, plugin_runner.ressources)()
+        self.assertEqual(self.query3.arguments["login"], "testzombie1")
+
+    def test_encode_base64_attribute_error(self):
+        with self.assertRaises(DecodeAlgorithmNotFoundError):
+
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data/ressourceswithundecodableencoding.yml",
+                "tests.plugins")
+            DecodeArguments(self.query3, plugin_runner.ressources)()
+
     def test_encode_base64_key_error(self):
         try:
             encodedzombie = base64.b64encode(b"testzombie1")
@@ -454,228 +450,232 @@ class CheckTest(TestCase):
                 method="action1",
                 request_method="GET")
             plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml",
-            "./tests/data/sources.yml",
-            "./tests/data//noargressources.yml",
-            "tests.plugins")
-            DecodeArguments(query,plugin_runner.ressources)()
-            
-        except Exception as e: 
-             self.assertTrue(isinstance(e,ExcaliburError))
-           
-    def test_all_error_risen(self): 
-        module = import_module('excalibur.exceptions') 
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data//noargressources.yml",
+                "tests.plugins")
+            DecodeArguments(query, plugin_runner.ressources)()
+
+        except Exception as e:
+            self.assertTrue(isinstance(e, ExcaliburError))
+
+    def test_all_error_risen(self):
+        module = import_module('excalibur.exceptions')
         message = "message sublime"
+
         def str_caller(e):
-            
-            exception_class= getattr(module,e)
+
+            exception_class = getattr(module, e)
             exception_instance = exception_class(message)
             errorList = ['ExcaliburInternalError',
                          'ExcaliburClientError',
                          'ExcaliburError']
             if not exception_instance.__class__.__name__ in errorList:
                 exceptionName = exception_instance.__class__.__name__
-                self.assertEqual ('%s : %s' % (exceptionName, message),
-                                  exception_instance.__str__())
+                self.assertEqual('%s : %s' % (exceptionName, message),
+                                 exception_instance.__str__())
             else:
-                self.assertEqual (message,exception_instance.__str__())
-             
-        [str_caller(error) for error in dir(module) if not error.startswith('_') ]
-        
+                self.assertEqual(message, exception_instance.__str__())
+
+        [str_caller(error)
+         for error in dir(module) if not error.startswith('_')]
+
     def test_key_errors(self):
         """
         KeyErrors should not be explicitly raised,
         they should instead be caught, and raise
         ExcaliburErrors.
         """
-        
+
         """
         Generate queries with wrong values and launches checks
         """
         def query_generator(pos):
             query = Query(
-            source="etab1",
-            remote_ip="127.0.0.1",
-            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-            arguments={"login": "testzombie1", },
-            ressource="actions",
-            method="action1",
-            request_method="GET"
-        )
-            setattr(query,pos,"wrong")
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={"login": "testzombie1", },
+                ressource="actions",
+                method="action1",
+                request_method="GET"
+            )
+            setattr(query, pos, "wrong")
             plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml", "./tests/data/sources.yml", 
-            "./tests/data/ressources.yml", 
-            "tests.plugins", 
-            query)
-            
-            #with self.assertRaises(ExcaliburError):
+                "./tests/data/acl.yml", "./tests/data/sources.yml",
+                "./tests/data/ressources.yml",
+                "tests.plugins",
+                query)
+
+            # with self.assertRaises(ExcaliburError):
             try:
-                CheckSource(query,plugin_runner.sources)()
-                CheckRequest(query,plugin_runner.ressources)()
-                CheckArguments(query,plugin_runner.ressources)()
-                CheckACL(query,plugin_runner.acl)()
-                
+                CheckSource(query, plugin_runner.sources)()
+                CheckRequest(query, plugin_runner.ressources)()
+                CheckArguments(query, plugin_runner.ressources)()
+                CheckACL(query, plugin_runner.acl)()
+
             except Exception as e:
-                self.assertTrue(isinstance(e,ExcaliburError))
-            
+                self.assertTrue(isinstance(e, ExcaliburError))
+
             return query
-            
-        query_generator_by_arg = lambda pos : query_generator(pos)
-        
-        [query_generator_by_arg(attr) for attr in dir(self.query) \
+
+        query_generator_by_arg = lambda pos: query_generator(pos)
+
+        [query_generator_by_arg(attr) for attr in dir(self.query)
          if attr.startswith("_Query") and not attr in ["_Query__remote_ip"]]
-        
 
     def test_check_not_implemented(self):
         c = Check()
         self.assertRaises(NotImplementedError, c.check)
-        
+
     def test_multiple_api_keys(self):
         error = "no_error_yet"
-        
+
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sourceswithmultipleapikeys.yml",
             "./tests/data/ressources.yml",
             "tests.plugins"
-            )
+        )
         try:
             plugin_runner(self.query)
         except Exception as e:
-            error="error"
+            error = "error"
         self.assertTrue(error == "no_error_yet")
-        
+
     def test_no_apikey_specified(self):
         error = "no_error_yet"
-           
+
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sourceswithnoapikey.yml",
             "./tests/data/ressources.yml",
             "tests.plugins"
-            )
+        )
         try:
             plugin_runner(self.query)
         except Exception as e:
-            error="error"
+            error = "error"
         self.assertTrue(error == "no_error_yet")
-        
-    def test_no_ip_required(self):  
+
+    def test_no_ip_required(self):
         error = "no_error_yet"
-     
-           
+
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sourceswithnoip.yml",
             "./tests/data/ressources.yml",
             "tests.plugins"
-            )
+        )
         try:
             plugin_runner(self.query)
         except Exception as e:
-            error="error"
+            error = "error"
         self.assertTrue(error == "no_error_yet")
-        
+
     def test_no_ip_specified(self):
         error = "no_error_yet"
-           
+
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sourceswithnoip.yml",
             "./tests/data/ressources.yml",
             "tests.plugins"
-            )
+        )
         try:
             plugin_runner(self.query)
         except Exception as e:
-            error="error"
+            error = "error"
         self.assertTrue(error == "no_error_yet")
-        
-    def test_ressources_arguments_not_present(self):  
-        error = None  
+
+    def test_ressources_arguments_not_present(self):
+        error = None
         try:
             plugin_runner = PluginsRunner(
-                "./tests/data/acl.yml", 
-                "./tests/data/sources.yml", 
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
                 "./tests/data/ressourceswithnoarguments.yml",
                 "tests.plugins",
                 check_signature=False)
             plugin_runner(self.query)
         except Exception as e:
-             error = e
-        self.assertTrue(error == None)
-        
+            error = e
+        self.assertTrue(not error)
+
     def test_ressources_arguments_empty_and_one_argument_provided(self):
-        with self.assertRaises(ArgumentError): 
-                query = Query(
-                    source="etab1",
-                    remote_ip="127.0.0.1",
-                    signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-                    arguments={"login": "testzombie1","uselessarg":"useless" },
-                    ressource="actions",
-                    method="action1",
-                    request_method="GET"
-                )
-                plugin_runner = PluginsRunner(
-                    "./tests/data/acl.yml", 
-                    "./tests/data/sources.yml", 
-                    "./tests/data/ressourceswithemptyargs.yml",
-                    "tests.plugins",
-                    check_signature=False)
-                plugin_runner(query)
+        with self.assertRaises(ArgumentError):
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={"login": "testzombie1", "uselessarg": "useless"},
+                ressource="actions",
+                method="action1",
+                request_method="GET"
+            )
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data/ressourceswithemptyargs.yml",
+                "tests.plugins",
+                check_signature=False)
+            plugin_runner(query)
+
     def test_optional_ressource_argument(self):
-        error = None  
+        error = None
         try:
             plugin_runner = PluginsRunner(
-                    "./tests/data/acl.yml", 
-                    "./tests/data/sources.yml", 
-                    "./tests/data/ressourceswithoptionalargs.yml",
-                    "tests.plugins",
-                    check_signature=False)
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data/ressourceswithoptionalargs.yml",
+                "tests.plugins",
+                check_signature=False)
             plugin_runner(self.query)
         except Exception as e:
-             error = e
-        self.assertTrue(error == None)
-        
+            error = e
+        self.assertTrue(not error)
+
     def test_optional_ressource_argument_and_matching_request_arg(self):
-        error = None  
+        error = None
         try:
             plugin_runner = PluginsRunner(
-                    "./tests/data/acl.yml", 
-                    "./tests/data/sources.yml", 
-                    "./tests/data/ressourceswithoptionalargs.yml",
-                    "tests.plugins",
-                    check_signature=False)
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data/ressourceswithoptionalargs.yml",
+                "tests.plugins",
+                check_signature=False)
             plugin_runner(self.query)
         except Exception as e:
-             error = e
-        self.assertTrue(error == None)
-    
-    def test_optional_ressource_argument_matching_request_arg_and_exceeding_arg(self):
-        error = None  
+            error = e
+        self.assertTrue(not error)
+
+    def test_optional_ressourcearg_matching_reqarg_and_exceeding_arg(self):
+        error = None
         try:
             query = Query(
-                    source="etab1",
-                    remote_ip="127.0.0.1",
-                    signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-                    arguments={"login": "testzombie1","uselessarg":"useless","exceedingarg":"exceeding" },
-                    ressource="actions",
-                    method="action1",
-                    request_method="GET"
-                )
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={
+                    "login": "testzombie1", "uselessarg": "useless",
+                    "exceedingarg": "exceeding"},
+                ressource="actions",
+                method="action1",
+                request_method="GET"
+            )
             plugin_runner = PluginsRunner(
-                    "./tests/data/acl.yml", 
-                    "./tests/data/sources.yml", 
-                    "./tests/data/ressourceswithoptionalargs.yml",
-                    "tests.plugins",
-                    check_signature=False)
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data/ressourceswithoptionalargs.yml",
+                "tests.plugins",
+                check_signature=False)
             plugin_runner(query)
         except Exception as e:
             error = e
-        self.assertTrue(error.message == 'ArgumentError : exceeding parameters')
-            
-    def test_ressources_arguments_empty_and_no_argument_provided(self): 
+        self.assertTrue(
+            error.message == 'ArgumentError : exceeding parameters')
+
+    def test_ressources_arguments_empty_and_no_argument_provided(self):
         error = "no_error_yet"
         query = Query(
             source="etab1",
@@ -687,14 +687,14 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         plugin_runner = PluginsRunner(
-                "./tests/data/acl.yml", 
-                "./tests/data/sources.yml", 
-                "./tests/data/ressourceswithemptyargs.yml",
-                "tests.plugins",
-                check_signature=False)
+            "./tests/data/acl.yml",
+            "./tests/data/sources.yml",
+            "./tests/data/ressourceswithemptyargs.yml",
+            "tests.plugins",
+            check_signature=False)
         plugin_runner(query)
-        self.assertTrue(error=="no_error_yet")
-        
+        self.assertTrue(error == "no_error_yet")
+
     def test_signature_not_in_generated_signatures(self):
         error = "no_error_yet"
         query = Query(
@@ -711,74 +711,75 @@ class CheckTest(TestCase):
             "./tests/data/sourceswithmultipleapikeys.yml",
             "./tests/data/ressources.yml",
             "tests.plugins"
-            )
+        )
         with self.assertRaises(WrongSignatureError):
             plugin_runner(query)
-            
+
     def test_checks_with_optional_args_and_bad_argument_value(self):
         try:
             query = Query(
-                        source="etab1",
-                        remote_ip="127.0.0.1",
-                        signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-                        arguments={"login": "testzombie1","uselessarg":"a" },
-                        ressource="actions",
-                        method="action2",
-                        request_method="GET"
-                    )
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={"login": "testzombie1", "uselessarg": "a"},
+                ressource="actions",
+                method="action2",
+                request_method="GET"
+            )
             plugin_runner = PluginsRunner(
-                        "./tests/data/acl.yml", 
-                        "./tests/data/sources.yml", 
-                        "./tests/data/ressourceswithoptionalargs.yml",
-                        "tests.plugins",
-                        check_signature=False)
-            plugin_runner(query) 
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data/ressourceswithoptionalargs.yml",
+                "tests.plugins",
+                check_signature=False)
+            plugin_runner(query)
         except Exception as e:
-            error=e
-        self.assertTrue(error.message=="ArgumentError : The check list did not pass")
-            
+            error = e
+        self.assertTrue(
+            error.message == "ArgumentError : The check list did not pass")
+
     def test_checks_with_optional_args_and_no_arg(self):
-        error=None
+        error = None
         try:
             query = Query(
-                        source="etab1",
-                        remote_ip="127.0.0.1",
-                        signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-                        arguments={"login": "testzombie1" },
-                        ressource="actions",
-                        method="action2",
-                        request_method="GET"
-                    )
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={"login": "testzombie1"},
+                ressource="actions",
+                method="action2",
+                request_method="GET"
+            )
             plugin_runner = PluginsRunner(
-                        "./tests/data/acl.yml", 
-                        "./tests/data/sources.yml", 
-                        "./tests/data/ressourceswithoptionalargs.yml",
-                        "tests.plugins",
-                        check_signature=False)
-            plugin_runner(query) 
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data/ressourceswithoptionalargs.yml",
+                "tests.plugins",
+                check_signature=False)
+            plugin_runner(query)
         except Exception as e:
-            error=e
-        self.assertTrue(error==None)
-        
+            error = e
+        self.assertTrue(error is None)
+
     def test_missing_args(self):
         with self.assertRaises(ArgumentError):
-                query = Query(
-                            source="etab1",
-                            remote_ip="127.0.0.1",
-                            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
-                            
-                            ressource="actions",
-                            method="action2",
-                            request_method="GET"
-                        )
-                plugin_runner = PluginsRunner(
-                            "./tests/data/acl.yml", 
-                            "./tests/data/sources.yml", 
-                            "./tests/data/ressourceswithoptionalargs.yml",
-                            "tests.plugins",
-                            check_signature=False)
-                plugin_runner(query) 
-             
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+
+                ressource="actions",
+                method="action2",
+                request_method="GET"
+            )
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml",
+                "./tests/data/sources.yml",
+                "./tests/data/ressourceswithoptionalargs.yml",
+                "tests.plugins",
+                check_signature=False)
+            plugin_runner(query)
+
 
 if __name__ == '__main__':
     main()
