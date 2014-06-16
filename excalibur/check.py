@@ -7,6 +7,7 @@ from excalibur.exceptions import ArgumentError,\
     NoACLMatchedError, RessourceNotFoundError, MethodNotFoundError,\
     HTTPMethodError, SourceNotFoundError, \
     IPNotAuthorizedError, WrongSignatureError
+from excalibur.decode import DecodeArguments
 
 
 class Check(object):
@@ -30,13 +31,16 @@ class CheckArguments(Check):
     et une valeur servant au test. La valeur de retour doit etre un booleen.
     """
 
-    def __init__(self, query, ressources):
+    def __init__(self, query, ressources, sources, acl):
+        DecodeArguments(query, ressources)()
         self.ressources = ressources
         self.arguments = query.arguments
         self.ressource = query.ressource
         self.method = query.method
+        self.query = query
 
     def __call__(self):
+
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None
@@ -99,7 +103,7 @@ class CheckACL(Check):
     le fichier acl.yml.
     """
 
-    def __init__(self, query, acl):
+    def __init__(self, query, ressources, sources, acl):
         self.acl = acl
         self.source = query.source
         self.ressource = query.ressource
@@ -131,7 +135,7 @@ class CheckRequest(Check):
     Les criteres attendus sont definis dans le fichier ressources.yml.
     """
 
-    def __init__(self, query, ressources):
+    def __init__(self, query, ressources, sources, acl):
         self.ressources = ressources
         self.http_method = query.request_method
         self.method = query.method
@@ -154,20 +158,20 @@ class CheckRequest(Check):
 
             if "arguments" in targeted_method.keys():
 
-                #method requires strictly no arguments and received arguments
-                #contained parameters
+                # method requires strictly no arguments and received arguments
+                # contained parameters
                 if not targeted_method['arguments']\
                         and self.arguments != {}:
                     raise ArgumentError("%s only supports no arguments "
                                         "requests, received : %s" % (
                                             self.method, self.arguments))
 
-                #wrong format in arguments received from the request
+                # wrong format in arguments received from the request
                 if not isinstance(self.arguments, dict):
                     raise ArgumentError("%s is not a supported format" % (
                         targeted_method))
 
-                #required args are missing
+                # required args are missing
                 if not self.all_required_args_found(
                         targeted_method["arguments"]):
                     raise ArgumentError("received arguments do no match :"
@@ -175,7 +179,7 @@ class CheckRequest(Check):
                                             self.arguments,
                                             targeted_method["arguments"]))
 
-                #args found neither in required nor optional args found
+                # args found neither in required nor optional args found
                 if not set(self.arguments.keys()).issubset(
                         set(targeted_method['arguments'].keys()if
                             targeted_method['arguments']is not None else[])):
@@ -206,7 +210,8 @@ class CheckSource(Check):
     Ensures source legitimacy according to sources.yml file
     """
 
-    def __init__(self, query, sources, sha1check=True, ipcheck=True):
+    def __init__(self, query, ressources, sources, acl,
+                 sha1check=True, ipcheck=True):
 
         self.sources = sources
         self.source = query.source

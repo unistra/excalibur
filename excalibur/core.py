@@ -7,11 +7,14 @@ from excalibur.loader import ConfigurationLoader, PluginLoader
 from excalibur.check import CheckACL, CheckArguments, CheckRequest, CheckSource
 from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError
+from importlib import import_module
+import inspect
 
 
 class PluginsRunner(object):
 
     # 22/04/2014 :checksign defaults to false
+
     def __init__(self, acl_file, sources_file, ressources_file,
                  plugins_module, check_signature=True, check_ip=True,
                  raw_yaml_content=False):
@@ -68,19 +71,26 @@ class PluginsRunner(object):
         """
         check all yml
         """
+
         def checks(self, query):
 
-            CheckSource(query, self.sources(query.project),
+            CheckSource(query, self.__ressources,
+                        self.sources(query.project),
+                        self.__acl,
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip)()
 
-            CheckACL(query, self.__acl)()
+            CheckACL(query, self.__ressources,
+                     self.sources(query.project),
+                     self.__acl)()
 
-            CheckRequest(query, self.__ressources)()
+            CheckRequest(query, self.__ressources,
+                         self.sources(query.project),
+                         self.__acl)()
 
-            DecodeArguments(query, self.__ressources)()
-
-            CheckArguments(query, self.__ressources)()
+            CheckArguments(query, self.__ressources,
+                           self.sources(query.project),
+                           self.__acl)()
 
             return foo(self, query)
 
@@ -125,7 +135,7 @@ class PluginsRunner(object):
                         'parameters_index': parameters_index,
                         'error': e.__class__.__name__,
                         'error_message': str(e)
-                        }
+                    }
 
                 if plugin_data is not None:
                     data[plugin_name] = plugin_data

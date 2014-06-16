@@ -69,7 +69,8 @@ class CheckTest(TestCase):
         """ test check sources """
         try:
             CheckSource(
-                self.query, self.plugin_runner.sources(self.query.project))()
+                self.query, None,
+                self.plugin_runner.sources(self.query.project), None)()
 
         except:
             self.fail("Error check source")
@@ -86,14 +87,18 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(SourceNotFoundError):
-            CheckSource(query1, self.plugin_runner.sources(query1.project))()
+            CheckSource(query1,
+                        None,
+                        self.plugin_runner.sources(query1.project), None)()
 
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
 
         with self.assertRaises(IPNotAuthorizedError):
             CheckSource(
-                self.query2, self.plugin_runner.sources(self.query2.project))()
+                self.query2,
+                None,
+                self.plugin_runner.sources(self.query2.project), None)()
 
     def test_check_source_ip_with_regexp(self):
         plugin_runner2 = PluginsRunner(
@@ -103,7 +108,8 @@ class CheckTest(TestCase):
             "tests.plugins")
         try:
             CheckSource(
-                self.query2, plugin_runner2.sources(self.query2.project))()
+                self.query2, None,
+                plugin_runner2.sources(self.query2.project), None)()
         except:
             self.fail("Error test_check_source_ip_with_regexp")
 
@@ -120,7 +126,11 @@ class CheckTest(TestCase):
         )
 
         with self.assertRaises(WrongSignatureError):
-            CheckSource(query3, self.plugin_runner.sources(query3.project))()
+            CheckSource(
+                query3,
+                None,
+                self.plugin_runner.sources(query3.project),
+                None)()
     """
     Check ACL
     """
@@ -128,8 +138,9 @@ class CheckTest(TestCase):
     def test_check_acl(self):
         """ test check acl """
         try:
-            CheckACL(self.query, self.plugin_runner.acl)()
-        except:
+            CheckACL(self.query, None, None, self.plugin_runner.acl)()
+        except Exception as e:
+            print("URGGGGGGGGGG", e)
             self.fail("Error check acl")
 
     def test_check_acl_no_matched(self):
@@ -144,7 +155,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(NoACLMatchedError):
-            CheckACL(query, self.plugin_runner.acl)()
+            CheckACL(query, None, None, self.plugin_runner.acl)()
 
         query2 = Query(
             source="etab1",
@@ -157,7 +168,7 @@ class CheckTest(TestCase):
             project="keyerror"
         )
         with self.assertRaises(NoACLMatchedError):
-            CheckACL(query2, self.plugin_runner.acl)()
+            CheckACL(query2, None, None, self.plugin_runner.acl)()
 
         query3 = Query(
             source="etab1",
@@ -177,7 +188,7 @@ class CheckTest(TestCase):
             query3)
 
         with self.assertRaises(NoACLMatchedError):
-            CheckACL(query3, plugin_runner.acl)()
+            CheckACL(query3, None, None, plugin_runner.acl)()
 
     """
     Check Request
@@ -186,7 +197,8 @@ class CheckTest(TestCase):
     def test_check_request(self):
         """ test check request """
         try:
-            CheckRequest(self.query, self.plugin_runner.ressources)()
+            CheckRequest(
+                self.query, self.plugin_runner.ressources, None, None)()
         except:
             self.fail("error check request")
 
@@ -202,7 +214,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(RessourceNotFoundError):
-            CheckRequest(query, self.plugin_runner.ressources)()
+            CheckRequest(query, self.plugin_runner.ressources, None, None)()
 
     def test_check_request_method_not_found(self):
         """ test check request """
@@ -216,7 +228,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(MethodNotFoundError):
-            CheckRequest(query, self.plugin_runner.ressources)()
+            CheckRequest(query, self.plugin_runner.ressources, None, None)()
 
     def test_check_request_method_not_specified(self):
         """ test check request """
@@ -237,7 +249,7 @@ class CheckTest(TestCase):
             "tests.plugins",
             query)
         try:
-            CheckRequest(query, plugin_runner.ressources)()
+            CheckRequest(query, plugin_runner.ressources, None, None)()
         except Exception as e:
             error = e
         self.assertTrue(not error)
@@ -254,7 +266,7 @@ class CheckTest(TestCase):
             request_method="GETnull"
         )
         with self.assertRaises(HTTPMethodError):
-            CheckRequest(query, self.plugin_runner.ressources)()
+            CheckRequest(query, self.plugin_runner.ressources, None, None)()
 
     def test_check_request_args_error(self):
         """ test check request """
@@ -277,7 +289,7 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(ArgumentError):
-            CheckRequest(query, self.plugin_runner.ressources)()
+            CheckRequest(query, self.plugin_runner.ressources, None, None)()
 # Not required anymore, when there is no arguments entry,
 # no checks are made
 #         plugin_runner = PluginsRunner(
@@ -299,7 +311,8 @@ class CheckTest(TestCase):
         try:
             DecodeArguments(self.query,
                             self.plugin_runner.ressources)()
-            CheckArguments(self.query, self.plugin_runner.ressources)()
+            CheckArguments(
+                self.query, self.plugin_runner.ressources, None, None)()
 
         except:
             self.fail("error check arguments")
@@ -319,7 +332,7 @@ class CheckTest(TestCase):
         with self.assertRaises(ArgumentError):
             DecodeArguments(self.query,
                             self.plugin_runner.ressources)()
-            CheckArguments(query, self.plugin_runner.ressources)()
+            CheckArguments(query, self.plugin_runner.ressources, None, None)()
 
         query2 = Query(
             source="etab1",
@@ -331,11 +344,13 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(ArgumentError):
-            CheckArguments(query2, self.plugin_runner.ressources)()
+            CheckArguments(query2, self.plugin_runner.ressources, None, None)()
 
     def test_check_value_in(self):
         check_arguments = CheckArguments(self.query,
-                                         self.plugin_runner.ressources)
+                                         self.plugin_runner.ressources,
+                                         None,
+                                         None)
         r = check_arguments.check_value_in("yes", ["yes", "no"])
         self.assertTrue(r)
 
@@ -344,7 +359,9 @@ class CheckTest(TestCase):
 
     def test_check_matches_re(self):
         check_arguments = CheckArguments(self.query,
-                                         self.plugin_runner.ressources)
+                                         self.plugin_runner.ressources,
+                                         None,
+                                         None)
         regex = "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]{2,4}$"
         r = check_arguments.check_matches_re("noreply@noreply.com",
                                              regex)
@@ -363,7 +380,7 @@ class CheckTest(TestCase):
             "tests.plugins", )
 
         with self.assertRaises(ArgumentCheckMethodNotFoundError):
-            CheckArguments(self.query, plugin_runner.ressources)()
+            CheckArguments(self.query, plugin_runner.ressources, None, None)()
 
     """
     Check all
@@ -509,10 +526,10 @@ class CheckTest(TestCase):
 
             # with self.assertRaises(ExcaliburError):
             try:
-                CheckSource(query, plugin_runner.sources)()
-                CheckRequest(query, plugin_runner.ressources)()
-                CheckArguments(query, plugin_runner.ressources)()
-                CheckACL(query, plugin_runner.acl)()
+                CheckSource(query, None, plugin_runner.sources, None)()
+                CheckRequest(query, plugin_runner.ressources, None, None,)()
+                CheckArguments(query, plugin_runner.ressources, None, None,)()
+                CheckACL(query, None, None, plugin_runner.acl)()
 
             except Exception as e:
                 self.assertTrue(isinstance(e, ExcaliburError))

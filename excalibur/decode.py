@@ -30,8 +30,11 @@ class DecodeArguments(object):
         Pour chacun des arguments passes, regarde s'il doit etre decode.
         Et si c'est le cas, appelle la methode correspondante.
         """
+        if self.ressource not in self.ressources.keys():
+            raise ArgumentError("ressource not found")
         ressource = self.ressources[self.ressource]
-        #the check is optionnal, it occurs only if there is an entry "arguments
+        # the check is optionnal, it occurs only if there is an entry
+        # "arguments
         if "arguments" in ressource[self.method_name].keys():
             try:
                 arguments = ressource[self.method_name]["arguments"]
