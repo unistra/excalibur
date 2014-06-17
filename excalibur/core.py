@@ -73,15 +73,15 @@ class PluginsRunner(object):
         """
 
         def checks(self, query):
-            
+
             module = import_module('excalibur.check')
             checks = ['CheckSource',
                       'CheckACL',
-                       'CheckRequest',
-                       'CheckArguments']
+                      'CheckRequest',
+                      'CheckArguments']
             for method_name in dir(module):
                 if method_name in checks:
-                    method = getattr(module,method_name)
+                    method = getattr(module, method_name)
             CheckSource(query, self.__ressources,
                         self.sources(query.project),
                         self.__acl,
