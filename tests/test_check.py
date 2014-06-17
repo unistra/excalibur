@@ -93,7 +93,7 @@ class CheckTest(TestCase):
 
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
-
+        
         with self.assertRaises(IPNotAuthorizedError):
             CheckSource(
                 self.query2,
@@ -140,7 +140,6 @@ class CheckTest(TestCase):
         try:
             CheckACL(self.query, None, None, self.plugin_runner.acl)()
         except Exception as e:
-            print("URGGGGGGGGGG", e)
             self.fail("Error check acl")
 
     def test_check_acl_no_matched(self):
@@ -685,12 +684,14 @@ class CheckTest(TestCase):
                 "./tests/data/sources.yml",
                 "./tests/data/ressourceswithoptionalargs.yml",
                 "tests.plugins",
-                check_signature=False)
+                check_signature=False,
+                )
             plugin_runner(query)
         except Exception as e:
             error = e
+        
         self.assertTrue(
-            error.message == 'ArgumentError : exceeding parameters')
+            isinstance(error, ArgumentError))
 
     def test_ressources_arguments_empty_and_no_argument_provided(self):
         error = "no_error_yet"

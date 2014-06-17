@@ -3,8 +3,7 @@
 Class to load configuration and plugins
 """
 
-from excalibur.exceptions import ExcaliburError,\
-    ConfigurationLoaderError, PluginLoaderError
+from excalibur.exceptions import ExcaliburError, ConfigurationLoaderError, PluginLoaderError
 import importlib
 import yaml
 
