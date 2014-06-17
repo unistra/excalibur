@@ -93,7 +93,7 @@ class CheckTest(TestCase):
 
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
-        
+
         with self.assertRaises(IPNotAuthorizedError):
             CheckSource(
                 self.query2,
@@ -486,7 +486,7 @@ class CheckTest(TestCase):
             errorList = ['ExcaliburInternalError',
                          'ExcaliburClientError',
                          'ExcaliburError']
-            if not exception_instance.__class__.__name__ in errorList:
+            if exception_instance.__class__.__name__ not in errorList:
                 exceptionName = exception_instance.__class__.__name__
                 self.assertEqual('%s : %s' % (exceptionName, message),
                                  exception_instance.__str__())
@@ -538,7 +538,7 @@ class CheckTest(TestCase):
         query_generator_by_arg = lambda pos: query_generator(pos)
 
         [query_generator_by_arg(attr) for attr in dir(self.query)
-         if attr.startswith("_Query") and not attr in ["_Query__remote_ip"]]
+         if attr.startswith("_Query") and attr not in ["_Query__remote_ip"]]
 
     def test_check_not_implemented(self):
         c = Check()
@@ -685,11 +685,11 @@ class CheckTest(TestCase):
                 "./tests/data/ressourceswithoptionalargs.yml",
                 "tests.plugins",
                 check_signature=False,
-                )
+            )
             plugin_runner(query)
         except Exception as e:
             error = e
-        
+
         self.assertTrue(
             isinstance(error, ArgumentError))
 
