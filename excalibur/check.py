@@ -33,17 +33,16 @@ class CheckArguments(Check):
 
     def __init__(self, query, ressources, sources, acl,
                  sha1check=True, ipcheck=True):
-        
+
         DecodeArguments(query, ressources)()
         self.ressources = ressources
         self.arguments = query.arguments
         self.ressource = query.ressource
         self.method = query.method
         self.query = query
-        
 
     def __call__(self):
-        
+
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None
@@ -76,7 +75,7 @@ class CheckArguments(Check):
                     except Exception as e:
                         # Erreur dans la 'check method'
                         raise CheckMethodError(e)
-        
+
         if errors:
             raise ArgumentError("The check list did not pass", errors)
 
@@ -154,7 +153,7 @@ class CheckRequest(Check):
 
             if self.method not in self.ressources[self.ressource]:
                 raise MethodNotFoundError(self.method)
-            
+
             targeted_method = self.ressources[self.ressource][self.method]
             if "request method" in\
                 targeted_method.keys()\
@@ -190,7 +189,7 @@ class CheckRequest(Check):
                         set(targeted_method['arguments'].keys()if
                             targeted_method['arguments']is not None else[])):
                     raise ArgumentError("exceeding parameters")
-                
+
         except KeyError as k:
             raise ArgumentError("key not found in sources")
 
@@ -218,7 +217,7 @@ class CheckSource(Check):
 
     def __init__(self, query, ressources, sources, acl,
                  sha1check=True, ipcheck=True):
-        
+
         self.sources = sources
         self.source = query.source
         self.ip = query.remote_ip
@@ -226,18 +225,16 @@ class CheckSource(Check):
         self.arguments = query.arguments
         self.sha1check = sha1check
         self.ipcheck = ipcheck
-        
+
         # doesn't check if apikey is not present in the source
         if self.sha1check and isinstance(self.sources, dict) and \
            self.source in sources and "apikey" not in sources[self.source]:
             self.sha1check = False
 
-         # doesn't check if apikey is not present in the source
+        # doesn't check if apikey is not present in the source
         if self.ipcheck and isinstance(self.sources, dict) and \
            self.source in sources and "ip" not in sources[self.source]:
             self.ipcheck = False
-       
-        
 
     def __call__(self):
         """
