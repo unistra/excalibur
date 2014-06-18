@@ -728,6 +728,7 @@ class CheckTest(TestCase):
             plugin_runner(query)
 
     def test_checks_with_optional_args_and_bad_argument_value(self):
+        error = None
         try:
             query = Query(
                 source="etab1",
