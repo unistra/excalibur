@@ -666,8 +666,7 @@ class CheckTest(TestCase):
         self.assertTrue(not error)
 
     def test_optional_ressourcearg_matching_reqarg_and_exceeding_arg(self):
-        error = None
-        try:
+        with self.assertRaises(ArgumentError):
             query = Query(
                 source="etab1",
                 remote_ip="127.0.0.1",
@@ -687,11 +686,6 @@ class CheckTest(TestCase):
                 check_signature=False,
             )
             plugin_runner(query)
-        except Exception as e:
-            error = e
-
-        self.assertTrue(
-            isinstance(error, ArgumentError))
 
     def test_ressources_arguments_empty_and_no_argument_provided(self):
         error = "no_error_yet"

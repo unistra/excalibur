@@ -32,7 +32,9 @@ class DecodeArguments(object):
         """
         if self.ressource not in self.ressources.keys():
             raise ArgumentError("ressource not found")
+        
         ressource = self.ressources[self.ressource]
+        
         # the check is optionnal, it occurs only if there is an entry
         # "arguments
         if "arguments" in ressource[self.method_name].keys():
@@ -45,6 +47,8 @@ class DecodeArguments(object):
                             method = getattr(self, "decode_" + algo)
                             self.arguments[argument_name] = method(
                                 self.arguments[argument_name])
+            except KeyError:
+                raise ArgumentError('key not found')
             except AttributeError:
                 raise DecodeAlgorithmNotFoundError(algo)
 

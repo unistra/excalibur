@@ -42,7 +42,7 @@ class CheckArguments(Check):
         self.query = query
 
     def __call__(self):
-
+        
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None

@@ -81,24 +81,35 @@ class PluginsRunner(object):
                       'CheckArguments']
             for method_name in dir(module):
                 if method_name in checks:
-                    method = getattr(module, method_name)
-            CheckSource(query, self.__ressources,
+                    checker = getattr(module, method_name)
+                    checker(query, self.__ressources,
                         self.sources(query.project),
                         self.__acl,
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip)()
-
-            CheckACL(query, self.__ressources,
-                     self.sources(query.project),
-                     self.__acl)()
-
-            CheckRequest(query, self.__ressources,
-                         self.sources(query.project),
-                         self.__acl)()
-
-            CheckArguments(query, self.__ressources,
-                           self.sources(query.project),
-                           self.__acl)()
+                    
+#             CheckSource(query, self.__ressources,
+#                         self.sources(query.project),
+#                         self.__acl,
+#                         sha1check=self.__check_signature,
+#                         ipcheck=self.__check_ip)()
+#   
+#             CheckACL(query, self.__ressources,
+#                      self.sources(query.project),
+#                      self.__acl,
+#                      sha1check=self.__check_signature,
+#                      ipcheck=self.__check_ip)()
+#   
+#             CheckRequest(query, self.__ressources,
+#                          self.sources(query.project),
+#                          self.__acl,
+#                          sha1check=self.__check_signature,
+#                          ipcheck=self.__check_ip)()
+#   
+#             CheckArguments(query, self.__ressources,
+#                            self.sources(query.project),
+#                            self.__acl,sha1check=self.__check_signature,
+#                            ipcheck=self.__check_ip)()
 
             return foo(self, query)
 
