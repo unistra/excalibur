@@ -18,18 +18,24 @@ class DecodeArguments(object):
     regle de nommage suivante decode_nomalgo doit recevoir la
     valeur en argument. Et retourner la valeur decodee.
     """
-
-    def __init__(self, query, ressources):
-        self.ressources = ressources
-        self.ressource = query.ressource
-        self.method_name = query.method
-        self.arguments = query.arguments
-
-    def __call__(self):
+    def __init__(self, f):
+        self.f = f
+        
+    def __get__(self,instance, owner):
+         self.cls = owner
+         self.obj = instance
+         return self.__call__
+           
+    def __call__(self, *k, **kw):
         """
         Pour chacun des arguments passes, regarde s'il doit etre decode.
         Et si c'est le cas, appelle la methode correspondante.
         """
+        self.ressources = k[1]
+        self.ressource = k[0].ressource
+        self.method_name = k[0].method
+        self.arguments = k[0].arguments
+        
         if self.ressource not in self.ressources.keys():
             raise ArgumentError("ressource not found")
         
@@ -51,7 +57,10 @@ class DecodeArguments(object):
                 raise ArgumentError('key not found')
             except AttributeError:
                 raise DecodeAlgorithmNotFoundError(algo)
-
+            
+        #k[0].arguments = arguments
+        return self.f(self.obj,*k, **kw)
+        
     def decode_base64(self, value):
         """
         Implemente le decodage base64.

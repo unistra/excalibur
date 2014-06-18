@@ -308,8 +308,8 @@ class CheckTest(TestCase):
     def test_check_arguments(self):
         """ test check arguments """
         try:
-            DecodeArguments(self.query,
-                            self.plugin_runner.ressources)()
+#             DecodeArguments(self.query,
+#                             self.plugin_runner.ressources)()
             CheckArguments(
                 self.query, self.plugin_runner.ressources, None, None)()
 
@@ -329,8 +329,8 @@ class CheckTest(TestCase):
             request_method="GET"
         )
         with self.assertRaises(ArgumentError):
-            DecodeArguments(self.query,
-                            self.plugin_runner.ressources)()
+#             DecodeArguments(self.query,
+#                             self.plugin_runner.ressources)()
             CheckArguments(query, self.plugin_runner.ressources, None, None)()
 
         query2 = Query(
@@ -441,7 +441,7 @@ class CheckTest(TestCase):
             "./tests/data/sources.yml",
             "./tests/data/ressourceswithencodingrequired.yml",
             "tests.plugins")
-        DecodeArguments(self.query3, plugin_runner.ressources)()
+        CheckArguments(self.query3, plugin_runner.ressources, None, None)()
         self.assertEqual(self.query3.arguments["login"], "testzombie1")
 
     def test_encode_base64_attribute_error(self):
@@ -452,7 +452,7 @@ class CheckTest(TestCase):
                 "./tests/data/sources.yml",
                 "./tests/data/ressourceswithundecodableencoding.yml",
                 "tests.plugins")
-            DecodeArguments(self.query3, plugin_runner.ressources)()
+            CheckArguments(self.query3, plugin_runner.ressources, None, None)()
 
     def test_encode_base64_key_error(self):
         try:
@@ -470,7 +470,7 @@ class CheckTest(TestCase):
                 "./tests/data/sources.yml",
                 "./tests/data//noargressources.yml",
                 "tests.plugins")
-            DecodeArguments(query, plugin_runner.ressources)()
+            CheckArguments(query, plugin_runner.ressources, None, None)()
 
         except Exception as e:
             self.assertTrue(isinstance(e, ExcaliburError))
@@ -708,28 +708,26 @@ class CheckTest(TestCase):
         self.assertTrue(error == "no_error_yet")
 
     def test_signature_not_in_generated_signatures(self):
-        error = "no_error_yet"
-        query = Query(
-            source="etab1",
-            remote_ip="127.0.0.1",
-            signature="azertyuiop12345",
-            arguments={"login": "testzombie1", },
-            ressource="actions",
-            method="action1",
-            request_method="GET"
-        )
-        plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml",
-            "./tests/data/sourceswithmultipleapikeys.yml",
-            "./tests/data/ressources.yml",
-            "tests.plugins"
-        )
         with self.assertRaises(WrongSignatureError):
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="azertyuiop12345",
+                arguments={"login": "testzombie1", },
+                ressource="actions",
+                method="action1",
+                request_method="GET"
+            )
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml",
+                "./tests/data/sourceswithmultipleapikeys.yml",
+                "./tests/data/ressources.yml",
+                "tests.plugins"
+            )
             plugin_runner(query)
 
     def test_checks_with_optional_args_and_bad_argument_value(self):
-        error = None
-        try:
+        with self.assertRaises(ArgumentError):
             query = Query(
                 source="etab1",
                 remote_ip="127.0.0.1",
@@ -746,10 +744,6 @@ class CheckTest(TestCase):
                 "tests.plugins",
                 check_signature=False)
             plugin_runner(query)
-        except Exception as e:
-            error = e
-        self.assertTrue(
-            error.message == "ArgumentError : The check list did not pass")
 
     def test_checks_with_optional_args_and_no_arg(self):
         error = None

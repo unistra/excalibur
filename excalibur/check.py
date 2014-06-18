@@ -30,11 +30,12 @@ class CheckArguments(Check):
     etre la valeur a tester
     et une valeur servant au test. La valeur de retour doit etre un booleen.
     """
-
+    
+    @DecodeArguments
     def __init__(self, query, ressources, sources, acl,
                  sha1check=True, ipcheck=True):
 
-        DecodeArguments(query, ressources)()
+        #DecodeArguments(query, ressources)()
         self.ressources = ressources
         self.arguments = query.arguments
         self.ressource = query.ressource
