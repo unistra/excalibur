@@ -475,7 +475,7 @@ class CheckTest(TestCase):
         except Exception as e:
             self.assertTrue(isinstance(e, ExcaliburError))
 
-    def test_all_error_risen(self):
+    def test_all_error_raised(self):
         module = import_module('excalibur.exceptions')
         message = "message sublime"
 
