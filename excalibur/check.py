@@ -241,8 +241,10 @@ class CheckSource(Check):
 
         """
 
-        # add arguments to main key before encoding
         def add_args(x, args):
+            """
+            add arguments to main key before encoding
+            """
             for argument in args:
                 x += (argument + self.arguments[argument])
             return x
