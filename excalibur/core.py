@@ -79,37 +79,17 @@ class PluginsRunner(object):
                       'CheckACL',
                       'CheckRequest',
                       'CheckArguments']
-            for method_name in dir(module):
-                if method_name in checks:
-                    checker = getattr(module, method_name)
-                    checker(query, self.__ressources,
+
+            def checker(x):
+                checker = getattr(module, x)
+                checker(query, self.__ressources,
                         self.sources(query.project),
                         self.__acl,
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip)()
-                    
-#             CheckSource(query, self.__ressources,
-#                         self.sources(query.project),
-#                         self.__acl,
-#                         sha1check=self.__check_signature,
-#                         ipcheck=self.__check_ip)()
-#   
-#             CheckACL(query, self.__ressources,
-#                      self.sources(query.project),
-#                      self.__acl,
-#                      sha1check=self.__check_signature,
-#                      ipcheck=self.__check_ip)()
-#   
-#             CheckRequest(query, self.__ressources,
-#                          self.sources(query.project),
-#                          self.__acl,
-#                          sha1check=self.__check_signature,
-#                          ipcheck=self.__check_ip)()
-#   
-#             CheckArguments(query, self.__ressources,
-#                            self.sources(query.project),
-#                            self.__acl,sha1check=self.__check_signature,
-#                            ipcheck=self.__check_ip)()
+
+            map(checker, [method_name for method_name in dir(module) if
+                          method_name in checks])
 
             return foo(self, query)
 
