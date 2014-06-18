@@ -75,7 +75,7 @@ class PluginsRunner(object):
         def checks(self, query):
 
             module = import_module('excalibur.check')
-            checks = ['CheckSource',
+            check_list = ['CheckSource',
                       'CheckACL',
                       'CheckRequest',
                       'CheckArguments']
@@ -88,8 +88,8 @@ class PluginsRunner(object):
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip)()
 
-            map(checker, [method_name for method_name in dir(module) if
-                          method_name in checks])
+            [checker(method_name) for method_name in dir(module) if
+                          method_name in check_list]
 
             return foo(self, query)
 
