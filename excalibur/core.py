@@ -57,7 +57,7 @@ class PluginsRunner(object):
 
     def sources_names(self, project=None):
         """
-        return all sources' names of a project
+        Return all sources' names of a project
         """
         if project:
             try:
@@ -69,7 +69,7 @@ class PluginsRunner(object):
 
     def check_all(foo):
         """
-        check all yml
+        Check all yml
         """
 
         def checks(self, query):
@@ -103,10 +103,11 @@ class PluginsRunner(object):
 
     def run_plugins(self, query):
         """
-        Parcours les plugins et execute la méthode demandée
+        Browses plugins and execute required method
         """
         data = {}
         errors = {}
+        # Load plugins
         plugin_loader = PluginLoader(self.__plugins_module)
         if query.project:
             plugins = self.plugins(query.source, query.project)
