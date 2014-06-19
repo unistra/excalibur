@@ -103,29 +103,41 @@ class PluginsRunner(object):
 
     def run_plugins(self, query):
         """
-        Browses plugins and execute required method
+        Browses plugins and executes required method
         """
+
         data = {}
         errors = {}
+
         # Load plugins
         plugin_loader = PluginLoader(self.__plugins_module)
-        if query.project:
-            plugins = self.plugins(query.source, query.project)
-        else:
-            plugins = self.plugins(query.source)
 
+        # Get plugins depending on the sources.yml depth
+        plugins = self.plugins(query.source, query.project if
+                               query.project else None)
+
+        # Name of the function to run
+        f_name = "%s_%s" % (query.ressource, query.method)
+
+        # Actually browse plugins to launch required methods
+        # First loop over registered plugins.
         for plugin_name, parameters_sets in plugins.items():
+            # Load plugin
+            plugin = plugin_loader.get_plugin(plugin_name)
+            # Then loop over each plugin registered parameters, with
+            # an index so that the error can specify which parameter
+            # raised the error.
             for parameters_index, parameters in enumerate(parameters_sets):
-                plugin = plugin_loader.get_plugin(plugin_name)
+                # Initialize returned data to None
                 plugin_data = None
-                # Name of the function to run
-                f_name = "%s_%s" % (
-                    query.ressource, query.method)
+
                 if not hasattr(plugin, f_name):
                     continue  # Ressource/method not implemented in plugin
+                # Get data
                 try:
                     f = getattr(plugin, f_name)
                     plugin_data = f(parameters, query.arguments)
+                # Or register exception
                 except Exception as e:
                     errors[plugin_name] = {
                         'source': query.source,
@@ -136,7 +148,7 @@ class PluginsRunner(object):
                         'error': e.__class__.__name__,
                         'error_message': str(e)
                     }
-
+                # Register data by plugin name
                 if plugin_data is not None:
                     data[plugin_name] = plugin_data
 
