@@ -23,12 +23,10 @@ class Check(object):
 class CheckArguments(Check):
 
     """
-    Classe verifiant la consistance des arguments.
-    Pour implementer un nouveau test, il suffit d'implementer
-    une nouvelle methode qui
-    doit se nommer check_nomdutest. Les arguments passes doivent
-    etre la valeur a tester
-    et une valeur servant au test. La valeur de retour doit etre un booleen.
+    Class ensuring argument consistency.
+    Search the ressources.yml's argument entry
+    to find all registered constraints and launch
+    matching methods based on naming convention.
     """
 
     @DecodeArguments
@@ -43,7 +41,8 @@ class CheckArguments(Check):
 
     def __call__(self):
 
-        errors = {}  # Garde la trace des arguments qui ont echoue aux checks
+        # Keep trace of arguments that do not pass tests.
+        errors = {}  
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None
         if targeted_ressource is None:
@@ -101,8 +100,8 @@ class CheckArguments(Check):
 class CheckACL(Check):
 
     """
-    Verifie les acces aux ressources et methodes. Les ACL sont definies dans
-    le fichier acl.yml.
+    Checks method and ressources allowances. ACLs are defined
+    in the acl.yml file.
     """
 
     def __init__(self, query, ressources, sources, acl,
@@ -131,11 +130,8 @@ class CheckACL(Check):
 class CheckRequest(Check):
 
     """
-    Verifie la requete realisee sur divers criteres.
-    La verification d'un critere
-    est effectuee par l'appel de l'une des methodes definies ci-dessous.
-
-    Les criteres attendus sont definis dans le fichier ressources.yml.
+    Check request legitimacy based on various
+    criteria registered in the ressources.yml file.
     """
 
     def __init__(self, query, ressources, sources, acl,
