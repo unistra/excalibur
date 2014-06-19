@@ -13,7 +13,8 @@ from excalibur.decode import DecodeArguments
 class Check(object):
 
     """
-    Classe mere pour implementer les Checks.
+    Check parent class.
+    Mostly empty.
     """
 
     def check(self):
@@ -27,6 +28,10 @@ class CheckArguments(Check):
     Search the ressources.yml's argument entry
     to find all registered constraints and launch
     matching methods based on naming convention.
+    By now, checks are two arguments methods that
+    compare a received value to an expected value.
+    The comparator is not dynamically obtained, it
+    is in the body of the method.
     """
 
     @DecodeArguments
@@ -42,20 +47,21 @@ class CheckArguments(Check):
     def __call__(self):
 
         # Keep trace of arguments that do not pass tests.
-        errors = {}  
+        errors = {}
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None
+
         if targeted_ressource is None:
             raise ArgumentError("unexpected argument")
 
-        if targeted_ressource and "arguments" in \
-                targeted_ressource[self.method].keys():
+        if "arguments" in targeted_ressource[self.method].keys():
+
+            args = targeted_ressource[self.method][
+                "arguments"]
             for argument_name in self.arguments:
                 try:
-                    check_list = targeted_ressource[self.method][
-                        "arguments"][argument_name]["checks"]\
-                        if targeted_ressource[self.method]["arguments"]is\
-                        not None else []
+                    check_list = args[argument_name]["checks"]\
+                        if args is not None else []
                 except KeyError as k:
                     raise ArgumentError("unexpected argument %s"
                                         % argument_name)
@@ -63,8 +69,7 @@ class CheckArguments(Check):
                     try:
                         check_method_name = self.format(check)
                         check_method = getattr(self, check_method_name)
-                        check_parameter = targeted_ressource[self.method][
-                            "arguments"][argument_name]["checks"][check]
+                        check_parameter = args[argument_name]["checks"][check]
                         value_to_check = self.arguments[argument_name]
                         if not check_method(value_to_check, check_parameter):
                             errors[argument_name] = check
@@ -72,7 +77,7 @@ class CheckArguments(Check):
                         raise ArgumentCheckMethodNotFoundError(
                             check_method_name)
                     except Exception as e:
-                        # Erreur dans la 'check method'
+
                         raise CheckMethodError(e)
 
         if errors:
