@@ -76,9 +76,9 @@ class PluginsRunner(object):
 
             module = import_module('excalibur.check')
             check_list = ['CheckSource',
-                      'CheckACL',
-                      'CheckRequest',
-                      'CheckArguments']
+                          'CheckACL',
+                          'CheckRequest',
+                          'CheckArguments']
 
             def checker(x):
                 checker = getattr(module, x)
@@ -89,7 +89,7 @@ class PluginsRunner(object):
                         ipcheck=self.__check_ip)()
 
             [checker(method_name) for method_name in dir(module) if
-                          method_name in check_list]
+                method_name in check_list]
 
             return foo(self, query)
 

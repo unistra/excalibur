@@ -30,12 +30,11 @@ class CheckArguments(Check):
     etre la valeur a tester
     et une valeur servant au test. La valeur de retour doit etre un booleen.
     """
-    
+
     @DecodeArguments
     def __init__(self, query, ressources, sources, acl,
                  sha1check=True, ipcheck=True):
 
-        #DecodeArguments(query, ressources)()
         self.ressources = ressources
         self.arguments = query.arguments
         self.ressource = query.ressource
@@ -43,7 +42,7 @@ class CheckArguments(Check):
         self.query = query
 
     def __call__(self):
-        
+
         errors = {}  # Garde la trace des arguments qui ont echoue aux checks
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None
@@ -51,7 +50,7 @@ class CheckArguments(Check):
             raise ArgumentError("unexpected argument")
 
         if targeted_ressource and "arguments" in \
-           targeted_ressource[self.method].keys():
+                targeted_ressource[self.method].keys():
             for argument_name in self.arguments:
                 try:
                     check_list = targeted_ressource[self.method][

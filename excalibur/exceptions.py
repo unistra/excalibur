@@ -11,8 +11,6 @@ class ExcaliburError(Exception):
         super(ExcaliburError, self).__init__(*args, **kwargs)
 
 
-
-
 class ExcaliburClientError(ExcaliburError):
 
     """
@@ -23,7 +21,6 @@ class ExcaliburClientError(ExcaliburError):
         super(ExcaliburClientError, self).__init__(*args, **kwargs)
 
 
-
 class ExcaliburInternalError(ExcaliburError):
 
     """
@@ -32,7 +29,6 @@ class ExcaliburInternalError(ExcaliburError):
 
     def __init__(self, *args, **kwargs):
         super(ExcaliburInternalError, self).__init__(*args, **kwargs)
-
 
 
 class ConfigurationLoaderError(ExcaliburInternalError):
@@ -61,7 +57,8 @@ class PluginLoaderError(ExcaliburInternalError):
 
     def __str__(self):
         return self.message
-    
+
+
 class PluginRunnerError(ExcaliburInternalError):
 
     """
@@ -228,4 +225,3 @@ class DecodeAlgorithmNotFoundError(ExcaliburInternalError):
 
     def __str__(self):
         return self.message
-
