@@ -15,17 +15,16 @@ class PluginsRunner(object):
 
     # 22/04/2014 :checksign defaults to false
 
-    def __init__(self, acl_file, sources_file, ressources_file,
+    def __init__(self, acl, sources, ressources,
                  plugins_module, check_signature=True, check_ip=True,
                  raw_yaml_content=False):
-        self.__acl = ConfigurationLoader(acl_file, raw_yaml_content).content
-        self.__sources = ConfigurationLoader(
-            sources_file, raw_yaml_content).content
-        self.__ressources = ConfigurationLoader(
-            ressources_file, raw_yaml_content).content
-        self.__plugins_module = plugins_module
-        self.__check_signature = check_signature
-        self.__check_ip = check_ip
+
+        self["acl"] = self.load(acl, raw_yaml_content)
+        self["sources"] = self.load(sources, raw_yaml_content)
+        self["ressources"] = self.load(ressources, raw_yaml_content)
+        self["plugins_module"] = plugins_module
+        self["check_signature"] = check_signature
+        self["check_ip"] = check_ip
 
     @property
     def acl(self):
@@ -54,6 +53,12 @@ class PluginsRunner(object):
                 raise PluginRunnerError("no such source found")
         else:
             return self.__sources
+
+    def __setitem__(self, key, value):
+        setattr(self, "_PluginsRunner__" + key, value)
+
+    def load(self, file, type):
+        return ConfigurationLoader(file, type).content
 
     def sources_names(self, project=None):
         """
@@ -103,7 +108,8 @@ class PluginsRunner(object):
 
     def run_plugins(self, query):
         """
-        Browses plugins and executes required method
+        Browses plugins and executes required method.
+        run_plugins is indeed excalibur's core.
         """
 
         data = {}
