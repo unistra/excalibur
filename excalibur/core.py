@@ -56,15 +56,16 @@ class PluginsRunner(object):
 
     def __setitem__(self, key, value):
 
-        setattr(self, "_PluginsRunner__" + key, value if
-                key in ["acl", "sources", "ressources"] else
-                self.load(value))
+        setattr(self, "_PluginsRunner__" + key,
+                self.load(value, key))
 
-    def load(self, file):
+    def load(self, file, key):
         return ConfigurationLoader(file,
                                    inspect.stack()[2][0].f_locals[
                                        "raw_yaml_content"]
-                                   ).content
+                                   ).content if\
+            key in ["acl", "sources", "ressources"]\
+            else file
 
     def sources_names(self, project=None):
         """
