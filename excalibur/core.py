@@ -19,9 +19,9 @@ class PluginsRunner(object):
                  plugins_module, check_signature=True, check_ip=True,
                  raw_yaml_content=False):
 
-        self["acl"] = self.load(acl, raw_yaml_content)
-        self["sources"] = self.load(sources, raw_yaml_content)
-        self["ressources"] = self.load(ressources, raw_yaml_content)
+        self["acl"] = acl
+        self["sources"] = sources
+        self["ressources"] = ressources
         self["plugins_module"] = plugins_module
         self["check_signature"] = check_signature
         self["check_ip"] = check_ip
@@ -55,10 +55,17 @@ class PluginsRunner(object):
             return self.__sources
 
     def __setitem__(self, key, value):
-        setattr(self, "_PluginsRunner__" + key, value)
 
-    def load(self, file, type):
-        return ConfigurationLoader(file, type).content
+        if key in ["acl", "sources", "ressources"]:
+            setattr(self, "_PluginsRunner__" + key, self.load(value))
+        else:
+            setattr(self, "_PluginsRunner__" + key, value)
+
+    def load(self, file):
+        return ConfigurationLoader(file,
+                                   inspect.stack()[2][0].f_locals[
+                                       "raw_yaml_content"]
+                                   ).content
 
     def sources_names(self, project=None):
         """
