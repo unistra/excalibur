@@ -8,7 +8,6 @@ from excalibur.check import CheckACL, CheckArguments, CheckRequest, CheckSource
 from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError
 from importlib import import_module
-import inspect
 
 
 class PluginsRunner(object):
@@ -18,6 +17,8 @@ class PluginsRunner(object):
     def __init__(self, acl, sources, ressources,
                  plugins_module, check_signature=True, check_ip=True,
                  raw_yaml_content=False):
+
+        self.__raw_yaml_content = raw_yaml_content
 
         self["acl"] = acl
         self["sources"] = sources
@@ -55,14 +56,12 @@ class PluginsRunner(object):
             return self.__sources
 
     def __setitem__(self, key, value):
+        setattr(self, "_"+self.__class__.__name__+"__" + key,
+                self.resolve(value, key))
 
-        setattr(self, "_PluginsRunner__" + key,
-                self.load(value, key))
-
-    def load(self, file, key):
+    def resolve(self, file, key):
         return ConfigurationLoader(file,
-                                   inspect.stack()[2][0].f_locals[
-                                       "raw_yaml_content"]
+                                   self.__raw_yaml_content
                                    ).content if\
             key in ["acl", "sources", "ressources"]\
             else file
