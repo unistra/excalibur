@@ -56,10 +56,9 @@ class PluginsRunner(object):
 
     def __setitem__(self, key, value):
 
-        if key in ["acl", "sources", "ressources"]:
-            setattr(self, "_PluginsRunner__" + key, self.load(value))
-        else:
-            setattr(self, "_PluginsRunner__" + key, value)
+        setattr(self, "_PluginsRunner__" + key, value if
+                key in ["acl", "sources", "ressources"] else
+                self.load(value))
 
     def load(self, file):
         return ConfigurationLoader(file,
