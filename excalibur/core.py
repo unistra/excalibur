@@ -180,14 +180,15 @@ class Query(object):
                  signature=None,
                  project=None,
                  arguments=None):
-        self.__project = project
-        self.__source = source
-        self.__remote_ip = remote_ip
-        self.__signature = signature
-        self.__arguments = arguments if arguments else {}
-        self.__ressource = ressource
-        self.__method = method
-        self.__request_method = request_method
+
+        self["project"] = project
+        self["source"] = source
+        self["remote_ip"] = remote_ip
+        self["signature"] = signature
+        self["arguments"] = arguments if arguments else {}
+        self["ressource"] = ressource
+        self["method"] = method
+        self["request_method"] = request_method
 
     def __str__(self):
         return "project:%s,source:%s,ip:%s,sign:%s,args:%s,ressource:%s,\
@@ -227,3 +228,7 @@ method:%s, request_method:%s" % (self.__project, self.__source,
     @property
     def request_method(self):
         return self.__request_method
+
+    def __setitem__(self, key, value):
+        setattr(self, "_"+self.__class__.__name__+"__" + key,
+                value)
