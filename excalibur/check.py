@@ -227,15 +227,14 @@ class CheckSource(Check):
         self.sha1check = sha1check
         self.ipcheck = ipcheck
 
-        # doesn't check if apikey is not present in the source
-        if self.sha1check and isinstance(self.sources, dict) and \
-           self.source in sources and "apikey" not in sources[self.source]:
-            self.sha1check = False
+        self.disable_check("apikey", "sha1check")
+        self.disable_check("ip", "ipcheck")
 
-        # doesn't check if apikey is not present in the source
-        if self.ipcheck and isinstance(self.sources, dict) and \
-           self.source in sources and "ip" not in sources[self.source]:
-            self.ipcheck = False
+    def disable_check(self, key_name, property_name):
+        if getattr(self, property_name) and isinstance(self.sources, dict) and \
+           self.source in self.sources and \
+           key_name not in self.sources[self.source]:
+            setattr(self, property_name, False)
 
     def __call__(self):
         """
