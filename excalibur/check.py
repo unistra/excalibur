@@ -213,7 +213,9 @@ class CheckRequest(Check):
 class CheckSource(Check):
 
     """
-    Ensures source legitimacy according to sources.yml file
+    Check source ensures that the right api_key is found
+    in the plugin's configuration which is targeted by the request.
+    It is also the application spot where the ip can be checked.
     """
 
     def __init__(self, query, ressources, sources, acl,
@@ -257,10 +259,11 @@ class CheckSource(Check):
         add_args_then_encode = lambda x, y: encode(add_args(x, y))
 
         try:
-            if self.source not in self.sources:
+            if self.source != "all" and self.source not in \
+                    self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             ip_authorized = True
-            if self.ipcheck:
+            if self.source != "all" and self.ipcheck:
                 # Check if IP is authorized
                 ip_authorized = False
                 for ip_re in self.sources[self.source]["ip"]:
@@ -270,17 +273,18 @@ class CheckSource(Check):
             if not ip_authorized:
                 raise IPNotAuthorizedError(self.ip)
             # Signature check
-            if self.sha1check:
-
+            if self.source != "all" and self.sha1check:
                 source_api_key = self.sources[self.source]["apikey"]
                 arguments_list = sorted(self.arguments)
 
+                # if multiple api_keys are registered
                 if isinstance(source_api_key, list):
                     signkeys = [add_args_then_encode(signature,
                                                      arguments_list)
                                 for signature in source_api_key]
                     if self.signature not in signkeys:
                         raise WrongSignatureError(self.signature)
+                # if there is only one api_key
                 else:
                     signkey = add_args_then_encode(source_api_key,
                                                    arguments_list)

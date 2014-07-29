@@ -6,8 +6,11 @@ class to run all the process
 from excalibur.loader import ConfigurationLoader, PluginLoader
 from excalibur.check import CheckACL, CheckArguments, CheckRequest, CheckSource
 from excalibur.decode import DecodeArguments
-from excalibur.exceptions import PluginRunnerError
+from excalibur.exceptions import PluginRunnerError, WrongSignatureError
 from importlib import import_module
+import base64
+import hashlib
+from functools import reduce
 
 
 class PluginsRunner(object):
@@ -39,24 +42,61 @@ class PluginsRunner(object):
     def plugins_module(self):
         return self.__plugins_module
 
-    def plugins(self, source, project=None):
+    def plugins(self, source, signature, arguments=None, project=None):
         try:
-            return self.sources(project)[source]["plugins"]
+            if source != "all":
+                return self.sources(signature,
+                                    project,
+                                    arguments)[source]["plugins"]
+            else:
+                def update_and_return(x, y):
+                    x.update(y)
+                    return x
+                return reduce(lambda x, y: update_and_return(x, y),
+                              [it["plugins"] for it in
+                               list(self.sources(signature,
+                                                 project,
+                                                 arguments).values())])
         except KeyError:
             raise PluginRunnerError("no such plugin found")
 
-    def sources(self, project=None):
+    def sources(self, signature, project=None, arguments=None):
+
+        def add_args(x, args):
+            """
+            add arguments to main key before encoding
+            """
+            if args:
+                for argument in args:
+                    x += (argument + arguments[argument])
+            return x
+
+        # encode full string
+        def encode(x):
+            return hashlib.sha1(x.encode("utf-8")).hexdigest()
+
+        # package the two above
+        add_args_then_encode = lambda x, y: encode(add_args(x, y))
+
         if project:
             try:
-                return self.__sources[project]["sources"]
-
+                project = self.__sources[project]
+                api_keys = [add_args_then_encode(entry['apikey'],
+                                                 sorted(arguments)) for
+                            entry in list(project["sources"].values())]
+                targeted_sources = project["sources"] if signature in\
+                    api_keys else None
+                if not targeted_sources:
+                    raise WrongSignatureError(signature)
+                return project["sources"] if signature in api_keys else None
             except KeyError:
                 raise PluginRunnerError("no such source found")
         else:
+
             return self.__sources
 
     def __setitem__(self, key, value):
-        setattr(self, "_"+self.__class__.__name__+"__" + key,
+        setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 self.resolve(value, key))
 
     def resolve(self, file, key):
@@ -86,15 +126,21 @@ class PluginsRunner(object):
         def checks(self, query):
 
             module = import_module('excalibur.check')
-            check_list = ['CheckSource',
-                          'CheckACL',
-                          'CheckRequest',
-                          'CheckArguments']
+            check_list = [
+                'CheckSource',
+                #                            'CheckACL',
+                'CheckRequest',
+                'CheckArguments'
+            ]
 
             def checker(x):
                 checker = getattr(module, x)
                 checker(query, self.__ressources,
-                        self.sources(query.project),
+                        self.sources(query.signature if
+                                     query.signature else None,
+                                     query.project,
+                                     query.arguments if
+                                     query.arguments else None),
                         self.__acl,
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip)()
@@ -108,7 +154,6 @@ class PluginsRunner(object):
 
     @check_all
     def __call__(self, query):
-
         data, errors = self.run_plugins(query)
         return data, errors
 
@@ -125,9 +170,13 @@ class PluginsRunner(object):
         plugin_loader = PluginLoader(self.__plugins_module)
 
         # Get plugins depending on the sources.yml depth
-        plugins = self.plugins(query.source, query.project if
-                               query.project else None)
+        plugins = self.plugins(query.source,
+                               query.signature,
+                               query.arguments,
+                               query.project if
+                               query.project else None,
 
+                               )
         # Name of the function to run
         f_name = "%s_%s" % (query.ressource, query.method)
 
@@ -230,5 +279,5 @@ method:%s, request_method:%s" % (self.__project, self.__source,
         return self.__request_method
 
     def __setitem__(self, key, value):
-        setattr(self, "_"+self.__class__.__name__+"__" + key,
+        setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 value)

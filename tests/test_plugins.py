@@ -203,6 +203,7 @@ actions:
 
 
     def test_runner(self):
+        
         data, errors = self.plugin_runner(self.query)
         self.assertEqual(data, self.data_ok)
         self.assertEqual(errors, {})
