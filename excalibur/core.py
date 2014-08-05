@@ -128,7 +128,7 @@ class PluginsRunner(object):
             module = import_module('excalibur.check')
             check_list = [
                 'CheckSource',
-                #                            'CheckACL',
+                'CheckACL',
                 'CheckRequest',
                 'CheckArguments'
             ]
@@ -212,7 +212,6 @@ class PluginsRunner(object):
                 # Register data by plugin name
                 if plugin_data is not None:
                     data[plugin_name] = plugin_data
-
         return data, errors
 
 

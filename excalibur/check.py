@@ -108,7 +108,8 @@ class CheckACL(Check):
     Checks method and ressources allowances. ACLs are defined
     in the acl.yml file.
     Right now, if we want to be enable requests that parse all sources,
-    acl verification MUST be disabled.
+    acl verification MUST be disabled when the source does not match any entry
+    in the acl file.
     Yet, checking methods availability is a good principle.
     An equivalent of this check could happen when the method in the core
     is about to be called.
@@ -124,18 +125,19 @@ class CheckACL(Check):
         self.project = query.project
 
     def __call__(self):
+        if self.source != "all":
+            try:
 
-        try:
-
-            allowed_method_suffixes = self.acl[self.project]\
-                [self.source]\
-                [self.ressource] if self.project else self.acl[self.source]\
-                [self.ressource]
-            if self.method not in allowed_method_suffixes:
+                allowed_method_suffixes = self.acl[self.project]\
+                    [self.source]\
+                    [self.ressource] if self.project else self.acl[self.source]\
+                    [self.ressource]
+                if self.method not in allowed_method_suffixes:
+                    raise NoACLMatchedError(
+                        "%s/%s" % (self.ressource, self.method))
+            except KeyError:
                 raise NoACLMatchedError(
                     "%s/%s" % (self.ressource, self.method))
-        except KeyError:
-            raise NoACLMatchedError("%s/%s" % (self.ressource, self.method))
 
 
 class CheckRequest(Check):
