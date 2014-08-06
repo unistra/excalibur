@@ -4,7 +4,8 @@ class to run all the process
 """
 
 from excalibur.loader import ConfigurationLoader, PluginLoader
-from excalibur.check import CheckACL, CheckArguments, CheckRequest, CheckSource
+from excalibur.check import CheckACL,\
+    CheckArguments, CheckRequest, CheckSource, add_args_then_encode
 from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError, WrongSignatureError
 from importlib import import_module
@@ -20,7 +21,6 @@ class PluginsRunner(object):
     def __init__(self, acl, sources, ressources,
                  plugins_module, check_signature=True, check_ip=True,
                  raw_yaml_content=False):
-
         self.__raw_yaml_content = raw_yaml_content
 
         self["acl"] = acl
@@ -62,27 +62,12 @@ class PluginsRunner(object):
 
     def sources(self, signature, project=None, arguments=None):
 
-        def add_args(x, args):
-            """
-            add arguments to main key before encoding
-            """
-            if args:
-                for argument in args:
-                    x += (argument + arguments[argument])
-            return x
-
-        # encode full string
-        def encode(x):
-            return hashlib.sha1(x.encode("utf-8")).hexdigest()
-
-        # package the two above
-        add_args_then_encode = lambda x, y: encode(add_args(x, y))
-
         if project:
             try:
                 project = self.__sources[project]
                 api_keys = [add_args_then_encode(entry['apikey'],
-                                                 sorted(arguments)) for
+                                                 sorted(arguments),
+                                                 arguments) for
                             entry in list(project["sources"].values())]
                 targeted_sources = project["sources"] if signature in\
                     api_keys else None
@@ -144,9 +129,10 @@ class PluginsRunner(object):
                         self.__acl,
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip)()
-
-            [checker(method_name) for method_name in dir(module) if
-                method_name in check_list]
+            list(map(checker, [method_name for method_name in dir(module) if
+                               method_name in check_list]))
+#             [checker(method_name) for method_name in dir(module) if
+#                 method_name in check_list]
 
             return foo(self, query)
 
@@ -228,7 +214,6 @@ class Query(object):
                  signature=None,
                  project=None,
                  arguments=None):
-
         self["project"] = project
         self["source"] = source
         self["remote_ip"] = remote_ip

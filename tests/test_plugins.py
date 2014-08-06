@@ -270,12 +270,24 @@ class RunnerWithProjectsTest(TestCase):
                             request_method="GET",
                             project="project1"
                             )
-
+        
+        self.query3 = Query(source="all",
+                            remote_ip="127.0.0.1",
+                            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                            arguments={"login": "testzombie1", },
+                            ressource="actions",
+                            method="action1",
+                            request_method="GET",
+                            project="project1"
+                            )
+         
         self.plugin_runner = PluginsRunner(
             "./tests/data/acl_projects.yml",
             "./tests/data/sources_projects.yml",
             "./tests/data/ressources.yml",
             "tests.plugins")
+        
+       
 
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
         self.errors_raw = {'Plugin1':
@@ -389,18 +401,36 @@ actions:
 
         plugin_runner = PluginsRunner(
             "./tests/data/acl_projects.yml",
-            "./tests/data/sources_projects.yml",
+            "./tests/data/sources_projects_encoded_api_keys.yml",
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query2)
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})
+        
+    def test_runner_with_query_source_set_to_all(self):
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sources_projects_encoded_api_keys.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+        data, errors = self.plugin_runner(self.query3)
+        self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
+        
 
     def test_sources_names(self):
         self.assertEqual(self.plugin_runner.sources_names(self.query.project),
                          ['etab1', 'etab2'])
         self.assertEqual(self.plugin_runner.sources_names("project2"),
                          ['etab1'])
+    def test_failing_sources_names(self):
+        p = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sourcesnoplugins.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+        with self.assertRaises(PluginRunnerError):
+            p.sources_names(self.query.project)
 
     def test_runner_with_raw_yaml(self):
       plugin_runner = PluginsRunner(

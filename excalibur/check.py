@@ -73,11 +73,10 @@ class CheckArguments(Check):
                         value_to_check = self.arguments[argument_name]
                         if not check_method(value_to_check, check_parameter):
                             errors[argument_name] = check
-                    except AttributeError:
+                    except AttributeError as a:
                         raise ArgumentCheckMethodNotFoundError(
                             check_method_name)
                     except Exception as e:
-
                         raise CheckMethodError(e)
 
         if errors:
@@ -252,21 +251,6 @@ class CheckSource(Check):
 
         """
 
-        def add_args(x, args):
-            """
-            add arguments to main key before encoding
-            """
-            for argument in args:
-                x += (argument + self.arguments[argument])
-            return x
-
-        # encode full string
-        def encode(x):
-            return hashlib.sha1(x.encode("utf-8")).hexdigest()
-
-        # package the two above
-        add_args_then_encode = lambda x, y: encode(add_args(x, y))
-
         try:
             if self.source != "all" and self.source not in \
                     self.sources:
@@ -289,18 +273,37 @@ class CheckSource(Check):
                 # if multiple api_keys are registered
                 if isinstance(source_api_key, list):
                     signkeys = [add_args_then_encode(signature,
-                                                     arguments_list)
+                                                     arguments_list,
+                                                     self.arguments)
                                 for signature in source_api_key]
                     if self.signature not in signkeys:
                         raise WrongSignatureError(self.signature)
                 # if there is only one api_key
                 else:
                     signkey = add_args_then_encode(source_api_key,
-                                                   arguments_list)
+                                                   arguments_list,
+                                                   self.arguments)
                     if self.signature != signkey:
                         raise WrongSignatureError(self.signature)
 
-        except KeyError:
+        except KeyError as k:
             raise SourceNotFoundError("key was not found in sources")
-        except TypeError:
+        except TypeError as t:
             raise SourceNotFoundError("key was not found in sources")
+
+
+def add_args_then_encode(x, y, arguments):
+    def add_args(x, args):
+        """
+        add arguments to main key before encoding
+        """
+        for argument in args:
+            x += (argument + arguments[argument])
+        return x
+
+    def encode(x):
+        """testing UI without selenium
+        encode full string
+        """
+        return hashlib.sha1(x.encode("utf-8")).hexdigest()
+    return encode(add_args(x, y))
