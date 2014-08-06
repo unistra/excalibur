@@ -293,6 +293,13 @@ class CheckSource(Check):
 
 
 def add_args_then_encode(x, y, arguments):
+    """
+    sha1checks are made on aggregated Strings. The process is used
+    in two spots. When checks regarding the sources.yml file are done
+    and in the case where allowed sources cannot be deduced from query
+    arguments but must be be obtained by checking apikeys directly in all 
+    sources.
+    """
     def add_args(x, args):
         """
         add arguments to main key before encoding
@@ -302,7 +309,7 @@ def add_args_then_encode(x, y, arguments):
         return x
 
     def encode(x):
-        """testing UI without selenium
+        """
         encode full string
         """
         return hashlib.sha1(x.encode("utf-8")).hexdigest()

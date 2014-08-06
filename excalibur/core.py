@@ -145,13 +145,14 @@ class PluginsRunner(object):
 
     def run_plugins(self, query):
         """
-        Browses plugins and executes required method.
+        Takes the query as argument and
+        browses plugins to execute methods it requires.
         run_plugins is indeed excalibur's core.
+        Returns obtained data and errors from all
+        launched plugins.
         """
 
-        data = {}
-        errors = {}
-
+        data,errors = {}, {}
         # Load plugins
         plugin_loader = PluginLoader(self.__plugins_module)
 
@@ -161,7 +162,6 @@ class PluginsRunner(object):
                                query.arguments,
                                query.project if
                                query.project else None,
-
                                )
         # Name of the function to run
         f_name = "%s_%s" % (query.ressource, query.method)
@@ -204,6 +204,9 @@ class PluginsRunner(object):
 class Query(object):
 
     """
+    Queries are client requests.
+    They bear data concerning both the client
+    and what he requires from the api.
     """
 
     def __init__(self, source,
@@ -214,6 +217,7 @@ class Query(object):
                  signature=None,
                  project=None,
                  arguments=None):
+        
         self["project"] = project
         self["source"] = source
         self["remote_ip"] = remote_ip
