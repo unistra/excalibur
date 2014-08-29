@@ -66,11 +66,27 @@ class PluginsRunner(object):
             try:
                 project = self.__sources[project]
                 if [it["apikey"] for it in list(project["sources"].values()) if "apikey" in list(it.keys())]:
-                    api_keys = [add_args_then_encode(entry['apikey'] if 'apikey'\
-                                                     in entry else '',
-                                                     sorted(arguments),
-                                                     arguments) for
-                                entry in list(project["sources"].values())]
+
+                    ########### REFACTOR PLZ
+                    entries = list(project["sources"].values())
+
+                    keys = None
+                    api_keys = []
+                    for entry in entries:
+                        keys = entry['apikey'] if 'apikey' in entry else ''
+
+                    if isinstance(keys,list):
+                        for key in keys:
+                            api_keys += [add_args_then_encode(key,
+                                                 sorted(arguments),
+                                                 arguments) for entry in entries]
+                    else:
+                        api_keys = [add_args_then_encode(entry['apikey'] if 'apikey'\
+                                                         in entry else '',
+                                                         sorted(arguments),
+                                                         arguments) for entry in entries]
+                    ###########
+
                     targeted_sources = project["sources"] if signature in\
                         api_keys else None
                     if not targeted_sources:
