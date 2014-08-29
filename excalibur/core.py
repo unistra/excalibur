@@ -65,17 +65,22 @@ class PluginsRunner(object):
         if project:
             try:
                 project = self.__sources[project]
-                api_keys = [add_args_then_encode(entry['apikey'],
-                                                 sorted(arguments),
-                                                 arguments) for
-                            entry in list(project["sources"].values())]
-                targeted_sources = project["sources"] if signature in\
-                    api_keys else None
-                if not targeted_sources:
-                    raise WrongSignatureError(signature)
-                return project["sources"] if signature in api_keys else None
+                if [it["apikey"] for it in list(project["sources"].values()) if "apikey" in list(it.keys())]:
+                    api_keys = [add_args_then_encode(entry['apikey'] if 'apikey'\
+                                                     in entry else '',
+                                                     sorted(arguments),
+                                                     arguments) for
+                                entry in list(project["sources"].values())]
+                    targeted_sources = project["sources"] if signature in\
+                        api_keys else None
+                    if not targeted_sources:
+                        raise WrongSignatureError(signature)
+                    return project["sources"] if signature in api_keys else None
+                else:
+                    return project["sources"]
+             
             except KeyError:
-                raise PluginRunnerError("no such source found")
+                    raise PluginRunnerError("no such source found")
         else:
 
             return self.__sources
