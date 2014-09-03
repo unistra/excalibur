@@ -558,6 +558,33 @@ class CheckTest(TestCase):
         except Exception as e:
             error = "error"
         self.assertTrue(error == "no_error_yet")
+    
+    def test_multiple_api_keys_project_depth_and_etab_set_to_all(self):
+        error = "no_error_yet"
+        print ("OUIDEBUTTESTQUIMERDE")
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/source_project_multiple_api_keys.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins"
+        )
+        query = Query(
+            source="all",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET",
+             project="project1"
+        )
+        try:
+            result = plugin_runner(query)
+            print("RESULT",result)
+        except Exception as e:
+            print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",e)
+            error = "error"
+        self.assertTrue(error == "no_error_yet")
 
     def test_no_apikey_specified(self):
         error = "no_error_yet"

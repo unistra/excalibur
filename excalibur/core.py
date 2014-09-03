@@ -43,39 +43,51 @@ class PluginsRunner(object):
         return self.__plugins_module
 
     def plugins(self, source, signature, arguments=None, project=None):
+        """
+        returns allowed plugins
+        """
         try:
             if source != "all":
                 return self.sources(signature,
                                     project,
                                     arguments)[source]["plugins"]
             else:
+                def plugins_entry_finder(x):
+                    if "plugins" not in list(x.keys()):
+                        return x["sources"]["plugins"]
+                    else:
+                        return x["plugins"]
+                
                 def update_and_return(x, y):
                     x.update(y)
                     return x
+                
                 return reduce(lambda x, y: update_and_return(x, y),
-                              [it["plugins"] for it in
+                              [plugins_entry_finder(it) for it in
                                list(self.sources(signature,
                                                  project,
-                                                 arguments).values())])
-        except KeyError:
+                                                 arguments).values())
+                               ])
+        except KeyError as k:
             raise PluginRunnerError("no such plugin found")
 
     def sources(self, signature, project=None, arguments=None):
-
+        
         if project:
             try:
                 project = self.__sources[project]
                 if [it["apikey"] for it in list(project["sources"].values()) if "apikey" in list(it.keys())]:
-
-                    ########### REFACTOR PLZ
                     entries = list(project["sources"].values())
-
-                    keys = None
+                    keys = []
                     api_keys = []
                     for entry in entries:
-                        keys = entry['apikey'] if 'apikey' in entry else ''
-
-                    if isinstance(keys,list):
+                        if type(entry['apikey']) is list:
+                            for k in entry['apikey']:
+                                keys.append(k)
+                        elif type(entry['apikey']) is str:
+                            keys.append(entry['apikey'])
+                            
+                    if len(keys)>1:
                         for key in keys:
                             api_keys += [add_args_then_encode(key,
                                                  sorted(arguments),
@@ -85,8 +97,6 @@ class PluginsRunner(object):
                                                          in entry else '',
                                                          sorted(arguments),
                                                          arguments) for entry in entries]
-                    ###########
-
                     targeted_sources = project["sources"] if signature in\
                         api_keys else None
                     if not targeted_sources:
@@ -152,8 +162,6 @@ class PluginsRunner(object):
                         ipcheck=self.__check_ip)()
             list(map(checker, [method_name for method_name in dir(module) if
                                method_name in check_list]))
-#             [checker(method_name) for method_name in dir(module) if
-#                 method_name in check_list]
 
             return foo(self, query)
 

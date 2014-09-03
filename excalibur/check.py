@@ -312,5 +312,7 @@ def add_args_then_encode(x, y, arguments):
         """
         encode full string
         """
+        print(x)
+        print(type(x))
         return hashlib.sha1(x.encode("utf-8")).hexdigest()
     return encode(add_args(x, y))

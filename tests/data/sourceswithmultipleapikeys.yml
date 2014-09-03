@@ -19,7 +19,9 @@ etab1:
                 token: S3CR3T
 
 etab2:
-    apikey: S3CR3T2
+    apikey: 
+            - S3CR3T2
+            - PWGEN
     ip:
             - 127.0.0.1
     plugins:
