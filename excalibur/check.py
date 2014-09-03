@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import hashlib
 import re
 
 from excalibur.exceptions import ArgumentError,\
@@ -8,6 +7,7 @@ from excalibur.exceptions import ArgumentError,\
     HTTPMethodError, SourceNotFoundError, \
     IPNotAuthorizedError, WrongSignatureError
 from excalibur.decode import DecodeArguments
+from excalibur.utils import add_args_then_encode
 
 
 class Check(object):
@@ -290,29 +290,3 @@ class CheckSource(Check):
             raise SourceNotFoundError("key was not found in sources")
         except TypeError as t:
             raise SourceNotFoundError("key was not found in sources")
-
-
-def add_args_then_encode(x, y, arguments):
-    """
-    sha1checks are made on aggregated Strings. The process is used
-    in two spots. When checks regarding the sources.yml file are done
-    and in the case where allowed sources cannot be deduced from query
-    arguments but must be be obtained by checking apikeys directly in all 
-    sources.
-    """
-    def add_args(x, args):
-        """
-        add arguments to main key before encoding
-        """
-        for argument in args:
-            x += (argument + arguments[argument])
-        return x
-
-    def encode(x):
-        """
-        encode full string
-        """
-        print(x)
-        print(type(x))
-        return hashlib.sha1(x.encode("utf-8")).hexdigest()
-    return encode(add_args(x, y))

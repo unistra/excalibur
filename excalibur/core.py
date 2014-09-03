@@ -5,13 +5,14 @@ class to run all the process
 
 from excalibur.loader import ConfigurationLoader, PluginLoader
 from excalibur.check import CheckACL,\
-    CheckArguments, CheckRequest, CheckSource, add_args_then_encode
+    CheckArguments, CheckRequest, CheckSource
 from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError, WrongSignatureError
 from importlib import import_module
 import base64
 import hashlib
 from functools import reduce
+from excalibur.utils import add_args_then_encode, get_api_keys
 
 
 class PluginsRunner(object):
@@ -57,11 +58,11 @@ class PluginsRunner(object):
                         return x["sources"]["plugins"]
                     else:
                         return x["plugins"]
-                
+
                 def update_and_return(x, y):
                     x.update(y)
                     return x
-                
+
                 return reduce(lambda x, y: update_and_return(x, y),
                               [plugins_entry_finder(it) for it in
                                list(self.sources(signature,
@@ -72,43 +73,35 @@ class PluginsRunner(object):
             raise PluginRunnerError("no such plugin found")
 
     def sources(self, signature, project=None, arguments=None):
-        
+        """
+        Since the sources are either registered at top-level
+        in the matching yml file or distibuted by projects
+        sources() works as a filter to return either the whole
+        yml, or the matching entries.
+        """
+
         if project:
             try:
                 project = self.__sources[project]
-                if [it["apikey"] for it in list(project["sources"].values()) if "apikey" in list(it.keys())]:
-                    entries = list(project["sources"].values())
-                    keys = []
-                    api_keys = []
-                    for entry in entries:
-                        if type(entry['apikey']) is list:
-                            for k in entry['apikey']:
-                                keys.append(k)
-                        elif type(entry['apikey']) is str:
-                            keys.append(entry['apikey'])
-                            
-                    if len(keys)>1:
-                        for key in keys:
-                            api_keys += [add_args_then_encode(key,
-                                                 sorted(arguments),
-                                                 arguments) for entry in entries]
-                    else:
-                        api_keys = [add_args_then_encode(entry['apikey'] if 'apikey'\
-                                                         in entry else '',
-                                                         sorted(arguments),
-                                                         arguments) for entry in entries]
+                if [it["apikey"] for
+                    it in list(project["sources"].values()) if
+                        "apikey" in list(it.keys())]:
+
+                    api_keys = get_api_keys(
+                        list(project["sources"].values()), arguments)
+
                     targeted_sources = project["sources"] if signature in\
                         api_keys else None
                     if not targeted_sources:
                         raise WrongSignatureError(signature)
-                    return project["sources"] if signature in api_keys else None
+                    return project["sources"] if\
+                        signature in api_keys else None
                 else:
                     return project["sources"]
-             
-            except KeyError:
-                    raise PluginRunnerError("no such source found")
-        else:
 
+            except KeyError:
+                raise PluginRunnerError("no such source found")
+        else:
             return self.__sources
 
     def __setitem__(self, key, value):
@@ -181,7 +174,7 @@ class PluginsRunner(object):
         launched plugins.
         """
 
-        data,errors = {}, {}
+        data, errors = {}, {}
         # Load plugins
         plugin_loader = PluginLoader(self.__plugins_module)
 
@@ -246,7 +239,7 @@ class Query(object):
                  signature=None,
                  project=None,
                  arguments=None):
-        
+
         self["project"] = project
         self["source"] = source
         self["remote_ip"] = remote_ip

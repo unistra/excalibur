@@ -561,7 +561,6 @@ class CheckTest(TestCase):
     
     def test_multiple_api_keys_project_depth_and_etab_set_to_all(self):
         error = "no_error_yet"
-        print ("OUIDEBUTTESTQUIMERDE")
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/source_project_multiple_api_keys.yml",
@@ -580,9 +579,7 @@ class CheckTest(TestCase):
         )
         try:
             result = plugin_runner(query)
-            print("RESULT",result)
         except Exception as e:
-            print("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",e)
             error = "error"
         self.assertTrue(error == "no_error_yet")
 
