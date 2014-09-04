@@ -416,7 +416,8 @@ actions:
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
-        self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
+       
+        self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1" and data["etab1|Plugin2"]=='p2ok1')
         
     def test_query_source_set_to_all_and_multiple_etabs(self):
         """
@@ -429,7 +430,7 @@ actions:
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
-        self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
+        self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1")
         
     def test_query_source_set_to_all__multiple_etabs_multiple_ips(self):
         """
@@ -441,22 +442,21 @@ actions:
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
-        self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
+        self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1")
         
     def test_query_all_missing_ip_in_an_etab(self):
         """
         
         """
        
-        try :
-            plugin_runner = PluginsRunner(
-            "./tests/data/acl_projects.yml",
-            "./tests/data/sources_all_with_apikey_matching_but_ip_not_authorized.yml",
-            "./tests/data/ressources.yml",
-            "tests.plugins")
-            data, errors = plugin_runner(self.query3)
-        except Exception as e:
-            print(e)
+        
+        plugin_runner = PluginsRunner(
+        "./tests/data/acl_projects.yml",
+        "./tests/data/sources_all_with_apikey_matching_but_ip_not_authorized.yml",
+        "./tests/data/ressources.yml",
+        "tests.plugins")
+
+       
         with self.assertRaises(IPNotAuthorizedError):
             data, errors = plugin_runner(self.query3)
             
@@ -474,8 +474,7 @@ actions:
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
-        print(data)
-        print(errors)
+     
 #         self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
         
 

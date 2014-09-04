@@ -54,21 +54,30 @@ class PluginsRunner(object):
                                     arguments)[source]["plugins"]
             else:
                 def plugins_entry_finder(x):
-                    if "plugins" not in list(x.keys()):
-                        return x["sources"]["plugins"]
-                    else:
+#                     if "plugins" not in list(x.keys()):
+#                         return x["sources"]["plugins"]
+#                     else:
                         return x["plugins"]
 
                 def update_and_return(x, y):
                     x.update(y)
                     return x
-
-                return reduce(lambda x, y: update_and_return(x, y),
-                              [plugins_entry_finder(it) for it in
-                               list(self.sources(signature,
+                toutelasauce = self.sources(signature,
                                                  project,
-                                                 arguments).values())
-                               ])
+                                                 arguments)
+                formatedPluginsList = {}
+                for k , v in toutelasauce.items():
+                    for clef,valeur in v['plugins'].items():
+                          formatedPluginsList[k+'|'+clef]=valeur
+                
+                
+                return formatedPluginsList
+#                 return reduce(lambda x, y: update_and_return(x, y),
+#                               [it["plugins"] for it in
+#                                list(self.sources(signature,
+#                                                  project,
+#                                                  arguments).values())
+#                                ])
         except KeyError as k:
             raise PluginRunnerError("no such plugin found")
 
@@ -83,6 +92,10 @@ class PluginsRunner(object):
         if project:
             try:
                 project = self.__sources[project]
+                
+#                 if there is at least one source that contains 
+#                 an apikey specification.
+                
                 if [it["apikey"] for
                     it in list(project["sources"].values()) if
                         "apikey" in list(it.keys())]:
@@ -96,6 +109,11 @@ class PluginsRunner(object):
                         raise WrongSignatureError(signature)
                     return project["sources"] if\
                         signature in api_keys else None
+                
+#                 if there is no apikey entry in any of the configured sources
+#                 it means that the apikey authentification is not used by 
+#                 the app, and that all sources are allowed sources.
+                
                 else:
                     return project["sources"]
 
@@ -173,7 +191,7 @@ class PluginsRunner(object):
         Returns obtained data and errors from all
         launched plugins.
         """
-
+        
         data, errors = {}, {}
         # Load plugins
         plugin_loader = PluginLoader(self.__plugins_module)
@@ -192,6 +210,11 @@ class PluginsRunner(object):
         # First loop over registered plugins.
         for plugin_name, parameters_sets in plugins.items():
             # Load plugin
+            raw_plugin_name=plugin_name
+            must_replace_names=False
+            if "|" in plugin_name:
+                must_replace_names=True
+                plugin_name = plugin_name[plugin_name.index('|')+1:]
             plugin = plugin_loader.get_plugin(plugin_name)
             # Then loop over each plugin registered parameters, with
             # an index so that the error can specify which parameter
@@ -219,7 +242,11 @@ class PluginsRunner(object):
                     }
                 # Register data by plugin name
                 if plugin_data is not None:
-                    data[plugin_name] = plugin_data
+                    if must_replace_names==True:
+                        data[raw_plugin_name] = plugin_data
+                    else:
+                        data[plugin_name] = plugin_data
+                        
         return data, errors
 
 
