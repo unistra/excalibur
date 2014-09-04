@@ -10,7 +10,7 @@ def add_args_then_encode(x, y, arguments):
     sha1checks are made on aggregated Strings. The process is used
     in two spots. When checks regarding the sources.yml file are done
     and in the case where allowed sources cannot be deduced from query
-    arguments but must be be obtained by checking apikeys directly in all 
+    arguments but must be be obtained by checking apikeys directly in all
     sources.
     """
     def add_args(x, args):

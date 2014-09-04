@@ -1,0 +1,23 @@
+project1:
+     sources:
+        etab1:
+            apikey: S3CR3T
+            ip:
+                    - 127.0.0.1
+            plugins:
+
+                Plugin1:
+
+                    -   spore: S3CR3T
+                        token: S3CR3T
+
+        etab2:
+            apikey: S3CR3T
+            ip:
+                    - 127.0.0.1
+            plugins:
+
+
+                Plugin2:
+                    -   spore: S3CR3T
+                        token: S3CR3T

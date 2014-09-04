@@ -575,7 +575,7 @@ class CheckTest(TestCase):
             ressource="actions",
             method="action1",
             request_method="GET",
-             project="project1"
+            project="project1"
         )
         try:
             result = plugin_runner(query)

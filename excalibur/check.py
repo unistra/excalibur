@@ -8,7 +8,7 @@ from excalibur.exceptions import ArgumentError,\
     IPNotAuthorizedError, WrongSignatureError
 from excalibur.decode import DecodeArguments
 from excalibur.utils import add_args_then_encode
-
+import itertools
 
 class Check(object):
 
@@ -256,13 +256,14 @@ class CheckSource(Check):
                     self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             ip_authorized = True
-            if self.source != "all" and self.ipcheck:
+#             if self.source != "all" and self.ipcheck:
+            if self.ipcheck:
                 # Check if IP is authorized
-                ip_authorized = False
-                for ip_re in self.sources[self.source]["ip"]:
-                    if re.match(ip_re, self.ip):
-                        ip_authorized = True
-                        break
+                ip_authorized = True
+                for ip_list in [it["ip"] for it in self.sources.values()]:
+                    if not [ip for ip in ip_list if re.match(ip, self.ip)]:
+                        ip_authorized = False
+
             if not ip_authorized:
                 raise IPNotAuthorizedError(self.ip)
             # Signature check

@@ -6,6 +6,7 @@ from excalibur.loader import ConfigurationLoader
 from excalibur.core import PluginsRunner
 from excalibur.core import Query
 from excalibur.exceptions import PluginRunnerError
+from excalibur.exceptions import IPNotAuthorizedError
 
 
 class PluginsTest(TestCase):
@@ -414,8 +415,68 @@ actions:
             "./tests/data/sources_projects_encoded_api_keys.yml",
             "./tests/data/ressources.yml",
             "tests.plugins")
-        data, errors = self.plugin_runner(self.query3)
+        data, errors = plugin_runner(self.query3)
         self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
+        
+    def test_query_source_set_to_all_and_multiple_etabs(self):
+        """
+        Checks that with 'source==all', data are correctly returned from
+        multiple establishments 
+        """
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/source_set_to_all_and_multiple_etabs.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+        data, errors = plugin_runner(self.query3)
+        self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
+        
+    def test_query_source_set_to_all__multiple_etabs_multiple_ips(self):
+        """
+        
+        """
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sources_many_ip.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+        data, errors = plugin_runner(self.query3)
+        self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
+        
+    def test_query_all_missing_ip_in_an_etab(self):
+        """
+        
+        """
+       
+        try :
+            plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sources_all_with_apikey_matching_but_ip_not_authorized.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+            data, errors = plugin_runner(self.query3)
+        except Exception as e:
+            print(e)
+        with self.assertRaises(IPNotAuthorizedError):
+            data, errors = plugin_runner(self.query3)
+            
+#         self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
+        
+    def test_query_source_set_to_all_and_multiple_etabs_with_errors(self):
+        """
+        Checks that with 'source==all', but ip does not match
+        errors are raised
+        NEEDS IP_CHECK TO BE REENABLED
+        """
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/source_set_to_all_and_multiple_etabs.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+        data, errors = plugin_runner(self.query3)
+        print(data)
+        print(errors)
+#         self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
         
 
     def test_sources_names(self):
@@ -423,6 +484,7 @@ actions:
                          ['etab1', 'etab2'])
         self.assertEqual(self.plugin_runner.sources_names("project2"),
                          ['etab1'])
+        
     def test_failing_sources_names(self):
         p = PluginsRunner(
             "./tests/data/acl_projects.yml",
