@@ -53,20 +53,14 @@ class PluginsRunner(object):
                                     project,
                                     arguments)[source]["plugins"]
             else:
-                def plugins_entry_finder(x):
-#                     if "plugins" not in list(x.keys()):
-#                         return x["sources"]["plugins"]
-#                     else:
-                        return x["plugins"]
-
-                def update_and_return(x, y):
-                    x.update(y)
-                    return x
-                toutelasauce = self.sources(signature,
+#                 def update_and_return(x, y):
+#                     x.update(y)
+#                     return x
+                targeted_sources = self.sources(signature,
                                                  project,
                                                  arguments)
                 formatedPluginsList = {}
-                for k , v in toutelasauce.items():
+                for k, v in targeted_sources.items():
                     for clef,valeur in v['plugins'].items():
                           formatedPluginsList[k+'|'+clef]=valeur
                 
@@ -115,6 +109,7 @@ class PluginsRunner(object):
 #                 the app, and that all sources are allowed sources.
                 
                 else:
+                    #here a more precise subselection could be done.
                     return project["sources"]
 
             except KeyError:

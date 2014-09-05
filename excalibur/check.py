@@ -126,7 +126,6 @@ class CheckACL(Check):
     def __call__(self):
         if self.source != "all":
             try:
-
                 allowed_method_suffixes = self.acl[self.project]\
                     [self.source]\
                     [self.ressource] if self.project else self.acl[self.source]\
@@ -238,7 +237,7 @@ class CheckSource(Check):
         self.ipcheck = ipcheck
 
         self.disable_check("apikey", "sha1check")
-        self.disable_check("ip", "ipcheck")
+#         self.disable_check("ip", "ipcheck")
 
     def disable_check(self, key_name, property_name):
         if getattr(self, property_name) and isinstance(self.sources, dict) and \
@@ -257,12 +256,12 @@ class CheckSource(Check):
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             ip_authorized = True
 #             if self.source != "all" and self.ipcheck:
-            if self.ipcheck:
+#             if self.ipcheck:
                 # Check if IP is authorized
-                ip_authorized = True
-                for ip_list in [it["ip"] for it in self.sources.values()]:
-                    if not [ip for ip in ip_list if re.match(ip, self.ip)]:
-                        ip_authorized = False
+            ip_authorized = True
+            for ip_list in [it["ip"] for it in self.sources.values() if "ip" in list(it.keys())]:
+                if not [ip for ip in ip_list if re.match(ip, self.ip)]:
+                    ip_authorized = False
 
             if not ip_authorized:
                 raise IPNotAuthorizedError(self.ip)
