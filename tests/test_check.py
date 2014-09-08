@@ -562,7 +562,7 @@ class CheckTest(TestCase):
     def test_multiple_api_keys_project_depth_and_etab_set_to_all(self):
         error = "no_error_yet"
         plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml",
+            "./tests/data/acl_projects.yml",
             "./tests/data/source_project_multiple_api_keys.yml",
             "./tests/data/ressources.yml",
             "tests.plugins"
@@ -749,6 +749,7 @@ class CheckTest(TestCase):
                 "tests.plugins"
             )
             plugin_runner(query)
+            
 
     def test_checks_with_optional_args_and_bad_argument_value(self):
         with self.assertRaises(ArgumentError):

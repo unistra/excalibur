@@ -6,7 +6,7 @@ from excalibur.loader import ConfigurationLoader
 from excalibur.core import PluginsRunner
 from excalibur.core import Query
 from excalibur.exceptions import PluginRunnerError
-from excalibur.exceptions import IPNotAuthorizedError
+from excalibur.exceptions import IPNotAuthorizedError,WrongSignatureError
 
 
 class PluginsTest(TestCase):
@@ -281,6 +281,16 @@ class RunnerWithProjectsTest(TestCase):
                             request_method="GET",
                             project="project1"
                             )
+        
+        self.query4 = Query(source="etab1,etab2",
+                            remote_ip="127.0.0.1",
+                            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                            arguments={"login": "testzombie1", },
+                            ressource="actions",
+                            method="action1",
+                            request_method="GET",
+                            project="project1"
+                            )
          
         self.plugin_runner = PluginsRunner(
             "./tests/data/acl_projects.yml",
@@ -288,8 +298,12 @@ class RunnerWithProjectsTest(TestCase):
             "./tests/data/ressources.yml",
             "tests.plugins")
         
-       
-
+        self.plugin_runner2 = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/query4_project.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+        
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
         self.errors_raw = {'Plugin1':
                            {'method': 'action2',
@@ -397,6 +411,16 @@ actions:
         data, errors = self.plugin_runner(self.query)
         self.assertEqual(data, self.data_ok)
         self.assertEqual(errors, {})
+        
+    def test_runner_query4_one_requested_source_does_not_match(self):
+        with self.assertRaises(WrongSignatureError):
+            data, errors = self.plugin_runner(self.query4)
+            
+    def test_runner_query4_one_requested_source(self):
+        """
+        """
+        data, errors = self.plugin_runner2(self.query4)
+        self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1" and data["etab1|Plugin2"]=='p2ok1')
 
     def test_runner_errors(self):
 
@@ -416,7 +440,6 @@ actions:
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
-       
         self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1" and data["etab1|Plugin2"]=='p2ok1')
         
     def test_query_source_set_to_all_and_multiple_etabs(self):

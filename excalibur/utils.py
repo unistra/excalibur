@@ -3,6 +3,7 @@
 Cross-classes utils
 """
 import hashlib
+import traceback
 
 
 def add_args_then_encode(x, y, arguments):
@@ -25,7 +26,9 @@ def add_args_then_encode(x, y, arguments):
         """
         encode full string
         """
+        
         return hashlib.sha1(x.encode("utf-8")).hexdigest()
+        
     return encode(add_args(x, y))
 
 

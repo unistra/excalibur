@@ -48,14 +48,12 @@ class PluginsRunner(object):
         returns allowed plugins
         """
         try:
-            if source != "all":
+            if source != "all" and "," not in source:
+
                 return self.sources(signature,
                                     project,
                                     arguments)[source]["plugins"]
             else:
-#                 def update_and_return(x, y):
-#                     x.update(y)
-#                     return x
                 targeted_sources = self.sources(signature,
                                                  project,
                                                  arguments)
@@ -64,14 +62,7 @@ class PluginsRunner(object):
                     for clef,valeur in v['plugins'].items():
                           formatedPluginsList[k+'|'+clef]=valeur
                 
-                
                 return formatedPluginsList
-#                 return reduce(lambda x, y: update_and_return(x, y),
-#                               [it["plugins"] for it in
-#                                list(self.sources(signature,
-#                                                  project,
-#                                                  arguments).values())
-#                                ])
         except KeyError as k:
             raise PluginRunnerError("no such plugin found")
 
@@ -86,10 +77,8 @@ class PluginsRunner(object):
         if project:
             try:
                 project = self.__sources[project]
-                
 #                 if there is at least one source that contains 
 #                 an apikey specification.
-                
                 if [it["apikey"] for
                     it in list(project["sources"].values()) if
                         "apikey" in list(it.keys())]:
@@ -107,11 +96,9 @@ class PluginsRunner(object):
 #                 if there is no apikey entry in any of the configured sources
 #                 it means that the apikey authentification is not used by 
 #                 the app, and that all sources are allowed sources.
-                
                 else:
                     #here a more precise subselection could be done.
                     return project["sources"]
-
             except KeyError:
                 raise PluginRunnerError("no such source found")
         else:
@@ -154,8 +141,10 @@ class PluginsRunner(object):
                 'CheckRequest',
                 'CheckArguments'
             ]
-
             def checker(x):
+                # ici il nfaut trouver un moyen de passer les bonnes
+                # sources pour le cas où c'est all
+                
                 checker = getattr(module, x)
                 checker(query, self.__ressources,
                         self.sources(query.signature if
@@ -186,7 +175,7 @@ class PluginsRunner(object):
         Returns obtained data and errors from all
         launched plugins.
         """
-        
+       
         data, errors = {}, {}
         # Load plugins
         plugin_loader = PluginLoader(self.__plugins_module)
@@ -207,6 +196,7 @@ class PluginsRunner(object):
             # Load plugin
             raw_plugin_name=plugin_name
             must_replace_names=False
+            #Should become the generic behavior
             if "|" in plugin_name:
                 must_replace_names=True
                 plugin_name = plugin_name[plugin_name.index('|')+1:]
@@ -261,7 +251,7 @@ class Query(object):
                  signature=None,
                  project=None,
                  arguments=None):
-
+        
         self["project"] = project
         self["source"] = source
         self["remote_ip"] = remote_ip

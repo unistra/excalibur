@@ -124,18 +124,23 @@ class CheckACL(Check):
         self.project = query.project
 
     def __call__(self):
-        if self.source != "all":
-            try:
-                allowed_method_suffixes = self.acl[self.project]\
-                    [self.source]\
-                    [self.ressource] if self.project else self.acl[self.source]\
+        targets = list(self.sources.keys()) if self.source=="all" else list(self.source.split(',')) if "," in self.source else [self.source]
+
+        allowed_method_suffixes=[]
+        try:
+            for target in targets:
+                allowed_method_suffixes += self.acl[self.project]\
+                    [target]\
+                    [self.ressource] if self.project else self.acl[target]\
                     [self.ressource]
-                if self.method not in allowed_method_suffixes:
-                    raise NoACLMatchedError(
-                        "%s/%s" % (self.ressource, self.method))
-            except KeyError:
+                
+            if self.method not in allowed_method_suffixes:
                 raise NoACLMatchedError(
                     "%s/%s" % (self.ressource, self.method))
+        except KeyError:
+            raise NoACLMatchedError(
+                "%s/%s" % (self.ressource, self.method))
+
 
 
 class CheckRequest(Check):
@@ -237,7 +242,7 @@ class CheckSource(Check):
         self.ipcheck = ipcheck
 
         self.disable_check("apikey", "sha1check")
-#         self.disable_check("ip", "ipcheck")
+        self.disable_check("ip", "ipcheck")
 
     def disable_check(self, key_name, property_name):
         if getattr(self, property_name) and isinstance(self.sources, dict) and \
@@ -251,40 +256,51 @@ class CheckSource(Check):
         """
 
         try:
-            if self.source != "all" and self.source not in \
+            #bon ici faudrait faire un truc.
+            if self.source != "all" and "," not in self.source and self.source not in \
                     self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
-            ip_authorized = True
-#             if self.source != "all" and self.ipcheck:
-#             if self.ipcheck:
+            if self.ipcheck:
                 # Check if IP is authorized
-            ip_authorized = True
-            for ip_list in [it["ip"] for it in self.sources.values() if "ip" in list(it.keys())]:
-                if not [ip for ip in ip_list if re.match(ip, self.ip)]:
-                    ip_authorized = False
-
-            if not ip_authorized:
-                raise IPNotAuthorizedError(self.ip)
+                ip_authorized = True
+                for ip_list in [it["ip"] for it in self.sources.values() if "ip" in list(it.keys())]:
+                    if not [ip for ip in ip_list if re.match(ip, self.ip)]:
+                        ip_authorized = False
+    
+                if not ip_authorized:
+                    raise IPNotAuthorizedError(self.ip)
             # Signature check
             if self.source != "all" and self.sha1check:
-                source_api_key = self.sources[self.source]["apikey"]
-                arguments_list = sorted(self.arguments)
+                
+                #The request has to be allowed for all the sources it targets
+                targets = list(self.source.split(',')) if "," in self.source else [self.source]
+                
+                def get_keys(x):
+                     if type(self.sources[x]["apikey"]) is list:
+                        return self.sources[x]["apikey"]
+                     else:
+                        return[self.sources[x]["apikey"]]
+                    
+                api_keys_by_sources={target:get_keys(target) for target in targets}
 
+                arguments_list = sorted(self.arguments)
+                
                 # if multiple api_keys are registered
-                if isinstance(source_api_key, list):
-                    signkeys = [add_args_then_encode(signature,
-                                                     arguments_list,
-                                                     self.arguments)
-                                for signature in source_api_key]
-                    if self.signature not in signkeys:
-                        raise WrongSignatureError(self.signature)
-                # if there is only one api_key
-                else:
-                    signkey = add_args_then_encode(source_api_key,
-                                                   arguments_list,
-                                                   self.arguments)
-                    if self.signature != signkey:
-                        raise WrongSignatureError(self.signature)
+                for target_name, api_keys  in api_keys_by_sources.items():
+                    if len(api_keys)>1:
+                        signkeys = [add_args_then_encode(signature,
+                                                         arguments_list,
+                                                         self.arguments)
+                                    for signature in api_keys]
+                        if self.signature not in signkeys:
+                            raise WrongSignatureError(self.signature)
+                    # if there is only one api_key
+                    else:
+                        signkey = add_args_then_encode(api_keys[0],
+                                                       arguments_list,
+                                                       self.arguments)
+                        if self.signature != signkey:
+                            raise WrongSignatureError(self.signature)
 
         except KeyError as k:
             raise SourceNotFoundError("key was not found in sources")
