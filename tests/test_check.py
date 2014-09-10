@@ -14,6 +14,7 @@ from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError,\
 from excalibur.core import PluginsRunner, Query
 import base64
 from importlib import import_module
+from excalibur.utils import ALL_KEYWORD
 
 
 class CheckTest(TestCase):
@@ -568,7 +569,7 @@ class CheckTest(TestCase):
             "tests.plugins"
         )
         query = Query(
-            source="all",
+            source=ALL_KEYWORD,
             remote_ip="127.0.0.1",
             signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
             arguments={"login": "testzombie1", },

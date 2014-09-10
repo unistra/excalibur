@@ -7,7 +7,7 @@ from excalibur.core import PluginsRunner
 from excalibur.core import Query
 from excalibur.exceptions import PluginRunnerError
 from excalibur.exceptions import IPNotAuthorizedError,WrongSignatureError
-
+from excalibur.utils import ALL_KEYWORD
 
 class PluginsTest(TestCase):
 
@@ -272,7 +272,7 @@ class RunnerWithProjectsTest(TestCase):
                             project="project1"
                             )
         
-        self.query3 = Query(source="all",
+        self.query3 = Query(source=ALL_KEYWORD,
                             remote_ip="127.0.0.1",
                             signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
                             arguments={"login": "testzombie1", },

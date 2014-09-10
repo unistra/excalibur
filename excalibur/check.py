@@ -7,7 +7,7 @@ from excalibur.exceptions import ArgumentError,\
     HTTPMethodError, SourceNotFoundError, \
     IPNotAuthorizedError, WrongSignatureError
 from excalibur.decode import DecodeArguments
-from excalibur.utils import add_args_then_encode
+from excalibur.utils import add_args_then_encode, ALL_KEYWORD, SOURCE_SEPARATOR
 import itertools
 
 class Check(object):
@@ -124,7 +124,7 @@ class CheckACL(Check):
         self.project = query.project
 
     def __call__(self):
-        targets = list(self.sources.keys()) if self.source=="all" else list(self.source.split(',')) if "," in self.source else [self.source]
+        targets = list(self.sources.keys()) if self.source==ALL_KEYWORD else list(self.source.split(SOURCE_SEPARATOR)) if SOURCE_SEPARATOR in self.source else [self.source]
 
         allowed_method_suffixes=[]
         try:
@@ -257,7 +257,7 @@ class CheckSource(Check):
 
         try:
             #bon ici faudrait faire un truc.
-            if self.source != "all" and "," not in self.source and self.source not in \
+            if self.source != ALL_KEYWORD and SOURCE_SEPARATOR not in self.source and self.source not in \
                     self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             if self.ipcheck:
@@ -270,10 +270,10 @@ class CheckSource(Check):
                 if not ip_authorized:
                     raise IPNotAuthorizedError(self.ip)
             # Signature check
-            if self.source != "all" and self.sha1check:
+            if self.source != ALL_KEYWORD and self.sha1check:
                 
                 #The request has to be allowed for all the sources it targets
-                targets = list(self.source.split(',')) if "," in self.source else [self.source]
+                targets = list(self.source.split(SOURCE_SEPARATOR)) if SOURCE_SEPARATOR in self.source else [self.source]
                 
                 def get_keys(x):
                      if type(self.sources[x]["apikey"]) is list:

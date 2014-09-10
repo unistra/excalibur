@@ -12,7 +12,8 @@ from importlib import import_module
 import base64
 import hashlib
 from functools import reduce
-from excalibur.utils import add_args_then_encode, get_api_keys
+from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
+    PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR
 
 
 class PluginsRunner(object):
@@ -48,7 +49,7 @@ class PluginsRunner(object):
         returns allowed plugins
         """
         try:
-            if source != "all" and "," not in source:
+            if source != ALL_KEYWORD and SOURCE_SEPARATOR not in source:
 
                 return self.sources(signature,
                                     project,
@@ -60,7 +61,7 @@ class PluginsRunner(object):
                 formatedPluginsList = {}
                 for k, v in targeted_sources.items():
                     for clef,valeur in v['plugins'].items():
-                          formatedPluginsList[k+'|'+clef]=valeur
+                          formatedPluginsList[k+PLUGIN_NAME_SEPARATOR+clef]=valeur
                 
                 return formatedPluginsList
         except KeyError as k:
@@ -197,9 +198,9 @@ class PluginsRunner(object):
             raw_plugin_name=plugin_name
             must_replace_names=False
             #Should become the generic behavior
-            if "|" in plugin_name:
+            if PLUGIN_NAME_SEPARATOR in plugin_name:
                 must_replace_names=True
-                plugin_name = plugin_name[plugin_name.index('|')+1:]
+                plugin_name = plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR)+1:]
             plugin = plugin_loader.get_plugin(plugin_name)
             # Then loop over each plugin registered parameters, with
             # an index so that the error can specify which parameter

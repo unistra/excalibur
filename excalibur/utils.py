@@ -5,6 +5,10 @@ Cross-classes utils
 import hashlib
 import traceback
 
+ALL_KEYWORD = "all"
+PLUGIN_NAME_SEPARATOR = "|"
+SOURCE_SEPARATOR = ","
+
 
 def add_args_then_encode(x, y, arguments):
     """
