@@ -81,8 +81,7 @@ class PluginsRunner(object):
 #                 an apikey specification.
                 if [it["apikey"] for
                     it in list(project["sources"].values()) if
-                        "apikey" in list(it.keys())]:
-
+                        "apikey" in list(it.keys())] and self.__check_signature==True:
                     api_keys = get_api_keys(
                         list(project["sources"].values()), arguments)
 
@@ -99,7 +98,8 @@ class PluginsRunner(object):
                 else:
                     #here a more precise subselection could be done.
                     return project["sources"]
-            except KeyError:
+            except KeyError as k:
+                print(k)
                 raise PluginRunnerError("no such source found")
         else:
             return self.__sources

@@ -137,7 +137,7 @@ class CheckACL(Check):
             if self.method not in allowed_method_suffixes:
                 raise NoACLMatchedError(
                     "%s/%s" % (self.ressource, self.method))
-        except KeyError:
+        except KeyError as k:
             raise NoACLMatchedError(
                 "%s/%s" % (self.ressource, self.method))
 

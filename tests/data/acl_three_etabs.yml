@@ -1,0 +1,18 @@
+project1:
+    etab1:
+        actions:
+            - action1
+            - action2
+
+    etab2:
+        actions:
+            - action1
+    etab3:
+        actions:
+            - action1
+
+project2:
+    etab1:
+        actions:
+            - action1
+            - action2

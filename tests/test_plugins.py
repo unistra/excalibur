@@ -455,6 +455,21 @@ actions:
         data, errors = plugin_runner(self.query3)
         self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1")
         
+    def test_request_set_to_all_and_checksignature_set_to_false(self):
+        """
+        """
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_three_etabs.yml",
+            "./tests/data/source_set_to_all_multiple_etabs_one_missing_api_key.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",
+            check_signature=False
+            )
+        data, errors = plugin_runner(self.query3)
+        self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1")
+        
+    
+        
     def test_query_source_set_to_all__multiple_etabs_multiple_ips(self):
         """
         
