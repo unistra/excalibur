@@ -9,7 +9,7 @@ from excalibur.exceptions import ArgumentError,\
 from excalibur.decode import DecodeArguments
 from excalibur.utils import add_args_then_encode,\
     ALL_KEYWORD, SOURCE_SEPARATOR, sources_list_or_list,\
-    all_sources_or_sources_list_or_list
+    all_sources_or_sources_list_or_list, is_simple_request_and_source_not_found
 import itertools
 
 
@@ -259,9 +259,7 @@ class CheckSource(Check):
         """
 
         try:
-            # bon ici faudrait faire un truc.
-            if self.source != ALL_KEYWORD and SOURCE_SEPARATOR not in self.source and self.source not in \
-                    self.sources:
+            if is_simple_request_and_source_not_found(self.source,self.sources):
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             if self.ipcheck:
                 # Check if IP is authorized

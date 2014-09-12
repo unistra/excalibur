@@ -69,3 +69,12 @@ def all_sources_or_sources_list_or_list(source,sources):
     """
     """
     return list(sources.keys()) if source==ALL_KEYWORD else sources_list_or_list(source)
+
+def is_simple_request(source,sources):
+    """
+    """
+    return source != ALL_KEYWORD and\
+            SOURCE_SEPARATOR not in source 
+            
+def is_simple_request_and_source_not_found(source,sources):
+    return is_simple_request(source,sources) and source not in sources
