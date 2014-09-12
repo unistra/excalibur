@@ -12,6 +12,7 @@ from excalibur.utils import add_args_then_encode,\
     all_sources_or_sources_list_or_list
 import itertools
 
+
 class Check(object):
 
     """
@@ -126,23 +127,23 @@ class CheckACL(Check):
         self.project = query.project
 
     def __call__(self):
-        targets = all_sources_or_sources_list_or_list(self.source,self.sources)
+        targets = all_sources_or_sources_list_or_list(
+            self.source, self.sources)
 
-        allowed_method_suffixes=[]
+        allowed_method_suffixes = []
         try:
             for target in targets:
                 allowed_method_suffixes += self.acl[self.project]\
                     [target]\
                     [self.ressource] if self.project else self.acl[target]\
                     [self.ressource]
-                
+
             if self.method not in allowed_method_suffixes:
                 raise NoACLMatchedError(
                     "%s/%s" % (self.ressource, self.method))
         except KeyError as k:
             raise NoACLMatchedError(
                 "%s/%s" % (self.ressource, self.method))
-
 
 
 class CheckRequest(Check):
@@ -258,38 +259,41 @@ class CheckSource(Check):
         """
 
         try:
-            #bon ici faudrait faire un truc.
+            # bon ici faudrait faire un truc.
             if self.source != ALL_KEYWORD and SOURCE_SEPARATOR not in self.source and self.source not in \
                     self.sources:
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             if self.ipcheck:
                 # Check if IP is authorized
                 ip_authorized = True
-                for ip_list in [it["ip"] for it in self.sources.values() if "ip" in list(it.keys())]:
+                for ip_list in [it["ip"] for
+                                it in self.sources.values() if "ip" in
+                                list(it.keys())]:
                     if not [ip for ip in ip_list if re.match(ip, self.ip)]:
                         ip_authorized = False
-    
+
                 if not ip_authorized:
                     raise IPNotAuthorizedError(self.ip)
             # Signature check
             if self.source != ALL_KEYWORD and self.sha1check:
-                
-                #The request has to be allowed for all the sources it targets
+
+                # The request has to be allowed for all the sources it targets
                 targets = sources_list_or_list(self.source)
-                
+
                 def get_keys(x):
-                     if type(self.sources[x]["apikey"]) is list:
+                    if type(self.sources[x]["apikey"]) is list:
                         return self.sources[x]["apikey"]
-                     else:
+                    else:
                         return[self.sources[x]["apikey"]]
-                    
-                api_keys_by_sources={target:get_keys(target) for target in targets}
+
+                api_keys_by_sources = {
+                    target: get_keys(target) for target in targets}
 
                 arguments_list = sorted(self.arguments)
-                
+
                 # if multiple api_keys are registered
-                for target_name, api_keys  in api_keys_by_sources.items():
-                    if len(api_keys)>1:
+                for target_name, api_keys in api_keys_by_sources.items():
+                    if len(api_keys) > 1:
                         signkeys = [add_args_then_encode(signature,
                                                          arguments_list,
                                                          self.arguments)
