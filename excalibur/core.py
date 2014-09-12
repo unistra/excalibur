@@ -143,9 +143,6 @@ class PluginsRunner(object):
                 'CheckArguments'
             ]
             def checker(x):
-                # ici il nfaut trouver un moyen de passer les bonnes
-                # sources pour le cas où c'est all
-                
                 checker = getattr(module, x)
                 checker(query, self.__ressources,
                         self.sources(query.signature if
