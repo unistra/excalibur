@@ -91,3 +91,13 @@ def ip_found_in_sources(sources,request_ip):
             ip_authorized = False
     return ip_authorized
 
+def get_api_keys_by_sources(sources,targets):
+    """
+    """
+    def get_keys(x):
+                    if type(sources[x]["apikey"]) is list:
+                        return sources[x]["apikey"]
+                    else:
+                        return[sources[x]["apikey"]]
+    return {target: get_keys(target) for target in targets}
+

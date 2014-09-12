@@ -10,7 +10,8 @@ from excalibur.decode import DecodeArguments
 from excalibur.utils import add_args_then_encode,\
     ALL_KEYWORD, SOURCE_SEPARATOR, sources_list_or_list,\
     all_sources_or_sources_list_or_list,\
-    is_simple_request_and_source_not_found,ip_found_in_sources\
+    is_simple_request_and_source_not_found,ip_found_in_sources,\
+    get_api_keys_by_sources
     
 import itertools
 
@@ -274,16 +275,8 @@ class CheckSource(Check):
 
                 # The request has to be allowed for all the sources it targets
                 targets = sources_list_or_list(self.source)
-
-                def get_keys(x):
-                    if type(self.sources[x]["apikey"]) is list:
-                        return self.sources[x]["apikey"]
-                    else:
-                        return[self.sources[x]["apikey"]]
-
-                api_keys_by_sources = {
-                    target: get_keys(target) for target in targets}
-
+                api_keys_by_sources = get_api_keys_by_sources(self.sources,
+                                                              targets)
                 arguments_list = sorted(self.arguments)
 
                 # if multiple api_keys are registered
