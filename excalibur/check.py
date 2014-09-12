@@ -9,7 +9,9 @@ from excalibur.exceptions import ArgumentError,\
 from excalibur.decode import DecodeArguments
 from excalibur.utils import add_args_then_encode,\
     ALL_KEYWORD, SOURCE_SEPARATOR, sources_list_or_list,\
-    all_sources_or_sources_list_or_list, is_simple_request_and_source_not_found
+    all_sources_or_sources_list_or_list,\
+    is_simple_request_and_source_not_found,ip_found_in_sources\
+    
 import itertools
 
 
@@ -263,12 +265,7 @@ class CheckSource(Check):
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             if self.ipcheck:
                 # Check if IP is authorized
-                ip_authorized = True
-                for ip_list in [it["ip"] for
-                                it in self.sources.values() if "ip" in
-                                list(it.keys())]:
-                    if not [ip for ip in ip_list if re.match(ip, self.ip)]:
-                        ip_authorized = False
+                ip_authorized = ip_found_in_sources(self.sources, self.ip)
 
                 if not ip_authorized:
                     raise IPNotAuthorizedError(self.ip)

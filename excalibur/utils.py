@@ -4,6 +4,7 @@ Cross-classes utils
 """
 import hashlib
 import traceback
+import re
 
 ALL_KEYWORD = "all"
 PLUGIN_NAME_SEPARATOR = "|"
@@ -78,3 +79,15 @@ def is_simple_request(source,sources):
             
 def is_simple_request_and_source_not_found(source,sources):
     return is_simple_request(source,sources) and source not in sources
+
+def ip_found_in_sources(sources,request_ip):
+    """
+    """
+    ip_authorized = True
+    for ip_list in [it["ip"] for
+                    it in sources.values() if "ip" in
+                    list(it.keys())]:
+        if not [ip for ip in ip_list if re.match(ip, request_ip)]:
+            ip_authorized = False
+    return ip_authorized
+
