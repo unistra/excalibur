@@ -59,3 +59,13 @@ def get_api_keys(entries, arguments):
                                          sorted(arguments),
                                          arguments) for entry in entries]
     return api_keys
+
+def sources_list_or_list(source):
+    """
+    """
+    return list(source.split(SOURCE_SEPARATOR)) if SOURCE_SEPARATOR in source else [source]
+
+def all_sources_or_sources_list_or_list(source,sources):
+    """
+    """
+    return list(sources.keys()) if source==ALL_KEYWORD else sources_list_or_list(source)

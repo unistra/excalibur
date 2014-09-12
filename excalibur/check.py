@@ -7,7 +7,9 @@ from excalibur.exceptions import ArgumentError,\
     HTTPMethodError, SourceNotFoundError, \
     IPNotAuthorizedError, WrongSignatureError
 from excalibur.decode import DecodeArguments
-from excalibur.utils import add_args_then_encode, ALL_KEYWORD, SOURCE_SEPARATOR
+from excalibur.utils import add_args_then_encode,\
+    ALL_KEYWORD, SOURCE_SEPARATOR, sources_list_or_list,\
+    all_sources_or_sources_list_or_list
 import itertools
 
 class Check(object):
@@ -124,7 +126,7 @@ class CheckACL(Check):
         self.project = query.project
 
     def __call__(self):
-        targets = list(self.sources.keys()) if self.source==ALL_KEYWORD else list(self.source.split(SOURCE_SEPARATOR)) if SOURCE_SEPARATOR in self.source else [self.source]
+        targets = all_sources_or_sources_list_or_list(self.source,self.sources)
 
         allowed_method_suffixes=[]
         try:
@@ -273,7 +275,7 @@ class CheckSource(Check):
             if self.source != ALL_KEYWORD and self.sha1check:
                 
                 #The request has to be allowed for all the sources it targets
-                targets = list(self.source.split(SOURCE_SEPARATOR)) if SOURCE_SEPARATOR in self.source else [self.source]
+                targets = sources_list_or_list(self.source)
                 
                 def get_keys(x):
                      if type(self.sources[x]["apikey"]) is list:
