@@ -8,6 +8,7 @@ from excalibur.core import Query
 from excalibur.exceptions import PluginRunnerError
 from excalibur.exceptions import IPNotAuthorizedError,WrongSignatureError
 from excalibur.utils import ALL_KEYWORD
+import yaml
 
 class PluginsTest(TestCase):
 
@@ -554,6 +555,8 @@ actions:
       data, errors = plugin_runner(self.query2)
       self.assertEqual(errors, self.errors_raw)
       self.assertEqual(data, {})
-
+      
+   
+        
 if __name__ == '__main__':
     main()

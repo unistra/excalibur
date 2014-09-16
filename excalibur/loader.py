@@ -15,17 +15,22 @@ class ConfigurationLoader(object):
     load config from yaml
     """
 
-    def __init__(self, myyaml, raw_yaml_content=False):
+    def __init__(self, myyaml, raw_yaml_content=False, key=None):
         """
         Load yaml file, or raw yaml if raw_yaml_content is True
         """
+        prefix = ""
+        if key:
+            prefix = """!!python/object:excalibur.conf.""" + key.title() + """
+"""
         try:
             if not raw_yaml_content:
                 with open(myyaml, "r") as configuration_file:
-                    self.__content = yaml.load(configuration_file)
+                    self.__content = yaml.load(
+                        prefix + configuration_file.read())
             else:
-                self.__content = yaml.load(myyaml)
-        except Exception:
+                self.__content = yaml.load(prefix + myyaml)
+        except Exception as e:
             raise ConfigurationLoaderError(
                 "error with the configuration loader: %s" % myyaml)
 

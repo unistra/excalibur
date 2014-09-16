@@ -10,9 +10,9 @@ from excalibur.decode import DecodeArguments
 from excalibur.utils import add_args_then_encode,\
     ALL_KEYWORD, SOURCE_SEPARATOR, sources_list_or_list,\
     all_sources_or_sources_list_or_list,\
-    is_simple_request_and_source_not_found,ip_found_in_sources,\
+    is_simple_request_and_source_not_found, ip_found_in_sources,\
     get_api_keys_by_sources
-    
+
 import itertools
 
 
@@ -136,10 +136,9 @@ class CheckACL(Check):
         allowed_method_suffixes = []
         try:
             for target in targets:
-                allowed_method_suffixes += self.acl[self.project]\
-                    [target]\
-                    [self.ressource] if self.project else self.acl[target]\
-                    [self.ressource]
+                allowed_method_suffixes +=\
+                    self.acl[self.project][target][self.ressource]\
+                    if self.project else self.acl[target][self.ressource]
 
             if self.method not in allowed_method_suffixes:
                 raise NoACLMatchedError(
@@ -167,7 +166,8 @@ class CheckRequest(Check):
 
     def __call__(self):
         try:
-            if self.ressource not in self.ressources:
+            # sure??
+            if self.ressource not in self.ressources.keys():
                 raise RessourceNotFoundError(self.ressource)
 
             if self.method not in self.ressources[self.ressource]:
@@ -229,7 +229,6 @@ class CheckRequest(Check):
 
 
 class CheckSource(Check):
-
     """
     Check source ensures that the right api_key is found
     in the plugin's configuration which is targeted by the request.
@@ -251,8 +250,9 @@ class CheckSource(Check):
         self.disable_check("ip", "ipcheck")
 
     def disable_check(self, key_name, property_name):
-        if getattr(self, property_name) and isinstance(self.sources, dict) and \
-           self.source in self.sources and \
+        # for yaml loaded classes to work, disable check should be modified
+        if getattr(self, property_name) and \
+           self.source in self.sources.keys() and \
            key_name not in self.sources[self.source]:
             setattr(self, property_name, False)
 
@@ -262,7 +262,8 @@ class CheckSource(Check):
         """
 
         try:
-            if is_simple_request_and_source_not_found(self.source,self.sources):
+            if is_simple_request_and_source_not_found(self.source,
+                                                      self.sources):
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             if self.ipcheck:
                 # Check if IP is authorized
@@ -272,14 +273,13 @@ class CheckSource(Check):
                     raise IPNotAuthorizedError(self.ip)
             # Signature check
             if self.source != ALL_KEYWORD and self.sha1check:
-
                 # The request has to be allowed for all the sources it targets
                 targets = sources_list_or_list(self.source)
                 api_keys_by_sources = get_api_keys_by_sources(self.sources,
                                                               targets)
                 arguments_list = sorted(self.arguments)
 
-                # if multiple api_keys are registered
+                # If multiple api_keys are registered
                 for target_name, api_keys in api_keys_by_sources.items():
                     if len(api_keys) > 1:
                         signkeys = [add_args_then_encode(signature,
@@ -288,14 +288,13 @@ class CheckSource(Check):
                                     for signature in api_keys]
                         if self.signature not in signkeys:
                             raise WrongSignatureError(self.signature)
-                    # if there is only one api_key
+                    # If there is only one api_key
                     else:
                         signkey = add_args_then_encode(api_keys[0],
                                                        arguments_list,
                                                        self.arguments)
                         if self.signature != signkey:
                             raise WrongSignatureError(self.signature)
-
         except KeyError as k:
             raise SourceNotFoundError("key was not found in sources")
         except TypeError as t:

@@ -31,9 +31,9 @@ def add_args_then_encode(x, y, arguments):
         """
         encode full string
         """
-        
+
         return hashlib.sha1(x.encode("utf-8")).hexdigest()
-        
+
     return encode(add_args(x, y))
 
 
@@ -61,43 +61,55 @@ def get_api_keys(entries, arguments):
                                          arguments) for entry in entries]
     return api_keys
 
+
 def sources_list_or_list(source):
     """
     """
-    return list(source.split(SOURCE_SEPARATOR)) if SOURCE_SEPARATOR in source else [source]
+    return list(source.split(SOURCE_SEPARATOR)) if\
+        SOURCE_SEPARATOR in source else [source]
 
-def all_sources_or_sources_list_or_list(source,sources):
+
+def all_sources_or_sources_list_or_list(source, sources):
     """
     """
-    return list(sources.keys()) if source==ALL_KEYWORD else sources_list_or_list(source)
+    return list(sources.keys())\
+        if source == ALL_KEYWORD else sources_list_or_list(source)
 
-def is_simple_request(source,sources):
+
+def is_simple_request(source, sources):
     """
     """
     return source != ALL_KEYWORD and\
-            SOURCE_SEPARATOR not in source 
-            
-def is_simple_request_and_source_not_found(source,sources):
-    return is_simple_request(source,sources) and source not in sources
+        SOURCE_SEPARATOR not in source
 
-def ip_found_in_sources(sources,request_ip):
+
+def is_simple_request_and_source_not_found(source, sources):
+    """
+    """
+    return is_simple_request(source, sources) and source not in sources.keys()
+
+
+def ip_found_in_sources(sources, request_ip):
     """
     """
     ip_authorized = True
+
     for ip_list in [it["ip"] for
                     it in sources.values() if "ip" in
                     list(it.keys())]:
         if not [ip for ip in ip_list if re.match(ip, request_ip)]:
             ip_authorized = False
+
     return ip_authorized
 
-def get_api_keys_by_sources(sources,targets):
+
+def get_api_keys_by_sources(sources, targets):
     """
     """
     def get_keys(x):
-                    if type(sources[x]["apikey"]) is list:
-                        return sources[x]["apikey"]
-                    else:
-                        return[sources[x]["apikey"]]
-    return {target: get_keys(target) for target in targets}
+        if type(sources[x]["apikey"]) is list:
+            return sources[x]["apikey"]
+        else:
+            return[sources[x]["apikey"]]
 
+    return {target: get_keys(target) for target in targets}

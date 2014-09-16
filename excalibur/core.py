@@ -14,6 +14,7 @@ import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR
+from excalibur.conf import Sources
 
 
 class PluginsRunner(object):
@@ -56,13 +57,14 @@ class PluginsRunner(object):
                                     arguments)[source]["plugins"]
             else:
                 targeted_sources = self.sources(signature,
-                                                 project,
-                                                 arguments)
+                                                project,
+                                                arguments)
                 formatedPluginsList = {}
                 for k, v in targeted_sources.items():
-                    for clef,valeur in v['plugins'].items():
-                          formatedPluginsList[k+PLUGIN_NAME_SEPARATOR+clef]=valeur
-                
+                    for clef, valeur in v['plugins'].items():
+                        formatedPluginsList[
+                            k + PLUGIN_NAME_SEPARATOR + clef] = valeur
+
                 return formatedPluginsList
         except KeyError as k:
             raise PluginRunnerError("no such plugin found")
@@ -78,11 +80,12 @@ class PluginsRunner(object):
         if project:
             try:
                 project = self.__sources[project]
-#                 if there is at least one source that contains 
+#                 if there is at least one source that contains
 #                 an apikey specification.
                 if [it["apikey"] for
                     it in list(project["sources"].values()) if
-                        "apikey" in list(it.keys())] and self.__check_signature==True:
+                        "apikey" in
+                        list(it.keys())] and self.__check_signature:
                     api_keys = get_api_keys(
                         list(project["sources"].values()), arguments)
 
@@ -92,15 +95,14 @@ class PluginsRunner(object):
                         raise WrongSignatureError(signature)
                     return project["sources"] if\
                         signature in api_keys else None
-                
+
 #                 if there is no apikey entry in any of the configured sources
-#                 it means that the apikey authentification is not used by 
+#                 it means that the apikey authentification is not used by
 #                 the app, and that all sources are allowed sources.
                 else:
-                    #here a more precise subselection could be done.
+                    # here a more precise subselection could be done.
                     return project["sources"]
             except KeyError as k:
-                print(k)
                 raise PluginRunnerError("no such source found")
         else:
             return self.__sources
@@ -111,7 +113,8 @@ class PluginsRunner(object):
 
     def resolve(self, file, key):
         return ConfigurationLoader(file,
-                                   self.__raw_yaml_content
+                                   self.__raw_yaml_content,
+                                   key=key
                                    ).content if\
             key in ["acl", "sources", "ressources"]\
             else file
@@ -142,6 +145,7 @@ class PluginsRunner(object):
                 'CheckRequest',
                 'CheckArguments'
             ]
+
             def checker(x):
                 checker = getattr(module, x)
                 checker(query, self.__ressources,
@@ -173,7 +177,7 @@ class PluginsRunner(object):
         Returns obtained data and errors from all
         launched plugins.
         """
-       
+
         data, errors = {}, {}
         # Load plugins
         plugin_loader = PluginLoader(self.__plugins_module)
@@ -192,12 +196,13 @@ class PluginsRunner(object):
         # First loop over registered plugins.
         for plugin_name, parameters_sets in plugins.items():
             # Load plugin
-            raw_plugin_name=plugin_name
-            must_replace_names=False
-            #Should become the generic behavior
+            raw_plugin_name = plugin_name
+            must_replace_names = False
+            # Should become the generic behavior
             if PLUGIN_NAME_SEPARATOR in plugin_name:
-                must_replace_names=True
-                plugin_name = plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR)+1:]
+                must_replace_names = True
+                plugin_name = plugin_name[
+                    plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
             plugin = plugin_loader.get_plugin(plugin_name)
             # Then loop over each plugin registered parameters, with
             # an index so that the error can specify which parameter
@@ -225,11 +230,11 @@ class PluginsRunner(object):
                     }
                 # Register data by plugin name
                 if plugin_data is not None:
-                    if must_replace_names==True:
+                    if must_replace_names:
                         data[raw_plugin_name] = plugin_data
                     else:
                         data[plugin_name] = plugin_data
-                        
+
         return data, errors
 
 
@@ -249,7 +254,7 @@ class Query(object):
                  signature=None,
                  project=None,
                  arguments=None):
-        
+
         self["project"] = project
         self["source"] = source
         self["remote_ip"] = remote_ip
