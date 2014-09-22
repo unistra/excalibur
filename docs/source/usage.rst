@@ -2,8 +2,13 @@
 Usage
 =====
 
+Excalibur is a tool intended on ressources management in applications.
+
 The purpose of Excalibur is to execute plugins methods according to query parameters.
-Excalibur analyzes the query according to yaml configuration files and select which plugin to run.
+
+Excalibur analyzes the query according to yaml configuration files and select which plugins should be run, and which parameters they should use,
+
+dependending on the allowances set in the yaml files.
 
 Excalibur works with Query and PluginsRunner objects which should be imported like : ::
 
@@ -22,7 +27,7 @@ Required Parameters
 For Query
 ---------
 
-The Query contains the data required by the PluginsRunner to select which process the app should select. 
+The Query contains the data required by the PluginsRunner to select which process the app should use. 
 
 For example, if you use this app in a web project, you could have a route like : ::
 
@@ -66,6 +71,12 @@ The signature is a sha1 hash obtained by:
 
         called url is:
         http://myapp.mydomain.com/project/source/ressource/method?sign=337730197d2aae0a0c3ce9eeea00554beb313ad4&firstname=toto&lastname=tata
+
+The client side sha1 signature is optional.
+
+By passing check_signature=False at your PluginRunner initialization you can exempt the consumer from building the sha1.
+
+It does not mean that the matching validation will be skipped, but that it will be made internally by Excalibur.
 
 
 

@@ -102,7 +102,9 @@ Example : ::
 acl.yml
 =======
 
-List of allowed methods by sources.
+List of allowed methods by sources. This module is used by the PluginRunner for validation purposes.
+On receiving the request it ensures that the plugins it targets contain the methods that are going to be 
+called by the request.
 
 Example : ::
 
