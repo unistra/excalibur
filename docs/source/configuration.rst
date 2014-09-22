@@ -28,6 +28,8 @@ You can also
 set the source to "all" in the request, in which case the PluginRunner will return all the sources where your credentials 
 are found.
 
+The parameters with which each plugin is to be executed depending on the user requiring it are registered here.
+
 Example : ::
 
 	uds:
