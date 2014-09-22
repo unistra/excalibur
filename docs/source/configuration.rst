@@ -10,6 +10,24 @@ sources.yml
 
 Api configuration by sources.
 
+Each source can have an apikey entry, which will be match against the 
+apikey carried by the request.
+
+ 
+Multiple apikeys can be registered by setting the value of this entry
+to a list.
+
+The ip entry works the same way, and is used to determine which ips are authorized.
+
+A single request can target one or many sources. 
+
+When building the request, to target multiple establishments
+you should use "," as separator, in the following example it would thus be source="uds,ensas".
+
+You can also
+set the source to "all" in the request, in which case the PluginRunner will return all the sources where your credentials 
+are found.
+
 Example : ::
 
 	uds:
