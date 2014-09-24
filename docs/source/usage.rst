@@ -35,6 +35,10 @@ For example, if you use this app in a web project, you could have a route like :
 
 - project : optional param. The project specified in the sources.yml.
 - source : targeted source specified in the sources.yml.
+			- 'all' is a reserved keyword, when you set source to all, 
+			  excalibur launches all the plugins whose yaml carries the right api key,
+			  NOT ALL PLUGINS BUT ALL ALLOWED PLUGINS. 
+			- you can specify multiple sources, if so you have to separate them with ','
 - remote_ip : the ip address of the client.
 - signature : passed in the query string, sha1 encoded. See above for more details.
 - ressource : targeted ressource specified in the .yml.
@@ -139,3 +143,4 @@ Tips
 ----
 - You can use the sources_names method of the PluginsRunner to get all sources names by project. It can be useful to loop over it to make multiple queries.
 - You can use the "raw_yaml_content=True" parameter for the PluginsRunner to pass a raw string instead of a file
+- You can use the "check_ip=False" parameter for the PluginsRunner to allow all ips.

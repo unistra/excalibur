@@ -8,6 +8,9 @@ All settings directives are done by yaml files.
 sources.yml
 ===========
 
+WARNING : 'all' and ',' are reserved in the Excalibur syntax, don't use them as sources names.
+
+
 Api configuration by sources.
 
 Each source can have an apikey entry, which will be match against the 
