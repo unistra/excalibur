@@ -267,8 +267,7 @@ class CheckSource(Check):
                 raise SourceNotFoundError("Unknown source %s" % self.source)
             if self.ipcheck:
                 # Check if IP is authorized
-                ip_authorized = ip_found_in_sources(self.sources, self.ip)
-
+                ip_authorized = ip_found_in_sources(self.source, self.sources, self.ip)
                 if not ip_authorized:
                     raise IPNotAuthorizedError(self.ip)
             # Signature check

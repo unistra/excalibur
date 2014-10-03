@@ -94,7 +94,6 @@ class CheckTest(TestCase):
  
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
- 
         with self.assertRaises(IPNotAuthorizedError):
             CheckSource(
                 self.query2,
