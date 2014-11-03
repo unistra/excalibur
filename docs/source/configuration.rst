@@ -102,6 +102,10 @@ ressources.yml
 
 
 Methods and arguments descriptions by sources.
+The registered keys found under the "arguments" entry are the the request arguments for
+which validations will be made. If you want a validation to be optional, i.e to be runned 
+only if the the argument is present, you can set optional to true at the same level than the
+check.
 
 Example : ::
 
@@ -118,6 +122,12 @@ Example : ::
 						min_length: 8
 						max_length: 50
 					encoding: base64
+				first_name:
+				       checks:
+						min_length: 8
+						max_length: 50
+					optional:true
+					
 
     ...
 
