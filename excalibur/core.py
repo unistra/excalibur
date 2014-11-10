@@ -13,7 +13,7 @@ import base64
 import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
-    PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR
+    PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_targeted_sources_for_all
 from excalibur.conf import Sources
 
 
@@ -56,9 +56,11 @@ class PluginsRunner(object):
                                     project,
                                     arguments)[source]["plugins"]
             else:
-                targeted_sources = self.sources(signature,
-                                                project,
-                                                arguments)
+                targeted_sources = get_targeted_sources_for_all(signature,
+                                                                self.__sources[project],
+                                                                arguments,
+                                                                self.__check_signature)
+
                 formatedPluginsList = {}
                 for k, v in targeted_sources.items():
                     for clef, valeur in v['plugins'].items():
@@ -79,29 +81,7 @@ class PluginsRunner(object):
 
         if project:
             try:
-                project = self.__sources[project]
-#                 if there is at least one source that contains
-#                 an apikey specification.
-                if [it["apikey"] for
-                    it in list(project["sources"].values()) if
-                        "apikey" in
-                        list(it.keys())] and self.__check_signature:
-                    api_keys = get_api_keys(
-                        list(project["sources"].values()), arguments)
-
-                    targeted_sources = project["sources"] if signature in\
-                        api_keys else None
-                    if not targeted_sources:
-                        raise WrongSignatureError(signature)
-                    return project["sources"] if\
-                        signature in api_keys else None
-
-#                 if there is no apikey entry in any of the configured sources
-#                 it means that the apikey authentification is not used by
-#                 the app, and that all sources are allowed sources.
-                else:
-                    # here a more precise subselection could be done.
-                    return project["sources"]
+                return self.__sources[project]["sources"]
             except KeyError as k:
                 raise PluginRunnerError("no such source found")
         else:

@@ -5,6 +5,7 @@ Cross-classes utils
 import hashlib
 import traceback
 import re
+from excalibur.exceptions import WrongSignatureError
 
 ALL_KEYWORD = "all"
 PLUGIN_NAME_SEPARATOR = "|"
@@ -37,17 +38,17 @@ def add_args_then_encode(x, y, arguments):
     return encode(add_args(x, y))
 
 
-def get_api_keys(entries, arguments):
+def get_api_keys(entry, arguments):
     """
     """
     keys = []
     api_keys = []
-    for entry in entries:
-        if type(entry['apikey']) is list:
-            for k in entry['apikey']:
-                keys.append(k)
-        elif type(entry['apikey']) is str:
-            keys.append(entry['apikey'])
+
+    if type(entry['apikey']) is list:
+        for k in entry['apikey']:
+            keys.append(k)
+    elif type(entry['apikey']) is str:
+        keys.append(entry['apikey'])
 
     for key in keys:
         api_key = add_args_then_encode(key,
@@ -114,3 +115,30 @@ def get_api_keys_by_sources(sources, targets):
             return[sources[x]["apikey"]]
 
     return {target: get_keys(target) for target in targets}
+
+
+def get_targeted_sources_for_all(signature, data_project,
+                                 arguments, check_signature):
+
+    apikey_present = [it["apikey"]
+                      for it in list(data_project["sources"].values())
+                      if "apikey" in list(it.keys())]
+
+    if apikey_present and check_signature:
+
+        targeted_sources = {}
+
+        for name, value in data_project["sources"].items():
+
+            api_keys = get_api_keys(value, arguments)
+
+            if signature in api_keys:
+                targeted_sources[name] = value
+
+        if not targeted_sources:
+            raise WrongSignatureError(signature)
+
+        return targeted_sources
+
+    else:
+        return data_project["sources"]

@@ -441,7 +441,8 @@ actions:
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
-        self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1" and data["etab1|Plugin2"]=='p2ok1')
+        self.assertTrue(data["etab1|Plugin1"]=="p1ok1" and data["etab1|Plugin2"]=='p2ok1')
+        self.assertTrue("etab2|Plugin2" not in data)
         
     def test_query_source_set_to_all_and_multiple_etabs(self):
         """
@@ -482,6 +483,7 @@ actions:
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
         self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1")
+        self.assertTrue("etab3|Plugin2" not in data)
         
     def test_query_all_missing_ip_in_an_etab(self):
         """
