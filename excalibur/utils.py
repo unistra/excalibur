@@ -49,16 +49,13 @@ def get_api_keys(entries, arguments):
         elif type(entry['apikey']) is str:
             keys.append(entry['apikey'])
 
-    if len(keys) > 1:
-        for key in keys:
-            api_keys += [add_args_then_encode(key,
-                                              sorted(arguments),
-                                              arguments) for entry in entries]
-    else:
-        api_keys = [add_args_then_encode(entry['apikey'] if 'apikey'
-                                         in entry else '',
-                                         sorted(arguments),
-                                         arguments) for entry in entries]
+    for key in keys:
+        api_key = add_args_then_encode(key,
+                                       sorted(arguments),
+                                       arguments)
+        if api_key not in api_keys:
+            api_keys.append(api_key)
+
     return api_keys
 
 
