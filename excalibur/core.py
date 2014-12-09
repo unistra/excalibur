@@ -160,7 +160,7 @@ class PluginsRunner(object):
 
         data, errors = {}, {}
         # Load plugins
-        plugin_loader = PluginLoader(self.__plugins_module)
+        plugin_loader = PluginLoader(self.__plugins_module, query)
 
         # Get plugins depending on the sources.yml depth
         plugins = self.plugins(query.source,
@@ -286,3 +286,9 @@ method:%s, request_method:%s" % (self.__project, self.__source,
     def __setitem__(self, key, value):
         setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 value)
+
+
+class Plugin(object):
+
+    def __init__(self, query=None):
+        self.query = query

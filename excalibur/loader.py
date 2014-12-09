@@ -48,8 +48,9 @@ class PluginLoader(object):
     Create plugin instance
     """
 
-    def __init__(self, plugin_module):
+    def __init__(self, plugin_module, query=None):
         self.plugin_module = plugin_module
+        self.query = query
 
     def get_plugin(self, plugin_name):
         """
@@ -59,7 +60,7 @@ class PluginLoader(object):
             module = importlib.import_module(
                 "%s.%s" % (self.plugin_module, plugin_name))
             plugin = getattr(module, plugin_name)
-            return plugin()
+            return plugin(query=self.query)
         except Exception as e:
             raise PluginLoaderError(
                 "Plugin %s failed to load: %s" % (plugin_name, e))

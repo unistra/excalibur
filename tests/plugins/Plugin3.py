@@ -1,4 +1,7 @@
-class Plugin3(object):
+from excalibur.core import Plugin
+
+
+class Plugin3(Plugin):
 
     def actions_notexist(self, parameters, arguments):
         pass
