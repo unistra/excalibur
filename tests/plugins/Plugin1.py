@@ -1,6 +1,4 @@
-from excalibur.core import Plugin
-
-class Plugin1(Plugin):
+class Plugin1(object):
 
     def actions_action1(self, parameters, arguments):
         return "p1ok1"
