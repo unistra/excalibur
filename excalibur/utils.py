@@ -94,7 +94,7 @@ def ip_found_in_sources(source, sources, request_ip):
 
     targeted_sources = []
     if is_simple_request(source, sources):
-        targeted_sources = [sources[source].get('ip',[])]
+        targeted_sources = [sources[source].get('ip', [])]
     else:
         targeted_sources = [it["ip"] for
                             it in sources.values() if "ip" in
@@ -102,7 +102,7 @@ def ip_found_in_sources(source, sources, request_ip):
     for ip_list in targeted_sources:
         if not [ip for ip in ip_list if re.match(ip, request_ip)]:
             ip_authorized = False
-    return ip_authorized 
+    return ip_authorized
 
 
 def get_api_keys_by_sources(sources, targets):
@@ -142,3 +142,13 @@ def get_targeted_sources_for_all(signature, data_project,
 
     else:
         return data_project["sources"]
+
+
+def format_error(query, e, parameters_index):
+    return {'source': query.source, 'ressource': query.ressource,
+            'method': query.method,
+            'arguments': query.arguments,
+            'parameters_index': parameters_index,
+            'error': e.__class__.__name__,
+            'error_message': str(e)
+            }

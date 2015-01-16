@@ -13,7 +13,8 @@ import base64
 import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
-    PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_targeted_sources_for_all
+    PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_targeted_sources_for_all,\
+    format_error
 from excalibur.conf import Sources
 
 
@@ -57,7 +58,8 @@ class PluginsRunner(object):
                                     arguments)[source]["plugins"]
             else:
                 targeted_sources = get_targeted_sources_for_all(signature,
-                                                                self.__sources[project],
+                                                                self.__sources[
+                                                                    project],
                                                                 arguments,
                                                                 self.__check_signature)
 
@@ -199,15 +201,8 @@ class PluginsRunner(object):
                     plugin_data = f(parameters, query.arguments)
                 # Or register exception
                 except Exception as e:
-                    errors[plugin_name] = {
-                        'source': query.source,
-                        'ressource': query.ressource,
-                        'method': query.method,
-                        'arguments': query.arguments,
-                        'parameters_index': parameters_index,
-                        'error': e.__class__.__name__,
-                        'error_message': str(e)
-                    }
+                    errors[plugin_name] = format_error(
+                        query, e, parameters_index)
                 # Register data by plugin name
                 if plugin_data is not None:
                     if must_replace_names:
