@@ -65,7 +65,8 @@ class DecodeArguments(object):
         """
         safeb64
         """
-        decoded_value = base64.urlsafe_b64decode(value).decode("utf-8")
+        decoded_value = base64.urlsafe_b64decode(value.encode('utf-8'))\
+        .decode("utf-8")
         return decoded_value
 
     def decode_base64(self, value):
