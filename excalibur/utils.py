@@ -116,7 +116,10 @@ def get_api_keys_by_sources(sources, targets):
 
     return {target: get_keys(target) for target in targets}
 
-
+def get_data(plugin, f_name, parameters, query):
+     f = getattr(plugin, f_name)
+     return f(parameters, query.arguments)
+ 
 def get_sources_for_all(signature, data_project,
                                  arguments, check_signature):
 

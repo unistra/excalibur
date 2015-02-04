@@ -14,7 +14,7 @@ import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
-    format_error, plugin_data_format, clean_plugin_name
+    format_error, plugin_data_format, clean_plugin_name, get_data
 from excalibur.conf import Sources
 
 
@@ -171,7 +171,7 @@ class PluginsRunner(object):
                                query.project else None,
                                )
         # Name of the function to run
-        f_name = "%s_%s" % (query.ressource, query.method)
+        f_name = query.function_name
 
         # Actually browse plugins to launch required methods
         # First loop over registered plugins.
@@ -187,7 +187,7 @@ class PluginsRunner(object):
             # Then loop over each plugin registered parameters, with
             # an index so that the error can specify which parameter
             # raised the error.
-            for parameters_index, parameters in enumerate(parameters_sets):
+            for index, parameters in enumerate(parameters_sets):
                 # Initialize returned data to None
                 plugin_data = None
 
@@ -195,18 +195,16 @@ class PluginsRunner(object):
                     continue  # Ressource/method not implemented in plugin
                 # Get data
                 try:
-                    f = getattr(plugin, f_name)
-                    plugin_data = f(parameters, query.arguments)
+                    plugin_data = get_data(plugin, f_name, parameters, query)
                 # Or register exception
                 except Exception as e:
-                    errors[plugin_name] = format_error(
-                        query, e, parameters_index)
+                    errors[plugin_name] = format_error(query, e, index)
                 # Register data by plugin name
                 data = plugin_data_format(plugin_data,
                                           data,
                                           must_replace_names,
                                           raw_plugin_name,
-                                          raw_plugin_name)
+                                          plugin_name)
         return data, errors
 
 
@@ -242,7 +240,9 @@ method:%s, request_method:%s" % (self.__project, self.__source,
                                  self.__remote_ip, self.__signature,
                                  self.__arguments, self.__ressource,
                                  self.__method, self.__request_method)
-
+    @property
+    def function_name(self):
+        return "%s_%s" % (self.ressource, self.method)
     @property
     def project(self):
         return self.__project
