@@ -117,7 +117,7 @@ def get_api_keys_by_sources(sources, targets):
     return {target: get_keys(target) for target in targets}
 
 
-def get_targeted_sources_for_all(signature, data_project,
+def get_sources_for_all(signature, data_project,
                                  arguments, check_signature):
 
     apikey_present = [it["apikey"]
@@ -153,7 +153,8 @@ def format_error(query, e, parameters_index):
             'error_message': str(e)
             }
 
-
+def clean_plugin_name(plugin_name):
+    return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
 def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
     if plugin_data is not None:
         if bool:

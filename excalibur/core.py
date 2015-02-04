@@ -13,8 +13,8 @@ import base64
 import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
-    PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_targeted_sources_for_all,\
-    format_error, plugin_data_format
+    PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
+    format_error, plugin_data_format, clean_plugin_name
 from excalibur.conf import Sources
 
 
@@ -57,11 +57,10 @@ class PluginsRunner(object):
                                     project,
                                     arguments)[source]["plugins"]
             else:
-                targeted_sources = get_targeted_sources_for_all(signature,
-                                                                self.__sources[
-                                                                    project],
-                                                                arguments,
-                                                                self.__check_signature)
+                targeted_sources = get_sources_for_all(signature,
+                                                       self.__sources[project],
+                                                       arguments,
+                                                       self.__check_signature)
 
                 formatedPluginsList = {}
                 for k, v in targeted_sources.items():
@@ -183,8 +182,7 @@ class PluginsRunner(object):
             # Should become the generic behavior
             if PLUGIN_NAME_SEPARATOR in plugin_name:
                 must_replace_names = True
-                plugin_name = plugin_name[
-                    plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
+                plugin_name = clean_plugin_name(plugin_name)
             plugin = plugin_loader.get_plugin(plugin_name)
             # Then loop over each plugin registered parameters, with
             # an index so that the error can specify which parameter
