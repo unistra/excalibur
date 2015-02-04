@@ -14,7 +14,11 @@ import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
-    format_error, plugin_data_format, clean_plugin_name, get_data
+    format_error, plugin_data_format,\
+    clean_plugin_name, get_data,\
+    separator_contained,set_plugin_name
+   
+
 from excalibur.conf import Sources
 
 
@@ -52,7 +56,6 @@ class PluginsRunner(object):
         """
         try:
             if source != ALL_KEYWORD and SOURCE_SEPARATOR not in source:
-
                 return self.sources(signature,
                                     project,
                                     arguments)[source]["plugins"]
@@ -61,7 +64,6 @@ class PluginsRunner(object):
                                                        self.__sources[project],
                                                        arguments,
                                                        self.__check_signature)
-
                 formatedPluginsList = {}
                 for k, v in targeted_sources.items():
                     for clef, valeur in v['plugins'].items():
@@ -178,11 +180,8 @@ class PluginsRunner(object):
         for plugin_name, parameters_sets in plugins.items():
             # Load plugin
             raw_plugin_name = plugin_name
-            must_replace_names = False
-            # Should become the generic behavior
-            if PLUGIN_NAME_SEPARATOR in plugin_name:
-                must_replace_names = True
-                plugin_name = clean_plugin_name(plugin_name)
+            must_replace_names = separator_contained(plugin_name)
+            plugin_name = set_plugin_name(plugin_name)
             plugin = plugin_loader.get_plugin(plugin_name)
             # Then loop over each plugin registered parameters, with
             # an index so that the error can specify which parameter
@@ -190,7 +189,6 @@ class PluginsRunner(object):
             for index, parameters in enumerate(parameters_sets):
                 # Initialize returned data to None
                 plugin_data = None
-
                 if not hasattr(plugin, f_name):
                     continue  # Ressource/method not implemented in plugin
                 # Get data
@@ -240,9 +238,11 @@ method:%s, request_method:%s" % (self.__project, self.__source,
                                  self.__remote_ip, self.__signature,
                                  self.__arguments, self.__ressource,
                                  self.__method, self.__request_method)
+
     @property
     def function_name(self):
         return "%s_%s" % (self.ressource, self.method)
+
     @property
     def project(self):
         return self.__project

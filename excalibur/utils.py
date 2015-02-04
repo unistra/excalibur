@@ -158,6 +158,12 @@ def format_error(query, e, parameters_index):
 
 def clean_plugin_name(plugin_name):
     return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
+def set_plugin_name(plugin_name):
+    return clean_plugin_name(plugin_name) if\
+          separator_contained(plugin_name) else plugin_name
+def separator_contained(plugin_name):
+    return PLUGIN_NAME_SEPARATOR in plugin_name
+
 def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
     if plugin_data is not None:
         if bool:
