@@ -16,7 +16,7 @@ from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
     format_error, plugin_data_format,\
     clean_plugin_name, get_data,\
-    separator_contained,set_plugin_name
+    separator_contained,set_plugin_name, get_data_or_errors
    
 
 from excalibur.conf import Sources
@@ -173,36 +173,24 @@ class PluginsRunner(object):
                                query.project else None,
                                )
         # Name of the function to run
-        f_name = query.function_name
+        name = query.function_name
 
         # Actually browse plugins to launch required methods
         # First loop over registered plugins.
+        
         for plugin_name, parameters_sets in plugins.items():
             # Load plugin
             raw_plugin_name = plugin_name
-            must_replace_names = separator_contained(plugin_name)
+            separated = separator_contained(plugin_name)
             plugin_name = set_plugin_name(plugin_name)
             plugin = plugin_loader.get_plugin(plugin_name)
             # Then loop over each plugin registered parameters, with
             # an index so that the error can specify which parameter
             # raised the error.
-            for index, parameters in enumerate(parameters_sets):
-                # Initialize returned data to None
-                plugin_data = None
-                if not hasattr(plugin, f_name):
-                    continue  # Ressource/method not implemented in plugin
-                # Get data
-                try:
-                    plugin_data = get_data(plugin, f_name, parameters, query)
-                # Or register exception
-                except Exception as e:
-                    errors[plugin_name] = format_error(query, e, index)
-                # Register data by plugin name
-                data = plugin_data_format(plugin_data,
-                                          data,
-                                          must_replace_names,
-                                          raw_plugin_name,
-                                          plugin_name)
+            (data, errors) = get_data_or_errors(separated, query, name,
+                                                plugin,
+                                                parameters_sets, data, errors,
+                                                raw_plugin_name, plugin_name)
         return data, errors
 
 

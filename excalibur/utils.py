@@ -171,3 +171,29 @@ def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
         else:
             data[plugin_name] = plugin_data
     return data
+
+def get_data_or_errors(must_replace_names,
+                  query,
+                  f_name,
+                  plugin,
+                  parameters_sets,
+                  data,
+                  errors,
+                  raw_plugin_name,
+                  plugin_name):
+        for index, parameters in enumerate(parameters_sets):
+            # Initialize returned data to None
+            plugin_data = None
+            if not hasattr(plugin, f_name):
+                continue  # Ressource/method not implemented in plugin
+            # Get data
+            try:
+                plugin_data = get_data(plugin, f_name, parameters, query)
+            # Or register exception
+            except Exception as e:
+                errors[plugin_name] = format_error(query, e, index)
+            # Register data by plugin name
+            data = plugin_data_format(plugin_data, data, must_replace_names,
+                                      raw_plugin_name, plugin_name)
+        return data, errors
+            
