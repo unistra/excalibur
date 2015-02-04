@@ -158,9 +158,11 @@ def format_error(query, e, parameters_index):
 
 def clean_plugin_name(plugin_name):
     return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
+
 def set_plugin_name(plugin_name):
     return clean_plugin_name(plugin_name) if\
           separator_contained(plugin_name) else plugin_name
+          
 def separator_contained(plugin_name):
     return PLUGIN_NAME_SEPARATOR in plugin_name
 
@@ -172,15 +174,18 @@ def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
             data[plugin_name] = plugin_data
     return data
 
-def get_data_or_errors(must_replace_names,
-                  query,
-                  f_name,
-                  plugin,
-                  parameters_sets,
-                  data,
-                  errors,
-                  raw_plugin_name,
-                  plugin_name):
+def get_data_or_errors(plugin_loader,
+                       plugin_name,
+                       query,
+                       parameters_sets,
+                       data,
+                       errors
+                       ):
+        f_name = query.function_name
+        raw_plugin_name = plugin_name
+        separated = separator_contained(plugin_name)
+        plugin_name = set_plugin_name(plugin_name)
+        plugin = plugin_loader.get_plugin(plugin_name)
         for index, parameters in enumerate(parameters_sets):
             # Initialize returned data to None
             plugin_data = None
@@ -193,7 +198,7 @@ def get_data_or_errors(must_replace_names,
             except Exception as e:
                 errors[plugin_name] = format_error(query, e, index)
             # Register data by plugin name
-            data = plugin_data_format(plugin_data, data, must_replace_names,
+            data = plugin_data_format(plugin_data, data, separated,
                                       raw_plugin_name, plugin_name)
         return data, errors
             

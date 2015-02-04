@@ -63,3 +63,4 @@ class PluginLoader(object):
         except Exception as e:
             raise PluginLoaderError(
                 "Plugin %s failed to load: %s" % (plugin_name, e))
+    
