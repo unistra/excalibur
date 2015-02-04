@@ -14,7 +14,7 @@ import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_targeted_sources_for_all,\
-    format_error
+    format_error, plugin_data_format
 from excalibur.conf import Sources
 
 
@@ -204,12 +204,11 @@ class PluginsRunner(object):
                     errors[plugin_name] = format_error(
                         query, e, parameters_index)
                 # Register data by plugin name
-                if plugin_data is not None:
-                    if must_replace_names:
-                        data[raw_plugin_name] = plugin_data
-                    else:
-                        data[plugin_name] = plugin_data
-
+                data = plugin_data_format(plugin_data,
+                                          data,
+                                          must_replace_names,
+                                          raw_plugin_name,
+                                          raw_plugin_name)
         return data, errors
 
 
