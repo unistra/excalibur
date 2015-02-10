@@ -128,11 +128,7 @@ class PluginsRunner(object):
             def checker(x):
                 checker = getattr(module, x)
                 checker(query, self.__ressources,
-                        self.sources(query.signature if
-                                     query.signature else None,
-                                     query.project,
-                                     query.arguments if
-                                     query.arguments else None),
+                        self.sources(*query.for_checks),
                         self.__acl,
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip)()
@@ -156,7 +152,6 @@ class PluginsRunner(object):
         Returns obtained data and errors from all
         launched plugins.
         """
-
         data, errors = {}, {}
         # Load plugins
         loader = PluginLoader(self.__plugins_module)
@@ -207,6 +202,14 @@ method:%s, request_method:%s" % (self.__project, self.__source,
                 self.__signature,
                 self.__arguments,
                 self.__project if self.__project else None,]
+        
+    @property
+    def for_checks(self):
+        return [self.__signature if
+                self.__signature else None,
+                self.__project,
+                self.__arguments if self.__arguments else None]
+        
     @property
     def function_name(self):
         return "%s_%s" % (self.ressource, self.method)
