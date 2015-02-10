@@ -128,7 +128,7 @@ class PluginsRunner(object):
             def checker(x):
                 checker = getattr(module, x)
                 checker(query, self.__ressources,
-                        self.sources(*query.for_checks),
+                        self.sources(*query("checks")),
                         self.__acl,
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip)()
@@ -155,12 +155,12 @@ class PluginsRunner(object):
         data, errors = {}, {}
         # Load plugins
         loader = PluginLoader(self.__plugins_module)
-        # Get plugins depending on the sources.yml depth
-        plugins = self.plugins(*query.for_plugins)
+        # Get required plugins depending on the sources.yml depth
+        plugins = self.plugins(*query("plugins"))
         # Actually browse plugins to launch required methods
-        for plugin_name, parameters_sets in plugins.items():
-            (data, errors) = get_data_or_errors(loader, plugin_name, query,
-                                                parameters_sets, data, errors)
+        for name, params in plugins.items():
+            (data, errors) = get_data_or_errors(loader, name, query,
+                                                params, data, errors)
         return data, errors
 
 
@@ -196,19 +196,17 @@ method:%s, request_method:%s" % (self.__project, self.__source,
                                  self.__remote_ip, self.__signature,
                                  self.__arguments, self.__ressource,
                                  self.__method, self.__request_method)
-    @property
-    def for_plugins(self):
-        return [self.__source,
+          
+    def for_(self, what):
+        return {"plugins":[self.__source,
                 self.__signature,
                 self.__arguments,
-                self.__project if self.__project else None,]
-        
-    @property
-    def for_checks(self):
-        return [self.__signature if
+                self.__project if self.__project else None,],
+                "checks":[self.__signature if
                 self.__signature else None,
                 self.__project,
                 self.__arguments if self.__arguments else None]
+               }[what]
         
     @property
     def function_name(self):
@@ -249,3 +247,10 @@ method:%s, request_method:%s" % (self.__project, self.__source,
     def __setitem__(self, key, value):
         setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 value)
+
+    def __call__(self, for_=None):
+        if for_ in ["plugins","checks"]:
+           return self.for_(for_)
+        else:
+            return self.__str__
+            
