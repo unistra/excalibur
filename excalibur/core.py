@@ -57,17 +57,16 @@ class PluginsRunner(object):
                                     project,
                                     arguments)[source]["plugins"]
             else:
-                targeted_sources = get_sources_for_all(signature,
-                                                       self.__sources[project],
-                                                       arguments,
-                                                       self.__check_signature)
-                formatedPluginsList = {}
-                for k, v in targeted_sources.items():
+                sources = get_sources_for_all(signature,
+                                              self.__sources[project],
+                                              arguments,
+                                              self.__check_signature)
+                cleanPluginList = {}
+                for k, v in sources.items():
                     for clef, valeur in v['plugins'].items():
-                        formatedPluginsList[
+                        cleanPluginList[
                             k + PLUGIN_NAME_SEPARATOR + clef] = valeur
-
-                return formatedPluginsList
+                return cleanPluginList
         except KeyError as k:
             raise PluginRunnerError("no such plugin found")
 
@@ -146,14 +145,14 @@ class PluginsRunner(object):
 
     @check_all
     def __call__(self, query):
-        data, errors = self.run_plugins(query)
+        data, errors = self.run(query)
         return data, errors
 
-    def run_plugins(self, query):
+    def run(self, query):
         """
         Takes the query as argument and
         browses plugins to execute methods it requires.
-        run_plugins is indeed excalibur's core.
+        run is indeed excalibur's core.
         Returns obtained data and errors from all
         launched plugins.
         """
@@ -162,20 +161,10 @@ class PluginsRunner(object):
         # Load plugins
         loader = PluginLoader(self.__plugins_module)
         # Get plugins depending on the sources.yml depth
-        plugins = self.plugins(query.source,
-                               query.signature,
-                               query.arguments,
-                               query.project if
-                               query.project else None,
-                               )
+        plugins = self.plugins(*query.for_plugins)
         # Actually browse plugins to launch required methods
-        # First loop over registered plugins.
         for plugin_name, parameters_sets in plugins.items():
-    
-            # Then loop over each plugin registered parameters, with
-            # an index so that the error can specify which parameter
-            # raised the error.
-            (data, errors) = get_data_or_errors(loader,plugin_name,query,
+            (data, errors) = get_data_or_errors(loader, plugin_name, query,
                                                 parameters_sets, data, errors)
         return data, errors
 
@@ -212,7 +201,12 @@ method:%s, request_method:%s" % (self.__project, self.__source,
                                  self.__remote_ip, self.__signature,
                                  self.__arguments, self.__ressource,
                                  self.__method, self.__request_method)
-
+    @property
+    def for_plugins(self):
+        return [self.__source,
+                self.__signature,
+                self.__arguments,
+                self.__project if self.__project else None,]
     @property
     def function_name(self):
         return "%s_%s" % (self.ressource, self.method)
