@@ -40,7 +40,10 @@ def add_args_then_encode(x, y, arguments):
 
 def get_api_keys(entry, arguments):
     """
+    do something with sets
     """
+    #TODO
+
     keys = []
     api_keys = []
 
@@ -86,20 +89,28 @@ def is_simple_request_and_source_not_found(source, sources):
     """
     return is_simple_request(source, sources) and source not in sources.keys()
 
+def get_ip_entry(source, sources):
+    """
+    get ip entry in sources
+    """
+    all_ip_lists = [] 
+    if is_simple_request(source, sources):
+        all_ip_lists = [sources[source].get('ip', [])]
+    else:
+        all_ip_lists = [it["ip"] for
+                            it in sources.values() if "ip" in
+                            list(it.keys())]
+    return all_ip_lists     
 
 def ip_found_in_sources(source, sources, request_ip):
     """
+    checks if the ip is found in sources.
     """
     ip_authorized = True
-
-    targeted_sources = []
-    if is_simple_request(source, sources):
-        targeted_sources = [sources[source].get('ip', [])]
-    else:
-        targeted_sources = [it["ip"] for
-                            it in sources.values() if "ip" in
-                            list(it.keys())]
-    for ip_list in targeted_sources:
+    
+    all_ip_lists = get_ip_entry(source, sources)
+    
+    for ip_list in all_ip_lists:
         if not [ip for ip in ip_list if re.match(ip, request_ip)]:
             ip_authorized = False
     return ip_authorized
@@ -116,12 +127,14 @@ def get_api_keys_by_sources(sources, targets):
 
     return {target: get_keys(target) for target in targets}
 
+
 def get_data(plugin, f_name, parameters, query):
-     f = getattr(plugin, f_name)
-     return f(parameters, query.arguments)
- 
+    f = getattr(plugin, f_name)
+    return f(parameters, query.arguments)
+
+
 def get_sources_for_all(signature, data_project,
-                                 arguments, check_signature):
+                        arguments, check_signature):
 
     apikey_present = [it["apikey"]
                       for it in list(data_project["sources"].values())
@@ -156,15 +169,19 @@ def format_error(query, e, parameters_index):
             'error_message': str(e)
             }
 
+
 def clean_plugin_name(plugin_name):
     return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
 
+
 def set_plugin_name(plugin_name):
     return clean_plugin_name(plugin_name) if\
-          separator_contained(plugin_name) else plugin_name
-          
+        separator_contained(plugin_name) else plugin_name
+
+
 def separator_contained(plugin_name):
     return PLUGIN_NAME_SEPARATOR in plugin_name
+
 
 def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
     if plugin_data is not None:
@@ -174,23 +191,23 @@ def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
             data[plugin_name] = plugin_data
     return data
 
-def get_data_or_errors(plugin_loader,
-                       plugin_name,
-                       query,
-                       parameters_sets,
-                       data,
-                       errors
-                       ):
-        f_name = query.function_name
-        raw_plugin_name = plugin_name
-        separated = separator_contained(plugin_name)
-        plugin_name = set_plugin_name(plugin_name)
-        plugin = plugin_loader.get_plugin(plugin_name)
-        for index, parameters in enumerate(parameters_sets):
+
+def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, data,
+                   errors):
+    """
+    real core of the application that tries to execute the plugin's code or 
+    continue
+    """
+    f_name = query.function_name
+    raw_plugin_name = plugin_name
+    separated = separator_contained(plugin_name)
+    plugin_name = set_plugin_name(plugin_name)
+    plugin = plugin_loader.get_plugin(plugin_name)
+
+    for index, parameters in enumerate(parameters_sets):
             # Initialize returned data to None
-            plugin_data = None
-            if not hasattr(plugin, f_name):
-                continue  # Ressource/method not implemented in plugin
+        plugin_data = None
+        if hasattr(plugin, f_name):
             # Get data
             try:
                 plugin_data = get_data(plugin, f_name, parameters, query)
@@ -200,5 +217,4 @@ def get_data_or_errors(plugin_loader,
             # Register data by plugin name
             data = plugin_data_format(plugin_data, data, separated,
                                       raw_plugin_name, plugin_name)
-        return data, errors
-            
+    return data, errors

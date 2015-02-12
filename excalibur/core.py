@@ -14,8 +14,8 @@ import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
-    get_data_or_errors
-   
+    data_or_errors
+
 
 from excalibur.conf import Sources
 
@@ -91,9 +91,7 @@ class PluginsRunner(object):
                 self.resolve(value, key))
 
     def resolve(self, file, key):
-        return ConfigurationLoader(file,
-                                   self.__raw_yaml_content,
-                                   key=key
+        return ConfigurationLoader(file, self.__raw_yaml_content, key=key
                                    ).content if\
             key in ["acl", "sources", "ressources"]\
             else file
@@ -159,8 +157,8 @@ class PluginsRunner(object):
         plugins = self.plugins(*query("plugins"))
         # Actually browse plugins to launch required methods
         for name, params in plugins.items():
-            (data, errors) = get_data_or_errors(loader, name, query,
-                                                params, data, errors)
+            (data, errors) = data_or_errors(loader, name, query,
+                                            params, data, errors)
         return data, errors
 
 
@@ -196,18 +194,18 @@ method:%s, request_method:%s" % (self.__project, self.__source,
                                  self.__remote_ip, self.__signature,
                                  self.__arguments, self.__ressource,
                                  self.__method, self.__request_method)
-          
+
     def for_(self, what):
-        return {"plugins":[self.__source,
-                self.__signature,
-                self.__arguments,
-                self.__project if self.__project else None,],
-                "checks":[self.__signature if
-                self.__signature else None,
-                self.__project,
-                self.__arguments if self.__arguments else None]
-               }[what]
-        
+        return {"plugins": [self.__source,
+                            self.__signature,
+                            self.__arguments,
+                            self.__project if self.__project else None, ],
+                "checks": [self.__signature if
+                           self.__signature else None,
+                           self.__project,
+                           self.__arguments if self.__arguments else None]
+                }[what]
+
     @property
     def function_name(self):
         return "%s_%s" % (self.ressource, self.method)
@@ -249,8 +247,5 @@ method:%s, request_method:%s" % (self.__project, self.__source,
                 value)
 
     def __call__(self, for_=None):
-        if for_ in ["plugins","checks"]:
-           return self.for_(for_)
-        else:
-            return self.__str__
-            
+        if for_ in ["plugins", "checks"]:
+            return self.for_(for_)
