@@ -69,3 +69,11 @@ class DecodeArguments(object):
         # base64 decoding returns bytestrings
         decoded_value = base64.b64decode(value).decode("utf-8")
         return decoded_value
+
+    def decode_base64url(self, value):
+        """
+        safeb64
+        """
+        decoded_value = base64.urlsafe_b64decode(value.encode('utf-8'))\
+            .decode("utf-8")
+        return decoded_value
