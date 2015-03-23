@@ -161,6 +161,9 @@ def get_sources_for_all(signature, data_project,
 
 
 def format_error(query, e, parameters_index):
+    """
+    The dict structure of the error returned to the client.
+    """
     return {'source': query.source, 'ressource': query.ressource,
             'method': query.method,
             'arguments': query.arguments,

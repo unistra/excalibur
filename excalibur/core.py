@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-class to run all the process
+Class to run all the process.
+Excalibur's architecture is quite simple. The lib consists in 
+PluginRunner objects that are able to treat and react to Query
+objects.
+The treatments those objects make depends on their configuration
+that is specified in dedicated yaml files.
 """
 
 from excalibur.loader import ConfigurationLoader, PluginLoader
@@ -21,7 +26,9 @@ from excalibur.conf import Sources
 
 
 class PluginsRunner(object):
-
+    """
+    
+    """
     # 22/04/2014 :checksign defaults to false
 
     def __init__(self, acl, sources, ressources,
@@ -196,14 +203,13 @@ method:%s, request_method:%s" % (self.__project, self.__source,
                                  self.__method, self.__request_method)
 
     def for_(self, what):
-        return {"plugins": [self.__source,
-                            self.__signature,
-                            self.__arguments,
-                            self.__project if self.__project else None, ],
-                "checks": [self.__signature if
-                           self.__signature else None,
-                           self.__project,
-                           self.__arguments if self.__arguments else None]
+        l1 = ['source','signature','arguments','project']
+        l2 = ['signature','project','arguments']
+        def getattrsubset(list):
+            return [self[y] for y in list]
+        
+        return {"plugins": getattrsubset(l1),
+                "checks": getattrsubset(l2)
                 }[what]
 
     @property
@@ -245,6 +251,9 @@ method:%s, request_method:%s" % (self.__project, self.__source,
     def __setitem__(self, key, value):
         setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 value)
+        
+    def __getitem__(self,key):
+        return getattr(self,key) or None
 
     def __call__(self, for_=None):
         if for_ in ["plugins", "checks"]:
