@@ -54,6 +54,10 @@ class PluginsRunner(object):
     @property
     def plugins_module(self):
         return self.__plugins_module
+    
+    
+    def project_sources(self,project):
+        return self.__sources[project]["sources"]
 
     def plugins(self, source, signature, arguments=None, project=None):
         """
@@ -85,10 +89,9 @@ class PluginsRunner(object):
         sources() works as a filter to return either the whole
         yml, or the matching entries.
         """
-
         if project:
             try:
-                return self.__sources[project]["sources"]
+                return self.project_sources(project)
             except KeyError as k:
                 raise PluginRunnerError("no such source found")
         else:
@@ -110,7 +113,7 @@ class PluginsRunner(object):
         """
         if project:
             try:
-                return sorted(self.__sources[project]["sources"].keys())
+                return sorted(self.project_sources(project).keys())
             except KeyError:
                 raise PluginRunnerError("no such source found")
         else:

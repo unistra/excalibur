@@ -93,11 +93,9 @@ def get_ip_entry(source, sources):
     """
     get ip entry in sources
     """
-    all_ip_lists = [] 
-    if is_simple_request(source, sources):
-        all_ip_lists = [sources[source].get('ip', [])]
-    else:
-        all_ip_lists = [it["ip"] for
+    
+    all_ip_lists = [sources[source].get('ip', [])] \
+                    if is_simple_request(source, sources) else [it["ip"] for
                             it in sources.values() if "ip" in
                             list(it.keys())]
     return all_ip_lists     
@@ -120,10 +118,10 @@ def get_api_keys_by_sources(sources, targets):
     """
     """
     def get_keys(x):
-        if type(sources[x]["apikey"]) is list:
-            return sources[x]["apikey"]
-        else:
-            return[sources[x]["apikey"]]
+        return sources[x]["apikey"]\
+             if type(sources[x]["apikey"]) is list else\
+             [sources[x]["apikey"]]
+       
 
     return {target: get_keys(target) for target in targets}
 

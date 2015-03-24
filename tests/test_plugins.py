@@ -89,9 +89,9 @@ class PluginsTest(TestCase):
 
     def test_query(self):
         self.assertEqual(self.query.__str__(),
-                         "project:None,source:etab1,ip:127.0.0.1,\
-sign:c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10,args:{'login': 'testzombie1'},\
-ressource:actions,method:action1, request_method:GET")
+                         "project:None,source:etab1,remote_ip:127.0.0.1,\
+signature:c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10,arguments:{'login': 'testzombie1'},\
+ressource:actions,method:action1,request_method:GET")
 
 
 class RunnerTest(TestCase):
