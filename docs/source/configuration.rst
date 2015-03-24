@@ -3,6 +3,7 @@ Configuration
 =============
 
 All settings directives are done by yaml files.
+This is where you specify which process Excalibur should call, which way it should do it, depending on who asks it.
 
 
 sources.yml
@@ -13,7 +14,7 @@ WARNING : 'all' and ',' are reserved in the Excalibur syntax, don't use them as 
 
 Api configuration by sources.
 
-Each source can have an apikey entry, which will be match against the 
+Each source can have an apikey entry, which will be matched against the 
 apikey carried by the request.
 
  

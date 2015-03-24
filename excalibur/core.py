@@ -54,9 +54,8 @@ class PluginsRunner(object):
     @property
     def plugins_module(self):
         return self.__plugins_module
-    
-    
-    def project_sources(self,project):
+
+    def project_sources(self, project):
         return self.__sources[project]["sources"]
 
     def plugins(self, source, signature, arguments=None, project=None):
@@ -264,5 +263,4 @@ class Query(object):
         return getattr(self, key) or None
 
     def __call__(self, for_=None):
-        if for_ in ["plugins", "checks"]:
-            return self.for_(for_)
+        return self.for_(for_) if for_ in ["plugins", "checks"] else None
