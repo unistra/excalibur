@@ -163,7 +163,6 @@ class PluginsRunner(object):
         loader = PluginLoader(self.__plugins_module)
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
-        print(plugins)
         # Actually browse plugins to launch required methods
         for name, params in plugins.items():
             (data, errors) = data_or_errors(loader, name, query,
