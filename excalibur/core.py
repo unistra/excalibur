@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Class to run all the process.
-Excalibur's architecture is quite simple. The lib consists in 
+Excalibur's architecture is quite simple. The lib consists in
 PluginRunner objects that are able to treat and react to Query
 objects.
 The treatments those objects make depends on their configuration
@@ -26,8 +26,9 @@ from excalibur.conf import Sources
 
 
 class PluginsRunner(object):
+
     """
-    
+
     """
     # 22/04/2014 :checksign defaults to false
 
@@ -162,6 +163,7 @@ class PluginsRunner(object):
         loader = PluginLoader(self.__plugins_module)
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
+        print(plugins)
         # Actually browse plugins to launch required methods
         for name, params in plugins.items():
             (data, errors) = data_or_errors(loader, name, query,
@@ -196,20 +198,24 @@ class Query(object):
         self["request_method"] = request_method
 
     def __str__(self):
-        return "project:%s,source:%s,ip:%s,sign:%s,args:%s,ressource:%s,\
-method:%s, request_method:%s" % (self.__project, self.__source,
-                                 self.__remote_ip, self.__signature,
-                                 self.__arguments, self.__ressource,
-                                 self.__method, self.__request_method)
+        exposed_attrs = ['project', 'source', 'remote_ip', 'signature',
+                         'arguments', 'ressource', 'method',
+                         'request_method']
+
+        def item_to_string(k):
+            return "%s:%s" % (k, str(self[k]))
+
+        return reduce(lambda x, y: (',').join((x, y)),
+                      [item_to_string(i) for i in exposed_attrs])
+
+    def getattrsubset(self, list):
+        return (self[y] for y in list)
 
     def for_(self, what):
-        l1 = ['source','signature','arguments','project']
-        l2 = ['signature','project','arguments']
-        def getattrsubset(list):
-            return [self[y] for y in list]
-        
-        return {"plugins": getattrsubset(l1),
-                "checks": getattrsubset(l2)
+        l1 = ['source', 'signature', 'arguments', 'project']
+        l2 = ['signature', 'project', 'arguments']
+        return {"plugins": self.getattrsubset(l1),
+                "checks": self.getattrsubset(l2)
                 }[what]
 
     @property
@@ -251,9 +257,9 @@ method:%s, request_method:%s" % (self.__project, self.__source,
     def __setitem__(self, key, value):
         setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 value)
-        
-    def __getitem__(self,key):
-        return getattr(self,key) or None
+
+    def __getitem__(self, key):
+        return getattr(self, key) or None
 
     def __call__(self, for_=None):
         if for_ in ["plugins", "checks"]:
