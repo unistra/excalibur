@@ -42,7 +42,7 @@ def get_api_keys(entry, arguments):
     """
     do something with sets
     """
-    #TODO
+    # TODO
 
     keys = []
     api_keys = []
@@ -89,25 +89,28 @@ def is_simple_request_and_source_not_found(source, sources):
     """
     return is_simple_request(source, sources) and source not in sources.keys()
 
+
 def get_ip_entry(source, sources):
     """
     get ip entry in sources
     """
-    
+
     all_ip_lists = [sources[source].get('ip', [])] \
-                    if is_simple_request(source, sources) else [it["ip"] for
-                            it in sources.values() if "ip" in
-                            list(it.keys())]
-    return all_ip_lists     
+        if is_simple_request(source, sources)\
+        else [it["ip"] for
+              it in sources.values() if "ip" in
+              list(it.keys())]
+    return all_ip_lists
+
 
 def ip_found_in_sources(source, sources, request_ip):
     """
     checks if the ip is found in sources.
     """
     ip_authorized = True
-    
+
     all_ip_lists = get_ip_entry(source, sources)
-    
+
     for ip_list in all_ip_lists:
         if not [ip for ip in ip_list if re.match(ip, request_ip)]:
             ip_authorized = False
@@ -119,9 +122,8 @@ def get_api_keys_by_sources(sources, targets):
     """
     def get_keys(x):
         return sources[x]["apikey"]\
-             if type(sources[x]["apikey"]) is list else\
-             [sources[x]["apikey"]]
-       
+            if type(sources[x]["apikey"]) is list else\
+            [sources[x]["apikey"]]
 
     return {target: get_keys(target) for target in targets}
 
@@ -129,6 +131,12 @@ def get_api_keys_by_sources(sources, targets):
 def get_data(plugin, f_name, parameters, query):
     f = getattr(plugin, f_name)
     return f(parameters, query.arguments)
+
+
+def set_targeted_sources(t, name, value, args, sign):
+    api_keys = get_api_keys(value, args)
+    if sign in api_keys:
+        t[name] = value
 
 
 def get_sources_for_all(signature, data_project,
@@ -139,21 +147,12 @@ def get_sources_for_all(signature, data_project,
                       if "apikey" in list(it.keys())]
 
     if apikey_present and check_signature:
-
-        targeted_sources = {}
-
-        for name, value in data_project["sources"].items():
-
-            api_keys = get_api_keys(value, arguments)
-
-            if signature in api_keys:
-                targeted_sources[name] = value
-
-        if not targeted_sources:
+        sources = {}
+        [set_targeted_sources(sources, name, value, arguments, signature) for
+         name, value in data_project["sources"].items()]
+        if not sources:
             raise WrongSignatureError(signature)
-
-        return targeted_sources
-
+        return sources
     else:
         return data_project["sources"]
 

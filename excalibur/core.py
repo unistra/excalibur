@@ -14,8 +14,6 @@ from excalibur.check import CheckACL,\
 from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError, WrongSignatureError
 from importlib import import_module
-import base64
-import hashlib
 from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
