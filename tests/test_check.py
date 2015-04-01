@@ -845,6 +845,32 @@ class CheckTest(TestCase):
                 check_signature=False)
             plugin_runner(query)
 
+    def test_acl_default(self):
+        error = False
+        query = Query(
+            source="etab1",
+            remote_ip="127.0.0.1",
+            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+            arguments={"login": "testzombie1", },
+            ressource="actions",
+            method="action1",
+            request_method="GET",
+
+        )
+
+        # Files
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_default.yml",
+            "./tests/data/sources_default.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",)
+        try:
+            plugin_runner(query)
+        except Exception  as e:
+            error = True
+        self.assertFalse(error)
+        
+
 
 if __name__ == '__main__':
     main()

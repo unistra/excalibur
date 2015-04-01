@@ -96,7 +96,7 @@ signature:c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10,arguments:{'login': 'testzomb
 ressource:actions,method:action1,request_method:GET")
 
 
-class RunnerTest(TestCase):
+class RunnerDefaultTest(TestCase):
 
     def setUp(self):
 
@@ -107,7 +107,6 @@ class RunnerTest(TestCase):
                            ressource="actions",
                            method="action1",
                            request_method="GET",
-                           project="project1"
                            )
 
         self.query2 = Query(source="etab1",
@@ -117,12 +116,11 @@ class RunnerTest(TestCase):
                             ressource="actions",
                             method="action2",
                             request_method="GET",
-                            project="project1"
                             )
 
         self.plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml",
-            "./tests/data/sources.yml",
+            "./tests/data/acl_default.yml",
+            "./tests/data/sources_default.yml",
             "./tests/data/ressources.yml",
             "tests.plugins")
 
@@ -145,7 +143,7 @@ class RunnerTest(TestCase):
                             'parameters_index': 0}
                            }
         self.raw_acl = """
-project1:
+default:
   etab1:
     actions:
         - action1
@@ -157,7 +155,7 @@ project1:
 
 """
         self.raw_sources = """
-project1:
+default:
  sources:
   etab1:
     apikey: S3CR3T
@@ -212,15 +210,15 @@ actions:
 
 
     def test_runner(self):
-        
+
         data, errors = self.plugin_runner(self.query)
         self.assertEqual(data, self.data_ok)
         self.assertEqual(errors, {})
 
     def test_runner_errors(self):
         plugin_runner = PluginsRunner(
-            "./tests/data/acl.yml",
-            "./tests/data/sources.yml",
+            "./tests/data/acl_default.yml",
+            "./tests/data/sources_default.yml",
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query2)
@@ -229,7 +227,7 @@ actions:
 
     def test_sources_names(self):
         self.assertEqual(
-            self.plugin_runner.sources_names(project="project1"), ['etab1', 'etab2'])
+            self.plugin_runner.sources_names(), ['etab1', 'etab2'])
 
     def test_runner_with_raw_yaml(self):
       plugin_runner = PluginsRunner(
