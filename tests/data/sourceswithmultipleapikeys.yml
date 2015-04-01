@@ -1,4 +1,6 @@
-etab1:
+project1:
+ sources:
+  etab1:
     apikey: 
             - S3CR3T
             - PWGEN
@@ -18,7 +20,7 @@ etab1:
             -   spore: S3CR3T
                 token: S3CR3T
 
-etab2:
+  etab2:
     apikey: 
             - S3CR3T2
             - PWGEN

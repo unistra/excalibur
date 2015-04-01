@@ -1,4 +1,6 @@
-etab1:
+project1:
+ sources:
+  etab1:
     apikey: S3CR3T
     ip:
             - 127.0.0.1

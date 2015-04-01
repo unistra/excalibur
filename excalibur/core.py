@@ -79,7 +79,7 @@ class PluginsRunner(object):
         except KeyError as k:
             raise PluginRunnerError("no such plugin found")
 
-    def sources(self, signature, project="default", arguments=None):
+    def sources(self, signature=None, project="default", arguments=None):
         """
         Since the sources are either registered at top-level
         in the matching yml file or distibuted by projects
@@ -117,6 +117,9 @@ class PluginsRunner(object):
         """
 
         def checks(self, query):
+            """
+            PITIE DE LA DOC MERCI
+            """
 
             module = import_module('excalibur.check')
             check_list = [

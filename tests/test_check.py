@@ -34,7 +34,8 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
  
         self.query2 = Query(
@@ -44,7 +45,8 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         encodedzombie = base64.b64encode(b"testzombie1")
         self.query3 = Query(
@@ -54,7 +56,9 @@ class CheckTest(TestCase):
             signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
             ressource="actions",
             method="action1",
-            request_method="GET")
+            request_method="GET",
+            project="project1"
+        )
         # Files
         self.plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
@@ -71,7 +75,7 @@ class CheckTest(TestCase):
         try:
             CheckSource(
                 self.query, None,
-                self.plugin_runner.sources(self.query.project), None)()
+                self.plugin_runner.sources(project=self.query.project), None)()
  
         except:
             self.fail("Error check source")
@@ -85,20 +89,26 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         with self.assertRaises(SourceNotFoundError):
             CheckSource(query1,
                         None,
-                        self.plugin_runner.sources(query1.project), None)()
+                        self.plugin_runner.sources(project=query1.project),
+                        None
+            )()
  
     def test_check_source_ip_not_authorized(self):
         """ test check sources """
         with self.assertRaises(IPNotAuthorizedError):
+            self.plugin_runner.sources(project=self.query2.project),
             CheckSource(
                 self.query2,
                 None,
-                self.plugin_runner.sources(self.query2.project), None)()
+                self.plugin_runner.sources(project=self.query2.project),
+                None
+            )()
  
     def test_check_source_ip_with_regexp(self):
         plugin_runner2 = PluginsRunner(
@@ -109,7 +119,7 @@ class CheckTest(TestCase):
         try:
             CheckSource(
                 self.query2, None,
-                plugin_runner2.sources(self.query2.project), None)()
+                plugin_runner2.sources(project=self.query2.project), None)()
         except:
             self.fail("Error test_check_source_ip_with_regexp")
  
@@ -122,14 +132,15 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
  
         with self.assertRaises(WrongSignatureError):
             CheckSource(
                 query3,
                 None,
-                self.plugin_runner.sources(query3.project),
+                self.plugin_runner.sources(project=query3.project),
                 None)()
     """
     Check ACL
@@ -151,7 +162,8 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="actions",
             method="actionull",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         with self.assertRaises(NoACLMatchedError):
             CheckACL(query, None, None, self.plugin_runner.acl)()
@@ -210,7 +222,8 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="ressourcenull",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         with self.assertRaises(RessourceNotFoundError):
             CheckRequest(query, self.plugin_runner.ressources, None, None)()
@@ -224,7 +237,8 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="actions",
             method="methodnull",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         with self.assertRaises(MethodNotFoundError):
             CheckRequest(query, self.plugin_runner.ressources, None, None)()
@@ -262,7 +276,8 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="actions",
             method="action1",
-            request_method="GETnull"
+            request_method="GETnull",
+            project="project1"
         )
         with self.assertRaises(HTTPMethodError):
             CheckRequest(query, self.plugin_runner.ressources, None, None)()
@@ -276,7 +291,8 @@ class CheckTest(TestCase):
             arguments="argumentsnull",
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         query2 = Query(
             source="etab1",
@@ -285,7 +301,8 @@ class CheckTest(TestCase):
             arguments="argumentsnull",
             ressource="actions",
             method="action2",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         with self.assertRaises(ArgumentError):
             CheckRequest(query, self.plugin_runner.ressources, None, None)()
@@ -326,7 +343,8 @@ class CheckTest(TestCase):
             arguments={"login": "a", },
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         with self.assertRaises(ArgumentError):
 #             DecodeArguments(self.query,
@@ -340,7 +358,8 @@ class CheckTest(TestCase):
             arguments={"login": "a", },
             ressource="wrong ressource",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         with self.assertRaises(ArgumentError):
             CheckArguments(query2, self.plugin_runner.ressources, None, None)()
@@ -398,7 +417,8 @@ class CheckTest(TestCase):
             arguments={"login": "testzombie1", },
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         error = None
         try:
@@ -420,7 +440,8 @@ class CheckTest(TestCase):
             signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         error = None
         try:
@@ -464,7 +485,8 @@ class CheckTest(TestCase):
                 signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
                 ressource="actions",
                 method="action1",
-                request_method="GET")
+                request_method="GET",
+                project="project1")
             plugin_runner = PluginsRunner(
                 "./tests/data/acl.yml",
                 "./tests/data/sources.yml",
@@ -514,7 +536,8 @@ class CheckTest(TestCase):
                 arguments={"login": "testzombie1", },
                 ressource="actions",
                 method="action1",
-                request_method="GET"
+                request_method="GET",
+                project="project1"
             )
             setattr(query, pos, "wrong")
             plugin_runner = PluginsRunner(
@@ -655,7 +678,8 @@ class CheckTest(TestCase):
                 arguments={"login": "testzombie1", "uselessarg": "useless"},
                 ressource="actions",
                 method="action1",
-                request_method="GET"
+                request_method="GET",
+                project="project1"
             )
             plugin_runner = PluginsRunner(
                 "./tests/data/acl.yml",
@@ -704,7 +728,8 @@ class CheckTest(TestCase):
                     "exceedingarg": "exceeding"},
                 ressource="actions",
                 method="action1",
-                request_method="GET"
+                request_method="GET",
+                project="project1"
             )
             plugin_runner = PluginsRunner(
                 "./tests/data/acl.yml",
@@ -724,7 +749,8 @@ class CheckTest(TestCase):
             arguments={},
             ressource="actions",
             method="action1",
-            request_method="GET"
+            request_method="GET",
+            project="project1"
         )
         plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
@@ -744,7 +770,8 @@ class CheckTest(TestCase):
                 arguments={"login": "testzombie1", },
                 ressource="actions",
                 method="action1",
-                request_method="GET"
+                request_method="GET",
+                project="project1"
             )
             plugin_runner = PluginsRunner(
                 "./tests/data/acl.yml",
@@ -764,7 +791,8 @@ class CheckTest(TestCase):
                 arguments={"login": "testzombie1", "uselessarg": "a"},
                 ressource="actions",
                 method="action2",
-                request_method="GET"
+                request_method="GET",
+                project="project1"
             )
             plugin_runner = PluginsRunner(
                 "./tests/data/acl.yml",
@@ -784,7 +812,8 @@ class CheckTest(TestCase):
                 arguments={"login": "testzombie1"},
                 ressource="actions",
                 method="action2",
-                request_method="GET"
+                request_method="GET",
+                project="project1"
             )
             plugin_runner = PluginsRunner(
                 "./tests/data/acl.yml",
@@ -803,7 +832,7 @@ class CheckTest(TestCase):
                 source="etab1",
                 remote_ip="127.0.0.1",
                 signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
- 
+                project="project1",
                 ressource="actions",
                 method="action2",
                 request_method="GET"

@@ -20,7 +20,8 @@ class PluginsTest(TestCase):
                            arguments={"login": "testzombie1", },
                            ressource="actions",
                            method="action1",
-                           request_method="GET"
+                           request_method="GET",
+                           project="project1"
                            )
 
         self.query2 = Query(source="etab1",
@@ -29,7 +30,8 @@ class PluginsTest(TestCase):
                             arguments={"login": "testzombie1", },
                             ressource="actions",
                             method="action2",
-                            request_method="GET"
+                            request_method="GET",
+                            project="project1"
                             )
 
         # Files
@@ -89,7 +91,7 @@ class PluginsTest(TestCase):
 
     def test_query(self):
         self.assertEqual(self.query.__str__(),
-                         "project:None,source:etab1,remote_ip:127.0.0.1,\
+                         "project:project1,source:etab1,remote_ip:127.0.0.1,\
 signature:c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10,arguments:{'login': 'testzombie1'},\
 ressource:actions,method:action1,request_method:GET")
 
@@ -104,7 +106,8 @@ class RunnerTest(TestCase):
                            arguments={"login": "testzombie1", },
                            ressource="actions",
                            method="action1",
-                           request_method="GET"
+                           request_method="GET",
+                           project="project1"
                            )
 
         self.query2 = Query(source="etab1",
@@ -113,7 +116,8 @@ class RunnerTest(TestCase):
                             arguments={"login": "testzombie1", },
                             ressource="actions",
                             method="action2",
-                            request_method="GET"
+                            request_method="GET",
+                            project="project1"
                             )
 
         self.plugin_runner = PluginsRunner(
@@ -141,18 +145,21 @@ class RunnerTest(TestCase):
                             'parameters_index': 0}
                            }
         self.raw_acl = """
-etab1:
+project1:
+  etab1:
     actions:
         - action1
         - action2
 
-etab2:
+  etab2:
     actions:
         - action1
 
 """
         self.raw_sources = """
-etab1:
+project1:
+ sources:
+  etab1:
     apikey: S3CR3T
     ip:
             - 127.0.0.1
@@ -170,7 +177,7 @@ etab1:
             -   spore: S3CR3T
                 token: S3CR3T
 
-etab2:
+  etab2:
     apikey: S3CR3T2
     ip:
             - 127.0.0.1
@@ -222,7 +229,7 @@ actions:
 
     def test_sources_names(self):
         self.assertEqual(
-            self.plugin_runner.sources_names(), ['etab1', 'etab2'])
+            self.plugin_runner.sources_names(project="project1"), ['etab1', 'etab2'])
 
     def test_runner_with_raw_yaml(self):
       plugin_runner = PluginsRunner(
@@ -532,7 +539,7 @@ actions:
             "./tests/data/ressources.yml",
             "tests.plugins")
         with self.assertRaises(PluginRunnerError):
-            p.sources_names(self.query.project)
+            p.sources_names(project="truc")
 
     def test_runner_with_raw_yaml(self):
       plugin_runner = PluginsRunner(
