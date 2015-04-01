@@ -548,8 +548,7 @@ class CheckTest(TestCase):
  
             # with self.assertRaises(ExcaliburError):
             try:
-                CheckSource(query, plugin_runner.ressources, plugin_runner.sources(query.signature if
-                                     query.signature else None,
+                CheckSource(query, plugin_runner.ressources, plugin_runner.sources(
                                      query.project,
                                      query.arguments if
                                      query.arguments else None), None)()

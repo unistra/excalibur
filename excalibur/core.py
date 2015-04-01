@@ -56,14 +56,13 @@ class PluginsRunner(object):
     def project_sources(self, project):
         return self.__sources[project]["sources"]
 
-    def plugins(self, source, signature, arguments=None, project="default"):
+    def plugins(self, source, signature=None, arguments=None, project="default"):
         """
         returns allowed plugins
         """
         try:
             if source != ALL_KEYWORD and SOURCE_SEPARATOR not in source:
-                return self.sources(signature,
-                                    project,
+                return self.sources(project,
                                     arguments)[source]["plugins"]
             else:
                 sources = get_sources_for_all(signature,
@@ -79,7 +78,7 @@ class PluginsRunner(object):
         except KeyError as k:
             raise PluginRunnerError("no such plugin found")
 
-    def sources(self, signature=None, project="default", arguments=None):
+    def sources(self, project="default", arguments=None):
         """
         Since the sources are either registered at top-level
         in the matching yml file or distibuted by projects
@@ -210,7 +209,7 @@ class Query(object):
 
     def for_(self, what):
         l1 = ['source', 'signature', 'arguments', 'project']
-        l2 = ['signature', 'project', 'arguments']
+        l2 = ['project', 'arguments']
         return {"plugins": self.getattrsubset(l1),
                 "checks": self.getattrsubset(l2)
                 }[what]
