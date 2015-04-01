@@ -56,7 +56,7 @@ class PluginsRunner(object):
     def project_sources(self, project):
         return self.__sources[project]["sources"]
 
-    def plugins(self, source, signature, arguments=None, project=None):
+    def plugins(self, source, signature, arguments=None, project="default"):
         """
         returns allowed plugins
         """
@@ -79,20 +79,18 @@ class PluginsRunner(object):
         except KeyError as k:
             raise PluginRunnerError("no such plugin found")
 
-    def sources(self, signature, project=None, arguments=None):
+    def sources(self, signature, project="default", arguments=None):
         """
         Since the sources are either registered at top-level
         in the matching yml file or distibuted by projects
         sources() works as a filter to return either the whole
         yml, or the matching entries.
         """
-        if project:
-            try:
-                return self.project_sources(project)
-            except KeyError as k:
-                raise PluginRunnerError("no such source found")
-        else:
-            return self.__sources
+        try:
+            return self.project_sources(project)
+        except KeyError as k:
+            raise PluginRunnerError("no such source found")
+
 
     def __setitem__(self, key, value):
         setattr(self, "_" + self.__class__.__name__ + "__" + key,
@@ -104,17 +102,14 @@ class PluginsRunner(object):
             key in ["acl", "sources", "ressources"]\
             else file
 
-    def sources_names(self, project=None):
+    def sources_names(self, project="default"):
         """
         Return all sources' names of a project
         """
-        if project:
-            try:
-                return sorted(self.project_sources(project).keys())
-            except KeyError:
-                raise PluginRunnerError("no such source found")
-        else:
-            return sorted(self.__sources.keys())
+        try:
+            return sorted(self.project_sources(project).keys())
+        except KeyError:
+            raise PluginRunnerError("no such source found")
 
     def check_all(foo):
         """
@@ -184,7 +179,7 @@ class Query(object):
                  method,
                  request_method,
                  signature=None,
-                 project=None,
+                 project="default",
                  arguments=None):
 
         self["project"] = project

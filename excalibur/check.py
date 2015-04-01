@@ -136,9 +136,7 @@ class CheckACL(Check):
         allowed_method_suffixes = []
         try:
             for target in targets:
-                allowed_method_suffixes +=\
-                    self.acl[self.project][target][self.ressource]\
-                    if self.project else self.acl[target][self.ressource]
+                allowed_method_suffixes += self.acl[self.project][target][self.ressource]
 
             if self.method not in allowed_method_suffixes:
                 raise NoACLMatchedError(
