@@ -33,7 +33,7 @@ For example, if you use this app in a web project, you could have a route like :
 
 	http://myapp.mydomain.com/project/source/ressource/method?sign=signature&firstname=toto&lastname=tata
 
-- project : optional param. The project specified in the sources.yml.
+- project :  The project specified in the sources.yml. Uses "default" by default.
 - source : targeted source specified in the sources.yml.
 			- 'all' is a reserved keyword, when you set source to all, 
 			  excalibur launches all the plugins whose yaml carries the right api key,
@@ -112,7 +112,9 @@ In your code you could, for instance, write : ::
               	ressource=ressource,  
               	method=method,   
               	request_method=request_method,  
-              	arguments=arguments)
+              	arguments=arguments,
+                project="my_project"
+              	)
 
 	plugin_runner = PluginsRunner(acl_file,
                               sources_file,

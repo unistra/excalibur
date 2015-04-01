@@ -12,7 +12,12 @@ sources.yml
 WARNING : 'all' and ',' are reserved in the Excalibur syntax, don't use them as sources names.
 
 
-Api configuration by sources.
+Api configuration by project and sources.
+
+The yml must have a top level project. By default we use the word "default".  If you want another name, 
+you need to explicitely pass the project name in the project kwarg of the query.
+
+All the sources entries must be encapsulated in a sources entry in the project entry.
 
 Each source can have an apikey entry, which will be matched against the 
 apikey carried by the request.
@@ -36,6 +41,8 @@ The parameters with which each plugin is to be executed depending on the user re
 
 Example : ::
 
+default:
+  sources:
 	uds:
 		apikey: S3CR3T
 		ip:
@@ -82,22 +89,6 @@ Example : ::
 		...
 
 
-A further level can be set in order to manage sources by projects.
-
-Example : ::
-
-	project1:
-	    source1:
-	        ...
-
-	    source2:
-	        ...
-
-	project2:
-	    source1:
-	        ...
-
-
 ressources.yml
 ==============
 
@@ -140,8 +131,11 @@ List of allowed methods by sources. This module is used by the PluginRunner for 
 On receiving the request it ensures that the plugins it targets contain the methods that are going to be 
 called by the request.
 
-Example : ::
+The yml must have a top level project. By default we use the word "default".  If you want another name, 
+you need to explicitely pass the project name in the project kwarg of the query.
 
+Example : ::
+default:
 	uds:
 		user:
 			- setpassword
@@ -151,25 +145,7 @@ Example : ::
 		user:
 			- setpassword
 
-A further level can be specified to manage sources by project.
 
-Example : ::
-
-	project1:
-	    source1:
-	        actions:
-	            - action1
-	            - action2
-
-	    source2:
-	        actions:
-	            - action1
-
-	project2:
-	    source1:
-	        actions:
-	            - action1
-	            - action2
 
 
 plugins module
