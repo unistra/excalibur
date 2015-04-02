@@ -5,7 +5,7 @@ from excalibur.exceptions import ArgumentError,\
     ArgumentCheckMethodNotFoundError, CheckMethodError,\
     NoACLMatchedError, RessourceNotFoundError, MethodNotFoundError,\
     HTTPMethodError, SourceNotFoundError, \
-    IPNotAuthorizedError, WrongSignatureError
+    IPNotAuthorizedError, WrongSignatureError, SourcesNotParsable
 from excalibur.decode import DecodeArguments
 from excalibur.utils import add_args_then_encode,\
     ALL_KEYWORD, SOURCE_SEPARATOR, sources_list_or_list,\
@@ -260,6 +260,7 @@ class CheckSource(Check):
         """
 
         try:
+
             if is_simple_request_and_source_not_found(self.source,
                                                       self.sources):
                 raise SourceNotFoundError("Unknown source %s" % self.source)

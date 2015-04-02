@@ -26,16 +26,16 @@ class ConfigurationLoaderTest(TestCase):
         self.raw_wrong = {'error': 'error'}
 
     def test_load_content_ok(self):
-        c = ConfigurationLoader(self.file_path_ok)
+        c = ConfigurationLoader(self.file_path_ok,"ttretter")
         self.assertEqual(c.content, self.raw)
 
     def test_load_content_wrong(self):
-        c = ConfigurationLoader(self.file_path_ok)
+        c = ConfigurationLoader(self.file_path_ok,"ttretter")
         self.assertNotEqual(c.content, self.raw_wrong)
 
     def test_load_content_doesntexist(self):
         with self.assertRaises(ConfigurationLoaderError):
-            ConfigurationLoader(self.file_path_wrong)
+            ConfigurationLoader(self.file_path_wrong,"ttretter")
 
 
 class ConfigurationLoaderRawTest(TestCase):
@@ -50,16 +50,16 @@ class ConfigurationLoaderRawTest(TestCase):
         self.raw_wrong = {'error': 'error'}
 
     def test_load_content_ok(self):
-        c = ConfigurationLoader(self.content_ok, raw_yaml_content=True)
+        c = ConfigurationLoader(self.content_ok,"ttretter", raw_yaml_content=True)
         self.assertEqual(c.content, self.raw)
 
     def test_load_content_wrong(self):
-        c = ConfigurationLoader(self.content_ok, raw_yaml_content=True)
+        c = ConfigurationLoader(self.content_ok,"ttretter", raw_yaml_content=True)
         self.assertNotEqual(c.content, self.raw_wrong)
 
     def test_load_content_doesntexist(self):
         with self.assertRaises(ConfigurationLoaderError):
-            ConfigurationLoader(self.content_wrong, raw_yaml_content=True)
+            ConfigurationLoader(self.content_wrong,"ttretter", raw_yaml_content=True)
 
 
 class PluginLoaderTest(TestCase):

@@ -96,7 +96,7 @@ class PluginsRunner(object):
                 self.resolve(value, key))
 
     def resolve(self, file, key):
-        return ConfigurationLoader(file, self.__raw_yaml_content, key=key
+        return ConfigurationLoader(file, key, self.__raw_yaml_content,  key=key
                                    ).content if\
             key in ["acl", "sources", "ressources"]\
             else file

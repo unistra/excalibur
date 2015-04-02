@@ -10,7 +10,7 @@ from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError,\
     WrongSignatureError, NoACLMatchedError, RessourceNotFoundError,\
     MethodNotFoundError, HTTPMethodError, ArgumentError, \
     ArgumentCheckMethodNotFoundError, ExcaliburError, \
-    DecodeAlgorithmNotFoundError
+    DecodeAlgorithmNotFoundError, SourcesNotParsable
 from excalibur.core import PluginsRunner, Query
 import base64
 from importlib import import_module
@@ -738,7 +738,7 @@ class CheckTest(TestCase):
                 check_signature=False,
             )
             plugin_runner(query)
- 
+
     def test_ressources_arguments_empty_and_no_argument_provided(self):
         error = "no_error_yet"
         query = Query(
@@ -779,7 +779,7 @@ class CheckTest(TestCase):
                 "tests.plugins"
             )
             plugin_runner(query)
-             
+
  
     def test_checks_with_optional_args_and_bad_argument_value(self):
         with self.assertRaises(ArgumentError):
@@ -868,7 +868,91 @@ class CheckTest(TestCase):
         except Exception  as e:
             error = True
         self.assertFalse(error)
-        
+
+    def test_sources_depth(self):
+            error = False
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={"login": "testzombie1", },
+                ressource="actions",
+                method="action1",
+                request_method="GET",
+                project="project1"
+            )
+            plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sources_with_http_sign.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",)
+            try:
+                plugin_runner(query)
+            except Exception  as e:
+                error = True
+            self.assertFalse(error)
+
+    def test_sources_depth_with_bad_depth(self):
+        with self.assertRaises(SourcesNotParsable):
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={"login": "testzombie1", },
+                ressource="actions",
+                method="action1",
+                request_method="GET",
+                project="project1"
+            )
+            plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/wrong.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+
+            plugin_runner(query)
+
+    def test_sources_depth_with_bad_depth_in_one_project(self):
+        with self.assertRaises(SourcesNotParsable):
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={"login": "testzombie1", },
+                ressource="actions",
+                method="action1",
+                request_method="GET",
+                project="project1"
+            )
+            plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sources_two_projects_one_with_bad_depth.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+
+            plugin_runner(query)
+
+    def test_sources_depth_with_bad_depth_and_sub_objet_is_an_array(self):
+        with self.assertRaises(SourcesNotParsable):
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                arguments={"login": "testzombie1", },
+                ressource="actions",
+                method="action1",
+                request_method="GET",
+                project="project1"
+            )
+            plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sources_subobject_is_an_array.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins")
+
+            plugin_runner(query)
+
+
 
 
 if __name__ == '__main__':

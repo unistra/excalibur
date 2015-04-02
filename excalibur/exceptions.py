@@ -170,6 +170,18 @@ class HTTPMethodError(ExcaliburClientError):
     def __str__(self):
         return self.message
 
+class SourcesNotParsable(ExcaliburClientError):
+
+    """
+    check error
+    """
+
+    def __init__(self, message, *args, **kwargs):
+        super(SourcesNotParsable, self).__init__(*args, **kwargs)
+        self.message = '%s : %s' % (self.__class__.__name__, message)
+
+    def __str__(self):
+        return self.message
 
 class SourceNotFoundError(ExcaliburClientError):
 
