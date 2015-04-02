@@ -10,7 +10,7 @@ that is specified in dedicated yaml files.
 
 from excalibur.loader import ConfigurationLoader, PluginLoader
 from excalibur.check import CheckACL,\
-    CheckArguments, CheckRequest, CheckSource
+    CheckArguments, CheckRequest, CheckSource,CheckHTTPSig
 from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError, WrongSignatureError
 from importlib import import_module
@@ -32,7 +32,9 @@ class PluginsRunner(object):
 
     def __init__(self, acl, sources, ressources,
                  plugins_module, check_signature=True, check_ip=True,
-                 raw_yaml_content=False):
+                 raw_yaml_content=False,
+                 http_sig=False
+                 ):
         self.__raw_yaml_content = raw_yaml_content
         self["acl"] = acl
         self["sources"] = sources
@@ -40,6 +42,7 @@ class PluginsRunner(object):
         self["plugins_module"] = plugins_module
         self["check_signature"] = check_signature
         self["check_ip"] = check_ip
+        self["http_sig"] = http_sig
 
     @property
     def acl(self):
@@ -78,7 +81,7 @@ class PluginsRunner(object):
         except KeyError as k:
             raise PluginRunnerError("no such plugin found")
 
-    def sources(self, project="default", arguments=None):
+    def sources(self, project=None, arguments=None, headers= None):
         """
         Since the sources are either registered at top-level
         in the matching yml file or distibuted by projects
@@ -122,19 +125,25 @@ class PluginsRunner(object):
 
             module = import_module('excalibur.check')
             check_list = [
+                'CheckHTTPSig',
                 'CheckSource',
                 'CheckACL',
                 'CheckRequest',
                 'CheckArguments'
             ]
+            print("WTF",check_list)
 
             def checker(x):
                 checker = getattr(module, x)
+                print(dir(module))
                 checker(query, self.__ressources,
                         self.sources(*query("checks")),
                         self.__acl,
                         sha1check=self.__check_signature,
-                        ipcheck=self.__check_ip)()
+                        ipcheck=self.__check_ip,
+                        http_sig =self.__http_sig)()
+#             print([method_name for method_name in dir(module) if
+#                                method_name in check_list])            
             list(map(checker, [method_name for method_name in dir(module) if
                                method_name in check_list]))
 
@@ -182,7 +191,10 @@ class Query(object):
                  request_method,
                  signature=None,
                  project="default",
-                 arguments=None):
+                 arguments=None,
+                 headers=None
+                 ):
+
 
         self["project"] = project
         self["source"] = source
@@ -192,6 +204,8 @@ class Query(object):
         self["ressource"] = ressource
         self["method"] = method
         self["request_method"] = request_method
+        self["headers"] = headers
+        print ("YIIIIIOOO",self["headers"])
 
     def __str__(self):
         exposed_attrs = ['project', 'source', 'remote_ip', 'signature',
@@ -209,7 +223,7 @@ class Query(object):
 
     def for_(self, what):
         l1 = ['source', 'signature', 'arguments', 'project']
-        l2 = ['project', 'arguments']
+        l2 = ['project', 'arguments', 'headers']
         return {"plugins": self.getattrsubset(l1),
                 "checks": self.getattrsubset(l2)
                 }[what]
@@ -237,6 +251,10 @@ class Query(object):
     @property
     def arguments(self):
         return self.__arguments
+
+    @property
+    def headers(self):
+        return self.__headers
 
     @property
     def ressource(self):

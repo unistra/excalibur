@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-
+from httpsig.verify import HeaderVerifier
 from excalibur.exceptions import ArgumentError,\
     ArgumentCheckMethodNotFoundError, CheckMethodError,\
     NoACLMatchedError, RessourceNotFoundError, MethodNotFoundError,\
@@ -27,6 +27,41 @@ class Check(object):
         raise NotImplementedError
 
 
+class CheckHTTPSig(Check):
+
+
+    def __init__(self, query, ressources, sources, acl,
+                 sha1check=True, ipcheck=True, http_sig=False):
+        print('BONJOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUR')
+        self.query = query
+        self.sources = sources
+        self.source = query.source
+        self.ip = query.remote_ip
+        self.signature = query.signature
+        self.arguments = query.arguments
+        self.sha1check = sha1check
+        self.ipcheck = ipcheck
+
+    def call(self):
+        try:
+          
+            key = open('/home/geoffroy/Documents/workspace/should/should/id_rsa.pub').read()
+            hv = HeaderVerifier(
+            headers=self.query["headers"],
+        #            secret='cdvbdfsibvqklscb',
+            secret=key,
+            method='GET',
+            path='/:etab/user/setpassword/',
+            required_headers=['(request-target)', 'x-api-key-id', 'host', 'user-agent'])
+        #        print 'M2 :', hv.__dict__
+            try:
+                
+                print 'OUESCH', hv.verify()
+            except Exception as e:
+                print ('EEEEEEEEEEe :',e)
+        except Exception as e : 
+            print("OooooOoOo",e)
+
 class CheckArguments(Check):
 
     """
@@ -42,7 +77,7 @@ class CheckArguments(Check):
 
     @DecodeArguments
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True):
+                 sha1check=True, ipcheck=True , http_sig=False):
 
         self.ressources = ressources
         self.arguments = query.arguments
@@ -121,7 +156,7 @@ class CheckACL(Check):
     """
 
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True):
+                 sha1check=True, ipcheck=True, http_sig=False):
         self.sources = sources
         self.acl = acl
         self.source = query.source
@@ -154,7 +189,7 @@ class CheckRequest(Check):
     """
 
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True):
+                 sha1check=True, ipcheck=True, http_sig=False):
 
         self.ressources = ressources
         self.http_method = query.request_method
@@ -234,7 +269,7 @@ class CheckSource(Check):
     """
 
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True):
+                 sha1check=True, ipcheck=True, http_sig=False):
 
         self.sources = sources
         self.source = query.source
