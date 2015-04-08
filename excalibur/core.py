@@ -125,7 +125,7 @@ class PluginsRunner(object):
 
             module = import_module('excalibur.check')
             check_list = [
-#                 'CheckHTTPSig',
+                'CheckHTTPSig',
                 'CheckSource',
                 'CheckACL',
                 'CheckRequest',
