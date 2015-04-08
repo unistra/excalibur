@@ -125,25 +125,21 @@ class PluginsRunner(object):
 
             module = import_module('excalibur.check')
             check_list = [
-                'CheckHTTPSig',
+#                 'CheckHTTPSig',
                 'CheckSource',
                 'CheckACL',
                 'CheckRequest',
                 'CheckArguments'
             ]
-            print("WTF",check_list)
 
             def checker(x):
                 checker = getattr(module, x)
-                print(dir(module))
                 checker(query, self.__ressources,
                         self.sources(*query("checks")),
                         self.__acl,
                         sha1check=self.__check_signature,
                         ipcheck=self.__check_ip,
                         http_sig =self.__http_sig)()
-#             print([method_name for method_name in dir(module) if
-#                                method_name in check_list])            
             list(map(checker, [method_name for method_name in dir(module) if
                                method_name in check_list]))
 
@@ -205,7 +201,6 @@ class Query(object):
         self["method"] = method
         self["request_method"] = request_method
         self["headers"] = headers
-        print ("YIIIIIOOO",self["headers"])
 
     def __str__(self):
         exposed_attrs = ['project', 'source', 'remote_ip', 'signature',

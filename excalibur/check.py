@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-from httpsig.verify import HeaderVerifier
+# from httpsig.verify import HeaderVerifier
 from excalibur.exceptions import ArgumentError,\
     ArgumentCheckMethodNotFoundError, CheckMethodError,\
     NoACLMatchedError, RessourceNotFoundError, MethodNotFoundError,\
@@ -32,7 +32,6 @@ class CheckHTTPSig(Check):
 
     def __init__(self, query, ressources, sources, acl,
                  sha1check=True, ipcheck=True, http_sig=False):
-        print('BONJOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUR')
         self.query = query
         self.sources = sources
         self.source = query.source
@@ -43,24 +42,26 @@ class CheckHTTPSig(Check):
         self.ipcheck = ipcheck
 
     def call(self):
-        try:
-          
-            key = open('/home/geoffroy/Documents/workspace/should/should/id_rsa.pub').read()
-            hv = HeaderVerifier(
-            headers=self.query["headers"],
-        #            secret='cdvbdfsibvqklscb',
-            secret=key,
-            method='GET',
-            path='/:etab/user/setpassword/',
-            required_headers=['(request-target)', 'x-api-key-id', 'host', 'user-agent'])
-        #        print 'M2 :', hv.__dict__
-            try:
-                
-                print 'OUESCH', hv.verify()
-            except Exception as e:
-                print ('EEEEEEEEEEe :',e)
-        except Exception as e : 
-            print("OooooOoOo",e)
+        pass
+#         try:
+#           
+#             key = open('/home/geoffroy/Documents/workspace/should/should/id_rsa.pub').read()
+#             hv = HeaderVerifier(
+#             headers=self.query["headers"],
+#         #            secret='cdvbdfsibvqklscb',
+#             secret=key,
+#             method='GET',
+#             path='/:etab/user/setpassword/',
+#             required_headers=['(request-target)', 'x-api-key-id', 'host', 'user-agent'])
+#         #        print 'M2 :', hv.__dict__
+# #             try:
+# #                 
+# #                 print 'OUESCH', hv.verify()
+# #             except Exception as e:
+# #                 print ('EEEEEEEEEEe :',e)
+# 
+#          except Exception as e :
+#              print("OooooOoOo",e)
 
 class CheckArguments(Check):
 
