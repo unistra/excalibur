@@ -32,3 +32,7 @@ For more information have a look at sphinx's documentation.
 .. image:: https://pypip.in/download/excalibur/badge.png
     :target: https://pypi.python.org/pypi/excalibur
     :alt: Download
+
+.. image:: https://landscape.io/github/unistra/excalibur/master/landscape.svg?style=flat
+  :target: https://landscape.io/github/unistra/excalibur/master
+  :alt: Code Health
