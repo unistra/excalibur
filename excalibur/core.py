@@ -137,6 +137,7 @@ class PluginsRunner(object):
         except KeyError:
             raise PluginRunnerError("no such source found")
 
+
     @check_all
     def __call__(self, query):
         """
