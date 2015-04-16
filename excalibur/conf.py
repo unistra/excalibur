@@ -25,7 +25,7 @@ class Sources(object):
         ret = None
         try:
             ret = getattr(self, key)
-        except AttributeError as ae:
+        except AttributeError:
             raise KeyError()
         return ret
 
@@ -55,7 +55,7 @@ class Ressources(object):
         ret = None
         try:
             ret = getattr(self, key)
-        except AttributeError as ae:
+        except AttributeError:
             raise KeyError()
         return ret
 
@@ -76,6 +76,16 @@ class Acl(object):
         ret = None
         try:
             ret = getattr(self, key)
-        except AttributeError as ae:
+        except AttributeError:
             raise KeyError()
         return ret
+
+    def keys(self):
+        """
+        """
+        return self.__dict__.keys()
+
+    def values(self):
+        """
+        """
+        return self.__dict__.values()

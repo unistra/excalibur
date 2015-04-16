@@ -15,10 +15,10 @@ from excalibur.core import PluginsRunner, Query
 import base64
 from importlib import import_module
 from excalibur.utils import ALL_KEYWORD
- 
- 
+
+
 class CheckTest(TestCase):
- 
+
     """
     Unit test for check method
     Warning : "Params" of the setUp method need to be valid with

@@ -9,32 +9,26 @@ that is specified in dedicated yaml files.
 """
 
 from excalibur.loader import ConfigurationLoader, PluginLoader
-from excalibur.check import CheckACL,\
-    CheckArguments, CheckRequest, CheckSource,CheckHTTPSig
-from excalibur.decode import DecodeArguments
-from excalibur.exceptions import PluginRunnerError, WrongSignatureError
-from importlib import import_module
-from functools import reduce
-from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
+
+from excalibur.exceptions import PluginRunnerError
+
+from functools import reduce as red
+from excalibur.utils import ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
-    data_or_errors
-
-
-from excalibur.conf import Sources
+    data_or_errors, check_all
 
 
 class PluginsRunner(object):
 
     """
-
+    The main class of the application.
     """
     # 22/04/2014 :checksign defaults to false
 
     def __init__(self, acl, sources, ressources,
                  plugins_module, check_signature=True, check_ip=True,
                  raw_yaml_content=False,
-                 http_sig=False
-                 ):
+                 http_sig=False):
         self.__raw_yaml_content = raw_yaml_content
         self["acl"] = acl
         self["sources"] = sources
@@ -46,20 +40,33 @@ class PluginsRunner(object):
 
     @property
     def acl(self):
-        return self.__acl
+        """
+        ACL getter
+        """
+        return self["acl"]
 
     @property
     def ressources(self):
-        return self.__ressources
+        """
+        ressources getter
+        """
+        return self['ressources']
 
     @property
     def plugins_module(self):
-        return self.__plugins_module
+        """
+        getter for the plugin module
+        """
+        return self['plugins_module']
 
     def project_sources(self, project):
-        return self.__sources[project]["sources"]
+        """
+        method to get soources in project
+        """
+        return self['sources'][project]["sources"]
 
-    def plugins(self, source, signature=None, arguments=None, project="default"):
+    def plugins(self, source, signature=None,
+                arguments=None, project="default"):
         """
         returns allowed plugins
         """
@@ -69,19 +76,19 @@ class PluginsRunner(object):
                                     arguments)[source]["plugins"]
             else:
                 sources = get_sources_for_all(signature,
-                                              self.__sources[project],
+                                              self['sources'][project],
                                               arguments,
-                                              self.__check_signature)
-                cleanPluginList = {}
-                for k, v in sources.items():
-                    for clef, valeur in v['plugins'].items():
-                        cleanPluginList[
-                            k + PLUGIN_NAME_SEPARATOR + clef] = valeur
-                return cleanPluginList
-        except KeyError as k:
+                                              self['check_signature'])
+                clean_plugin_list = {}
+                for key, value in sources.items():
+                    for clef, valeur in value['plugins'].items():
+                        clean_plugin_list[
+                            key + PLUGIN_NAME_SEPARATOR + clef] = valeur
+                return clean_plugin_list
+        except KeyError:
             raise PluginRunnerError("no such plugin found")
 
-    def sources(self, project=None, arguments=None, headers= None):
+    def sources(self, project=None, arguments=None, headers=None):
         """
         Since the sources are either registered at top-level
         in the matching yml file or distibuted by projects
@@ -90,19 +97,36 @@ class PluginsRunner(object):
         """
         try:
             return self.project_sources(project)
-        except KeyError as k:
+        except KeyError:
             raise PluginRunnerError("no such source found")
 
-
     def __setitem__(self, key, value):
+        """
+        setitem is overriden so that in the init, the function resolve
+        can be called for each argument received in the constructor.
+        """
         setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 self.resolve(value, key))
 
-    def resolve(self, file, key):
-        return ConfigurationLoader(file, key, self.__raw_yaml_content,  key=key
-                                   ).content if\
+    def __getitem__(self, key):
+        """
+        """
+        ret = None
+        try:
+            ret = getattr(self, "_" + self.__class__.__name__ + "__" + key)
+        except AttributeError:
+            raise KeyError()
+        return ret
+
+    def resolve(self, conf_file, key):
+        """
+        load files or put strings
+        """
+        return ConfigurationLoader(conf_file, key,
+                                   self.__raw_yaml_content,
+                                   key=key).content if\
             key in ["acl", "sources", "ressources"]\
-            else file
+            else conf_file
 
     def sources_names(self, project="default"):
         """
@@ -113,42 +137,11 @@ class PluginsRunner(object):
         except KeyError:
             raise PluginRunnerError("no such source found")
 
-    def check_all(foo):
-        """
-        Check all yml
-        """
-
-        def checks(self, query):
-            """
-            PITIE DE LA DOC MERCI
-            """
-
-            module = import_module('excalibur.check')
-            check_list = [
-#                 'CheckHTTPSig',
-                'CheckSource',
-                'CheckACL',
-                'CheckRequest',
-                'CheckArguments'
-            ]
-
-            def checker(x):
-                checker = getattr(module, x)
-                checker(query, self.__ressources,
-                        self.sources(*query("checks")),
-                        self.__acl,
-                        sha1check=self.__check_signature,
-                        ipcheck=self.__check_ip,
-                        http_sig =self.__http_sig)()
-            list(map(checker, [method_name for method_name in dir(module) if
-                               method_name in check_list]))
-
-            return foo(self, query)
-
-        return checks
-
     @check_all
     def __call__(self, query):
+        """
+        main execution
+        """
         data, errors = self.run(query)
         return data, errors
 
@@ -162,7 +155,7 @@ class PluginsRunner(object):
         """
         data, errors = {}, {}
         # Load plugins
-        loader = PluginLoader(self.__plugins_module)
+        loader = PluginLoader(self['plugins_module'])
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
         # Actually browse plugins to launch required methods
@@ -188,9 +181,7 @@ class Query(object):
                  signature=None,
                  project="default",
                  arguments=None,
-                 headers=None
-                 ):
-
+                 headers=None):
 
         self["project"] = project
         self["source"] = source
@@ -203,72 +194,126 @@ class Query(object):
         self["headers"] = headers
 
     def __str__(self):
+        """
+        string representation
+        """
         exposed_attrs = ['project', 'source', 'remote_ip', 'signature',
                          'arguments', 'ressource', 'method',
                          'request_method']
 
         def item_to_string(k):
+            """
+            k,v pair in a string
+            """
             return "%s:%s" % (k, str(self[k]))
 
-        return reduce(lambda x, y: (',').join((x, y)),
-                      [item_to_string(i) for i in exposed_attrs])
+        return red(lambda x, y: (',').join((x, y)),
+                   [item_to_string(i) for i in exposed_attrs])
 
-    def getattrsubset(self, list):
-        return (self[y] for y in list)
+    def getattrsubset(self, attrlist):
+        """
+        return self[something] for something in a list
+        """
+        return (self[y] for y in attrlist)
 
     def for_(self, what):
-        l1 = ['source', 'signature', 'arguments', 'project']
-        l2 = ['project', 'arguments', 'headers']
-        return {"plugins": self.getattrsubset(l1),
-                "checks": self.getattrsubset(l2)
-                }[what]
+        """
+        return the list of attrs required in  a context
+        """
+        plugins = ['source', 'signature', 'arguments', 'project']
+        checks = ['project', 'arguments', 'headers']
+        return {"plugins": self.getattrsubset(plugins),
+                "checks": self.getattrsubset(checks)}[what]
 
     @property
     def function_name(self):
+        """
+        returns the name of the function
+        """
         return "%s_%s" % (self.ressource, self.method)
 
     @property
     def project(self):
-        return self.__project
+        """
+        project getter
+        """
+        return self['project']
 
     @property
     def source(self):
-        return self.__source
+        """
+        source getter
+        """
+        return self['source']
 
     @property
     def remote_ip(self):
-        return self.__remote_ip
+        """
+        remote_ip getter
+        """
+        return self['remote_ip']
 
     @property
     def signature(self):
-        return self.__signature
+        """
+        signature getter
+        """
+        return self['signature']
 
     @property
     def arguments(self):
-        return self.__arguments
+        """
+        arguments getter
+        """
+        return self['arguments']
 
     @property
     def headers(self):
-        return self.__headers
+        """
+        headers getter
+        """
+        return self['headers']
 
     @property
     def ressource(self):
-        return self.__ressource
+        """
+        ressource getter
+        """
+        return self['ressource']
 
     @property
     def method(self):
-        return self.__method
+        """
+        method getter
+        """
+        return self['method']
 
     @property
     def request_method(self):
-        return self.__request_method
+        """
+        request_method getter
+        """
+        return self['request_method']
 
     def __setitem__(self, key, value):
+        """
+        item setter
+        """
         setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 value)
 
     def __getitem__(self, key):
-        return getattr(self, key) or None
+        """
+        """
+        ret = None
+        try:
+            ret = getattr(self, "_" + self.__class__.__name__ + "__" + key)
+        except AttributeError:
+            raise KeyError()
+        return ret
 
     def __call__(self, for_=None):
+        """
+        call
+        """
         return self.for_(for_) if for_ in ["plugins", "checks"] else None

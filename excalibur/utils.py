@@ -3,8 +3,8 @@
 Cross-classes utils
 """
 import hashlib
-import traceback
 import re
+from importlib import import_module
 from excalibur.exceptions import WrongSignatureError
 
 ALL_KEYWORD = "all"
@@ -131,6 +131,39 @@ def get_api_keys_by_sources(sources, targets):
 def get_data(plugin, f_name, parameters, query):
     f = getattr(plugin, f_name)
     return f(parameters, query.arguments)
+
+
+def check_all(process):
+        """
+        Check all yml
+        """
+
+        def checks(current, query):
+            """
+            PITIE DE LA DOC MERCI
+            """
+
+            module = import_module('excalibur.check')
+            # 'CheckHTTPSig',
+            check_list = ['CheckSource',
+                          'CheckACL',
+                          'CheckRequest',
+                          'CheckArguments']
+
+            def checker(check):
+                checker = getattr(module, check)
+                checker(query, current["ressources"],
+                        current.sources(*query("checks")),
+                        current.acl,
+                        sha1check=current["check_signature"],
+                        ipcheck=current["check_ip"],
+                        http_sig=current["http_sig"])()
+            list([checker(method_name) for method_name in dir(module) if
+                  method_name in check_list])
+
+            return process(current, query)
+
+        return checks
 
 
 def set_targeted_sources(t, name, value, args, sign):

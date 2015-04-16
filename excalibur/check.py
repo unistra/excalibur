@@ -177,7 +177,7 @@ class CheckACL(Check):
             if self.method not in allowed_method_suffixes:
                 raise NoACLMatchedError(
                     "%s/%s" % (self.ressource, self.method))
-        except KeyError as k:
+        except KeyError:
             raise NoACLMatchedError(
                 "%s/%s" % (self.ressource, self.method))
 
@@ -210,8 +210,7 @@ class CheckRequest(Check):
             targeted_method = self.ressources[self.ressource][self.method]
             if "request method" in\
                 targeted_method.keys()\
-                and self.http_method !=\
-                    targeted_method["request method"]:
+                and self.http_method not in targeted_method["request method"]:
                 raise HTTPMethodError(
                     targeted_method["request method"])
 
@@ -243,7 +242,7 @@ class CheckRequest(Check):
                             targeted_method['arguments']is not None else[])):
                     raise ArgumentError("exceeding parameters")
 
-        except KeyError as k:
+        except KeyError:
             raise ArgumentError("key not found in sources")
 
     def all_required_args_found(self, required):
@@ -314,12 +313,14 @@ class CheckSource(Check):
                 arguments_list = sorted(self.arguments)
 
                 # If multiple api_keys are registered
-                for target_name, api_keys in api_keys_by_sources.items():
+                for api_keys in api_keys_by_sources.values():
+                    print(api_keys)
                     if len(api_keys) > 1:
                         signkeys = [add_args_then_encode(signature,
                                                          arguments_list,
                                                          self.arguments)
                                     for signature in api_keys]
+                        print(signkeys)
                         if self.signature not in signkeys:
                             raise WrongSignatureError(self.signature)
                     # If there is only one api_key
@@ -327,9 +328,10 @@ class CheckSource(Check):
                         signkey = add_args_then_encode(api_keys[0],
                                                        arguments_list,
                                                        self.arguments)
+                        print(signkey)
                         if self.signature != signkey:
                             raise WrongSignatureError(self.signature)
-        except KeyError as k:
+        except KeyError:
             raise SourceNotFoundError("key was not found in sources")
-        except TypeError as t:
+        except TypeError:
             raise SourceNotFoundError("key was not found in sources")
