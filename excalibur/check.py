@@ -116,6 +116,7 @@ class CheckArguments(Check):
                         if not check_method(value_to_check, check_parameter):
                             errors[argument_name] = check
                     except AttributeError as a:
+                        print (a)
                         raise ArgumentCheckMethodNotFoundError(
                             check_method_name)
                     except Exception as e:
