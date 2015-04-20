@@ -2,7 +2,8 @@
 
 
 class Plugin():
-    pass
+    def __init__(self, query=None):
+        self.query = query
 
 
 class BritneyPlugin(Plugin):

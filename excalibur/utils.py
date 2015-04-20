@@ -127,6 +127,16 @@ def get_api_keys_by_sources(sources, targets):
 
     return {target: get_keys(target) for target in targets}
 
+def get_keyid_by_sources(sources, targets):
+    """
+    """
+    def get_keys(x):
+        return sources[x]["httpsig"]["keyid"]\
+            if "httpsig" in sources[x].keys() and type(sources[x]["httpsig"]["keyid"]) is list else\
+            [sources[x]["httpsig"]["keyid"]if "httpsig" in sources[x].keys() else None]
+
+    return {target: get_keys(target) for target in targets}
+
 
 def get_data(plugin, f_name, parameters, query):
     f = getattr(plugin, f_name)
@@ -253,3 +263,16 @@ def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, data,
             data = plugin_data_format(plugin_data, data, separated,
                                       raw_plugin_name, plugin_name)
     return data, errors
+
+
+def generate_RSA(bits=2048):
+    '''
+    Generate an RSA keypair with an exponent of 65537 in PEM format
+    param: bits The key length in bits
+    Return private key and public key
+    '''
+    from Crypto.PublicKey import RSA
+    new_key = RSA.generate(bits, e=65537)
+    public_key = new_key.publickey().exportKey("PEM")
+    private_key = new_key.exportKey("PEM")
+    return private_key, public_key 

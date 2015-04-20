@@ -1,4 +1,4 @@
-from excalibur.core import Plugin
+from excalibur.plugin import Plugin
 
 
 class Plugin3(Plugin):

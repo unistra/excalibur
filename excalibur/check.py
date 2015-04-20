@@ -11,9 +11,7 @@ from excalibur.utils import add_args_then_encode,\
     ALL_KEYWORD, SOURCE_SEPARATOR, sources_list_or_list,\
     all_sources_or_sources_list_or_list,\
     is_simple_request_and_source_not_found, ip_found_in_sources,\
-    get_api_keys_by_sources
-
-import itertools
+    get_api_keys_by_sources, get_keyid_by_sources
 
 
 class Check(object):
@@ -29,9 +27,8 @@ class Check(object):
 
 class CheckHTTPSig(Check):
 
-
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True,
+                 sha1check=True,ipcheck=True,
                  http_sig=False,
                  keys_folder=None):
         self.query = query
@@ -45,21 +42,29 @@ class CheckHTTPSig(Check):
         self.keys_folder = keys_folder
 
     def __call__(self):
-        print ("I AM CALLED")
         try:
-
-            key = open(self.keys_folder+'id_rsa.pub').read()
-            hv = HeaderVerifier(
-            headers=self.query["headers"],
-        #            secret='cdvbdfsibvqklscb',
-            secret=key,
-            method='GET',
-            path='/:etab/user/setpassword/',
-            required_headers=['(request-target)', 'x-api-key-id', 'host', 'user-agent'])
-            print 'M2 :', hv.__dict__
+#             with open(self.keys_folder+'/id_rsa.pub') as g:
+#                 try:
+#                     print(g.read())
+#                 except Exception as e:
+#                     print("ERTERTER", e)
+            targets = sources_list_or_list(self.source)
+            keyid_by_sources = get_keyid_by_sources(self.sources, targets)
+            key = open(self.keys_folder+'/'+keyid_by_sources[targets[0]][0]+'.pub').read()
+            print (key)
+            hv = HeaderVerifier(headers=self.query["headers"],
+                                #  secret='cdvbdfsibvqklscb',
+                                secret=key,
+                                method='GET',
+                                path='/:etab/user/setpassword/',
+                                required_headers=['(request-target)',
+                                                  'x-api-key-id',
+                                                  'host',
+                                                  'user-agent'])
+            print ('M2 :', hv.__dict__)
             try:
 
-                print 'OUESCH', hv.verify()
+                print ('OUESCH', hv.verify())
             except Exception as e:
                 pass
  
