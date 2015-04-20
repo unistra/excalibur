@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import re
-# from httpsig.verify import HeaderVerifier
+from httpsig.verify import HeaderVerifier
 from excalibur.exceptions import ArgumentError,\
     ArgumentCheckMethodNotFoundError, CheckMethodError,\
     NoACLMatchedError, RessourceNotFoundError, MethodNotFoundError,\
@@ -31,7 +31,9 @@ class CheckHTTPSig(Check):
 
 
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True, http_sig=False):
+                 sha1check=True, ipcheck=True,
+                 http_sig=False,
+                 keys_folder=None):
         self.query = query
         self.sources = sources
         self.source = query.source
@@ -40,28 +42,29 @@ class CheckHTTPSig(Check):
         self.arguments = query.arguments
         self.sha1check = sha1check
         self.ipcheck = ipcheck
+        self.keys_folder = keys_folder
 
-    def call(self):
-        pass
-#         try:
-#           
-#             key = open('/home/geoffroy/Documents/workspace/should/should/id_rsa.pub').read()
-#             hv = HeaderVerifier(
-#             headers=self.query["headers"],
-#         #            secret='cdvbdfsibvqklscb',
-#             secret=key,
-#             method='GET',
-#             path='/:etab/user/setpassword/',
-#             required_headers=['(request-target)', 'x-api-key-id', 'host', 'user-agent'])
-#         #        print 'M2 :', hv.__dict__
-# #             try:
-# #                 
-# #                 print 'OUESCH', hv.verify()
-# #             except Exception as e:
-# #                 print ('EEEEEEEEEEe :',e)
-# 
-#          except Exception as e :
-#              print("OooooOoOo",e)
+    def __call__(self):
+        print ("I AM CALLED")
+        try:
+
+            key = open(self.keys_folder+'id_rsa.pub').read()
+            hv = HeaderVerifier(
+            headers=self.query["headers"],
+        #            secret='cdvbdfsibvqklscb',
+            secret=key,
+            method='GET',
+            path='/:etab/user/setpassword/',
+            required_headers=['(request-target)', 'x-api-key-id', 'host', 'user-agent'])
+            print 'M2 :', hv.__dict__
+            try:
+                 
+                print 'OUESCH', hv.verify()
+            except Exception as e:
+                pass
+ 
+        except Exception as e:
+            pass
 
 class CheckArguments(Check):
 
@@ -78,7 +81,8 @@ class CheckArguments(Check):
 
     @DecodeArguments
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True , http_sig=False):
+                 sha1check=True, ipcheck=True , http_sig=False,
+                 keys_folder=None):
 
         self.ressources = ressources
         self.arguments = query.arguments
@@ -158,7 +162,8 @@ class CheckACL(Check):
     """
 
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True, http_sig=False):
+                 sha1check=True, ipcheck=True, http_sig=False,
+                 keys_folder=None):
         self.sources = sources
         self.acl = acl
         self.source = query.source
@@ -191,7 +196,8 @@ class CheckRequest(Check):
     """
 
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True, http_sig=False):
+                 sha1check=True, ipcheck=True, http_sig=False,
+                 keys_folder=None):
 
         self.ressources = ressources
         self.http_method = query.request_method
@@ -270,7 +276,8 @@ class CheckSource(Check):
     """
 
     def __init__(self, query, ressources, sources, acl,
-                 sha1check=True, ipcheck=True, http_sig=False):
+                 sha1check=True, ipcheck=True, http_sig=False,
+                 keys_folder=None):
 
         self.sources = sources
         self.source = query.source
@@ -279,7 +286,7 @@ class CheckSource(Check):
         self.arguments = query.arguments
         self.sha1check = sha1check
         self.ipcheck = ipcheck
-
+        self.http_sig=http_sig
         self.disable_check("apikey", "sha1check")
         self.disable_check("ip", "ipcheck")
 
@@ -306,7 +313,7 @@ class CheckSource(Check):
                 if not ip_authorized:
                     raise IPNotAuthorizedError(self.ip)
             # Signature check
-            if self.source != ALL_KEYWORD and self.sha1check:
+            if self.source != ALL_KEYWORD and self.sha1check and not self.http_sig:
                 # The request has to be allowed for all the sources it targets
                 targets = sources_list_or_list(self.source)
                 api_keys_by_sources = get_api_keys_by_sources(self.sources,
@@ -321,7 +328,6 @@ class CheckSource(Check):
                                                          arguments_list,
                                                          self.arguments)
                                     for signature in api_keys]
-                        print(signkeys)
                         if self.signature not in signkeys:
                             raise WrongSignatureError(self.signature)
                     # If there is only one api_key

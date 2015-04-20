@@ -28,7 +28,9 @@ class PluginsRunner(object):
     def __init__(self, acl, sources, ressources,
                  plugins_module, check_signature=True, check_ip=True,
                  raw_yaml_content=False,
-                 http_sig=False):
+                 http_sig=False,
+                 keys_folder=None):
+
         self.__raw_yaml_content = raw_yaml_content
         self["acl"] = acl
         self["sources"] = sources
@@ -37,6 +39,7 @@ class PluginsRunner(object):
         self["check_signature"] = check_signature
         self["check_ip"] = check_ip
         self["http_sig"] = http_sig
+        self["keys_folder"] = keys_folder
 
     @property
     def acl(self):
@@ -159,10 +162,13 @@ class PluginsRunner(object):
         loader = PluginLoader(self['plugins_module'])
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
-        # Actually browse plugins to launch required methods
-        for name, params in plugins.items():
-            (data, errors) = data_or_errors(loader, name, query,
-                                            params, data, errors)
+        try:
+            # Actually browse plugins to launch required methods
+            for name, params in plugins.items():
+                (data, errors) = data_or_errors(loader, name, query,
+                                                params, data, errors)
+        except Exception as e:
+            print(e)
         return data, errors
 
 

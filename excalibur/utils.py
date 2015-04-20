@@ -137,15 +137,16 @@ def check_all(process):
         """
         Check all yml
         """
-
+       
         def checks(current, query):
             """
             PITIE DE LA DOC MERCI
             """
 
             module = import_module('excalibur.check')
-            # 'CheckHTTPSig',
-            check_list = ['CheckSource',
+            # ,
+            check_list = ['CheckHTTPSig',
+                          'CheckSource',
                           'CheckACL',
                           'CheckRequest',
                           'CheckArguments']
@@ -157,7 +158,8 @@ def check_all(process):
                         current.acl,
                         sha1check=current["check_signature"],
                         ipcheck=current["check_ip"],
-                        http_sig=current["http_sig"])()
+                        http_sig=current["http_sig"],
+                        keys_folder=current["keys_folder"])()
             list([checker(method_name) for method_name in dir(module) if
                   method_name in check_list])
 
