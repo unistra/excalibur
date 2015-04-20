@@ -58,7 +58,7 @@ class CheckHTTPSig(Check):
             required_headers=['(request-target)', 'x-api-key-id', 'host', 'user-agent'])
             print 'M2 :', hv.__dict__
             try:
-                 
+
                 print 'OUESCH', hv.verify()
             except Exception as e:
                 pass

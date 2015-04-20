@@ -140,7 +140,6 @@ class PluginsRunner(object):
         except KeyError:
             raise PluginRunnerError("no such source found")
 
-
     @check_all
     def __call__(self, query):
         """
@@ -159,6 +158,7 @@ class PluginsRunner(object):
         """
         data, errors = {}, {}
         # Load plugins
+
         loader = PluginLoader(self['plugins_module'])
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
@@ -169,6 +169,7 @@ class PluginsRunner(object):
                                                 params, data, errors)
         except Exception as e:
             print(e)
+
         return data, errors
 
 
@@ -324,3 +325,10 @@ class Query(object):
         call
         """
         return self.for_(for_) if for_ in ["plugins", "checks"] else None
+
+
+class Plugin(object):
+
+    def __init__(self, query=None):
+        self.query = query
+
