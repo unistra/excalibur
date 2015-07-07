@@ -13,23 +13,23 @@ For more information have a look at sphinx's documentation.
     :target: http://coveralls.io/r/unistra/excalibur?branch=master
     :alt: Coverage
 
-.. image:: https://pypip.in/version/excalibur/badge.png
+.. image:: https://img.shields.io/pypi/v/excalibur.svg
     :target: https://pypi.python.org/pypi/excalibur
     :alt: Version
 
-.. image:: https://pypip.in/py_versions/excalibur/badge.png
+.. image:: https://img.shields.io/pypi/pyversions/excalibur.svg
     :target: https://pypi.python.org/pypi/excalibur
     :alt: Python Version
 
-.. image:: https://pypip.in/status/excalibur/badge.png
+.. image:: https://img.shields.io/pypi/status/excalibur.svg
     :target: https://pypi.python.org/pypi/excalibur
     :alt: Status
 
-.. image:: https://pypip.in/license/excalibur/badge.png
+.. image:: https://img.shields.io/pypi/l/excalibur.svg
     :target: https://docs.python.org/2/license.html
     :alt: Licence
 
-.. image:: https://pypip.in/download/excalibur/badge.png
+.. image:: https://img.shields.io/pypi/dm/excalibur.svg
     :target: https://pypi.python.org/pypi/excalibur
     :alt: Download
 
