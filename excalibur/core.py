@@ -8,13 +8,15 @@ The treatments those objects make depends on their configuration
 that is specified in dedicated yaml files.
 """
 
+import collections
+from functools import reduce
+from importlib import import_module
+
 from excalibur.loader import ConfigurationLoader, PluginLoader
 from excalibur.check import CheckACL,\
     CheckArguments, CheckRequest, CheckSource
 from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError, WrongSignatureError
-from importlib import import_module
-from functools import reduce
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
     data_or_errors
@@ -32,7 +34,7 @@ class PluginsRunner(object):
 
     def __init__(self, acl, sources, ressources,
                  plugins_module, check_signature=True, check_ip=True,
-                 raw_yaml_content=False):
+                 raw_yaml_content=False, plugins_order=None):
         self.__raw_yaml_content = raw_yaml_content
         self["acl"] = acl
         self["sources"] = sources
@@ -40,6 +42,7 @@ class PluginsRunner(object):
         self["plugins_module"] = plugins_module
         self["check_signature"] = check_signature
         self["check_ip"] = check_ip
+        self["plugins_order"] = plugins_order
 
     @property
     def acl(self):
@@ -158,13 +161,15 @@ class PluginsRunner(object):
         Returns obtained data and errors from all
         launched plugins.
         """
-        data, errors = {}, {}
+        data, errors = collections.OrderedDict(), collections.OrderedDict()
         # Load plugins
         loader = PluginLoader(self.__plugins_module)
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
+        plugins_list = self.__plugins_order or plugins.keys()
         # Actually browse plugins to launch required methods
-        for name, params in plugins.items():
+        for name in plugins_list:
+            params = plugins[name]
             (data, errors) = data_or_errors(loader, name, query,
                                             params, data, errors)
         return data, errors

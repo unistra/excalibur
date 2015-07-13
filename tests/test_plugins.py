@@ -225,28 +225,52 @@ actions:
             self.plugin_runner.sources_names(), ['etab1', 'etab2'])
 
     def test_runner_with_raw_yaml(self):
-      plugin_runner = PluginsRunner(
-          self.raw_acl,
-          self.raw_sources,
-          self.raw_ressources,
-          "tests.plugins",
-          raw_yaml_content=True)
+        plugin_runner = PluginsRunner(
+            self.raw_acl,
+            self.raw_sources,
+            self.raw_ressources,
+            "tests.plugins",
+            raw_yaml_content=True)
 
-      data, errors = plugin_runner(self.query)
-      self.assertEqual(data, self.data_ok)
-      self.assertEqual(errors, {})
+        data, errors = plugin_runner(self.query)
+        self.assertEqual(data, self.data_ok)
+        self.assertEqual(errors, {})
 
     def test_runner_with_raw_yaml_errors(self):
-      plugin_runner = PluginsRunner(
-          self.raw_acl,
-          self.raw_sources,
-          self.raw_ressources,
-          "tests.plugins",
-          raw_yaml_content=True)
+        plugin_runner = PluginsRunner(
+            self.raw_acl,
+            self.raw_sources,
+            self.raw_ressources,
+            "tests.plugins",
+            raw_yaml_content=True)
 
-      data, errors = plugin_runner(self.query2)
-      self.assertEqual(errors, self.errors_raw)
-      self.assertEqual(data, {})
+        data, errors = plugin_runner(self.query2)
+        self.assertEqual(errors, self.errors_raw)
+        self.assertEqual(data, {})
+
+    def test_runner_with_plugins_order(self):
+        plugins_order = ['Plugin2', 'Plugin1']
+        plugin_runner2 = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sources.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",
+            plugins_order=plugins_order
+        )
+        data, errors = plugin_runner2(self.query)
+        self.assertListEqual(plugins_order, list(data.keys()))
+
+    def test_runner_with_plugins_order_and_less_plugins(self):
+        plugins_order = ['Plugin2']
+        plugin_runner2 = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sources.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins",
+            plugins_order=plugins_order
+        )
+        data, errors = plugin_runner2(self.query)
+        self.assertListEqual(plugins_order, list(data.keys()))
 
 
 class RunnerWithProjectsTest(TestCase):
