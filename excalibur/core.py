@@ -89,6 +89,10 @@ class PluginsRunner(object):
         sources() works as a filter to return either the whole
         yml, or the matching entries.
         """
+
+        project = project or (
+            'default' if 'default' in self.__sources.keys() else project)
+
         if project:
             try:
                 return self.project_sources(project)
@@ -125,7 +129,6 @@ class PluginsRunner(object):
         """
 
         def checks(self, query):
-
             module = import_module('excalibur.check')
             check_list = [
                 'CheckSource',
@@ -143,7 +146,6 @@ class PluginsRunner(object):
                         ipcheck=self.__check_ip)()
             list(map(checker, [method_name for method_name in dir(module) if
                                method_name in check_list]))
-
             return foo(self, query)
 
         return checks
