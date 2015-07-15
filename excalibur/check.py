@@ -134,12 +134,13 @@ class CheckACL(Check):
             self.source, self.sources)
 
         allowed_method_suffixes = []
+        project = self.project or (
+            'default' if hasattr(self.acl, 'default') else self.project)
         try:
             for target in targets:
                 allowed_method_suffixes +=\
-                    self.acl[self.project][target][self.ressource]\
-                    if self.project else self.acl[target][self.ressource]
-
+                    self.acl[project][target][self.ressource]\
+                    if project else self.acl[target][self.ressource]
             if self.method not in allowed_method_suffixes:
                 raise NoACLMatchedError(
                     "%s/%s" % (self.ressource, self.method))
