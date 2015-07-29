@@ -10,6 +10,7 @@ from excalibur.exceptions import IPNotAuthorizedError,WrongSignatureError
 from excalibur.utils import ALL_KEYWORD
 import yaml
 
+
 class PluginsTest(TestCase):
 
     def setUp(self):
@@ -40,22 +41,24 @@ class PluginsTest(TestCase):
             "tests.plugins")
 
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
-        self.errors_raw = {'Plugin1':
-                           {'error_message': 'error plugin 1 action 2 !',
+        self.errors_raw = {'Plugin1': {
+                            'error_message': 'error plugin 1 action 2 !',
                             'method': 'action2',
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
                             'ressource': 'actions',
-                            'parameters_index': 0},
-                           'Plugin2':
-                          {'error_message': 'error plugin 2 action 2 !',
-                           'method': 'action2',
-                           'source': 'etab1',
-                           'arguments': {'login': 'testzombie1'},
-                           'error': 'Exception', 'ressource':
-                           'actions',
-                           'parameters_index': 0}
+                            'parameters_index': 0,
+                            'project': None},
+                           'Plugin2': {
+                            'error_message': 'error plugin 2 action 2 !',
+                            'method': 'action2',
+                            'source': 'etab1',
+                            'arguments': {'login': 'testzombie1'},
+                            'error': 'Exception', 'ressource':
+                            'actions',
+                            'parameters_index': 0,
+                            'project': None},
                            }
 
     def test_run(self):
@@ -123,22 +126,24 @@ class RunnerTest(TestCase):
             "tests.plugins")
 
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
-        self.errors_raw = {'Plugin1':
-                           {'method': 'action2',
+        self.errors_raw = {'Plugin1': {
+                            'method': 'action2',
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
                             'error_message': 'error plugin 1 action 2 !',
                             'ressource': 'actions',
-                            'parameters_index': 0},
-                           'Plugin2':
-                           {'method': 'action2',
+                            'parameters_index': 0,
+                            'project': None},
+                           'Plugin2': {
+                            'method': 'action2',
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
                             'error_message': 'error plugin 2 action 2 !',
                             'ressource': 'actions',
-                            'parameters_index': 0}
+                            'parameters_index': 0,
+                            'project': None}
                            }
         self.raw_acl = """
 etab1:
@@ -184,7 +189,7 @@ etab2:
             -   spore: S3CR3T2
                 token: S3CR3T2
 """
-        self.raw_ressources ="""
+        self.raw_ressources = """
 actions:
     action1:
         request method: GET
@@ -203,9 +208,7 @@ actions:
                     max length: 50
 """
 
-
     def test_runner(self):
-        
         data, errors = self.plugin_runner(self.query)
         self.assertEqual(data, self.data_ok)
         self.assertEqual(errors, {})
@@ -296,7 +299,7 @@ class RunnerWithProjectsTest(TestCase):
                             request_method="GET",
                             project="project1"
                             )
-        
+
         self.query3 = Query(source=ALL_KEYWORD,
                             remote_ip="127.0.0.1",
                             signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
@@ -306,7 +309,7 @@ class RunnerWithProjectsTest(TestCase):
                             request_method="GET",
                             project="project1"
                             )
-        
+
         self.query4 = Query(source="etab1,etab2",
                             remote_ip="127.0.0.1",
                             signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
@@ -316,36 +319,38 @@ class RunnerWithProjectsTest(TestCase):
                             request_method="GET",
                             project="project1"
                             )
-         
+
         self.plugin_runner = PluginsRunner(
             "./tests/data/acl_projects.yml",
             "./tests/data/sources_projects.yml",
             "./tests/data/ressources.yml",
             "tests.plugins")
-        
+
         self.plugin_runner2 = PluginsRunner(
             "./tests/data/acl_projects.yml",
             "./tests/data/query4_project.yml",
             "./tests/data/ressources.yml",
             "tests.plugins")
-        
+
         self.data_ok = {'Plugin1': 'p1ok1', 'Plugin2': 'p2ok1'}
-        self.errors_raw = {'Plugin1':
-                           {'method': 'action2',
+        self.errors_raw = {'Plugin1': {
+                            'method': 'action2',
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
                             'error_message': 'error plugin 1 action 2 !',
                             'ressource': 'actions',
-                            'parameters_index': 0},
-                           'Plugin2':
-                           {'method': 'action2',
+                            'parameters_index': 0,
+                            'project': 'project1'},
+                           'Plugin2': {
+                            'method': 'action2',
                             'source': 'etab1',
                             'arguments': {'login': 'testzombie1'},
                             'error': 'Exception',
                             'error_message': 'error plugin 2 action 2 !',
                             'ressource': 'actions',
-                            'parameters_index': 0}}
+                            'parameters_index': 0,
+                            'project': 'project1'}}
 
         self.raw_acl = """
 project1:
@@ -413,7 +418,7 @@ project2:
                     -   spore: S3CR3T
                         token: S3CR3T
 """
-        self.raw_ressources ="""
+        self.raw_ressources = """
 actions:
     action1:
         request method: GET
@@ -436,11 +441,11 @@ actions:
         data, errors = self.plugin_runner(self.query)
         self.assertEqual(data, self.data_ok)
         self.assertEqual(errors, {})
-        
+
     def test_runner_query4_one_requested_source_does_not_match(self):
         with self.assertRaises(WrongSignatureError):
             data, errors = self.plugin_runner(self.query4)
-            
+
     def test_runner_query4_one_requested_source(self):
         """
         """
@@ -457,7 +462,7 @@ actions:
         data, errors = plugin_runner(self.query2)
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})
-        
+
     def test_runner_with_query_source_set_to_all(self):
         plugin_runner = PluginsRunner(
             "./tests/data/acl_projects.yml",
@@ -467,7 +472,7 @@ actions:
         data, errors = plugin_runner(self.query3)
         self.assertTrue(data["etab1|Plugin1"]=="p1ok1" and data["etab1|Plugin2"]=='p2ok1')
         self.assertTrue("etab2|Plugin2" not in data)
-        
+
     def test_query_source_set_to_all_and_multiple_etabs(self):
         """
         Checks that with 'source==all', data are correctly returned from
@@ -480,7 +485,7 @@ actions:
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
         self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1")
-        
+
     def test_request_set_to_all_and_checksignature_set_to_false(self):
         """
         """
@@ -493,12 +498,9 @@ actions:
             )
         data, errors = plugin_runner(self.query3)
         self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1")
-        
-    
-        
+
     def test_query_source_set_to_all__multiple_etabs_multiple_ips(self):
         """
-        
         """
         plugin_runner = PluginsRunner(
             "./tests/data/acl_projects.yml",
@@ -508,25 +510,21 @@ actions:
         data, errors = plugin_runner(self.query3)
         self.assertTrue(data["etab2|Plugin2"]=="p2ok1" and data["etab1|Plugin1"]=="p1ok1")
         self.assertTrue("etab3|Plugin2" not in data)
-        
+
     def test_query_all_missing_ip_in_an_etab(self):
         """
-        
         """
-       
-        
         plugin_runner = PluginsRunner(
         "./tests/data/acl_projects.yml",
         "./tests/data/sources_all_with_apikey_matching_but_ip_not_authorized.yml",
         "./tests/data/ressources.yml",
         "tests.plugins")
 
-       
         with self.assertRaises(IPNotAuthorizedError):
             data, errors = plugin_runner(self.query3)
-            
+
 #         self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
-        
+
     def test_query_source_set_to_all_and_multiple_etabs_with_errors(self):
         """
         Checks that with 'source==all', but ip does not match
@@ -539,16 +537,15 @@ actions:
             "./tests/data/ressources.yml",
             "tests.plugins")
         data, errors = plugin_runner(self.query3)
-     
+
 #         self.assertTrue(data["Plugin2"]=="p2ok1" and data["Plugin1"]=="p1ok1")
-        
 
     def test_sources_names(self):
         self.assertEqual(self.plugin_runner.sources_names(self.query.project),
                          ['etab1', 'etab2'])
         self.assertEqual(self.plugin_runner.sources_names("project2"),
                          ['etab1'])
-        
+
     def test_failing_sources_names(self):
         p = PluginsRunner(
             "./tests/data/acl_projects.yml",
@@ -559,30 +556,29 @@ actions:
             p.sources_names(self.query.project)
 
     def test_runner_with_raw_yaml(self):
-      plugin_runner = PluginsRunner(
-          self.raw_acl,
-          self.raw_sources,
-          self.raw_ressources,
-          "tests.plugins",
-          raw_yaml_content=True)
+        plugin_runner = PluginsRunner(
+            self.raw_acl,
+            self.raw_sources,
+            self.raw_ressources,
+            "tests.plugins",
+            raw_yaml_content=True)
 
-      data, errors = plugin_runner(self.query)
-      self.assertEqual(data, self.data_ok)
-      self.assertEqual(errors, {})
+        data, errors = plugin_runner(self.query)
+        self.assertEqual(data, self.data_ok)
+        self.assertEqual(errors, {})
 
     def test_runner_with_raw_yaml_errors(self):
-      plugin_runner = PluginsRunner(
-          self.raw_acl,
-          self.raw_sources,
-          self.raw_ressources,
-          "tests.plugins",
-          raw_yaml_content=True)
+        plugin_runner = PluginsRunner(
+            self.raw_acl,
+            self.raw_sources,
+            self.raw_ressources,
+            "tests.plugins",
+            raw_yaml_content=True)
 
-      data, errors = plugin_runner(self.query2)
-      self.assertEqual(errors, self.errors_raw)
-      self.assertEqual(data, {})
-      
-   
-        
+        data, errors = plugin_runner(self.query2)
+        self.assertEqual(errors, self.errors_raw)
+        self.assertEqual(data, {})
+
+
 if __name__ == '__main__':
     main()
