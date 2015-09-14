@@ -3,7 +3,7 @@ excalibur
 
 A tool to manage plugins.
 
-For more information have a look at sphinx's documentation.
+For more information have a look at sphinx's documentation `here <http://unistra.github.io/excalibur/>`_
 
 .. image:: https://secure.travis-ci.org/unistra/excalibur.png?branch=master
     :target: https://travis-ci.org/unistra/excalibur
