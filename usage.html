@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Usage &mdash; excalibur 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="excalibur 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Development" href="development.html" />
+    <link rel="prev" title="Configuration" href="configuration.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="development.html" title="Development"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">excalibur 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>Excalibur is a tool intended on ressources management in applications.</p>
+<p>The purpose of Excalibur is to execute plugins methods according to query parameters.</p>
+<p>Excalibur analyzes the query according to yaml configuration files and select which plugins should be run, and which parameters they should use,</p>
+<p>dependending on the allowances set in the yaml files.</p>
+<p>Excalibur works with Query and PluginsRunner objects which should be imported like :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">excalibur.core</span> <span class="kn">import</span> <span class="n">PluginsRunner</span><span class="p">,</span> <span class="n">Query</span>
+</pre></div>
+</div>
+<p>associated error classes should be imported too :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">excalibur.exceptions</span> <span class="kn">import</span> <span class="n">ExcaliburClientError</span><span class="p">,</span> <span class="n">ExcaliburInternalError</span>
+</pre></div>
+</div>
+<div class="section" id="required-parameters">
+<h2>Required Parameters<a class="headerlink" href="#required-parameters" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="for-query">
+<h3>For Query<a class="headerlink" href="#for-query" title="Permalink to this headline">¶</a></h3>
+<p>The Query contains the data required by the PluginsRunner to select which process the app should use.</p>
+<p>For example, if you use this app in a web project, you could have a route like :</p>
+<div class="highlight-python"><div class="highlight"><pre>http://myapp.mydomain.com/project/source/ressource/method?sign=signature&amp;firstname=toto&amp;lastname=tata
+</pre></div>
+</div>
+<ul>
+<li><p class="first">project : optional param. The project specified in the sources.yml.</p>
+</li>
+<li><dl class="first docutils">
+<dt>source <span class="classifier-delimiter">:</span> <span class="classifier">targeted source specified in the sources.yml.</span></dt>
+<dd><ul class="first last simple">
+<li>&#8216;all&#8217; is a reserved keyword, when you set source to all,
+excalibur launches all the plugins whose yaml carries the right api key,
+NOT ALL PLUGINS BUT ALL ALLOWED PLUGINS.</li>
+<li>you can specify multiple sources, if so you have to separate them with &#8216;,&#8217;</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">remote_ip : the ip address of the client.</p>
+</li>
+<li><p class="first">signature : passed in the query string, sha1 encoded. See above for more details.</p>
+</li>
+<li><p class="first">ressource : targeted ressource specified in the .yml.</p>
+</li>
+<li><p class="first">method : specified in the yaml ressources, match the plugin class method.</p>
+</li>
+<li><p class="first">request_method : GET, POST, PATCH, PUT or DELETE</p>
+</li>
+<li><p class="first">arguments : a dict of key/values (contains firstname, lastname, ...)</p>
+</li>
+</ul>
+</div>
+<div class="section" id="specs-of-the-signature">
+<h3>Specs of the signature<a class="headerlink" href="#specs-of-the-signature" title="Permalink to this headline">¶</a></h3>
+<dl class="docutils">
+<dt>The signature is a sha1 hash obtained by:</dt>
+<dd><ul class="first">
+<li><dl class="first docutils">
+<dt>concatenation of, in that order :</dt>
+<dd><ul class="first last simple">
+<li>the client apikey found in the sources.yml</li>
+<li>the first arg key</li>
+<li>the first arg value</li>
+<li>second arg key</li>
+<li>second arg value</li>
+<li>etc ...</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first">hash to sha1</p>
+</li>
+</ul>
+<dl class="last docutils">
+<dt>Example:</dt>
+<dd><ul class="first simple">
+<li>project: project</li>
+<li>source : source</li>
+<li>apikey: &#8220;0XFF&#8221;</li>
+<li>firstname: &#8220;toto&#8221;</li>
+<li>lastname=tata</li>
+</ul>
+<p>concatenated string is:
+&#8220;0XFFfirstnametotolastnametata&#8221;</p>
+<p>hash is then :
+&#8220;337730197d2aae0a0c3ce9eeea00554beb313ad4&#8221;</p>
+<p class="last">called url is:
+<a class="reference external" href="http://myapp.mydomain.com/project/source/ressource/method?sign=337730197d2aae0a0c3ce9eeea00554beb313ad4&amp;firstname=toto&amp;lastname=tata">http://myapp.mydomain.com/project/source/ressource/method?sign=337730197d2aae0a0c3ce9eeea00554beb313ad4&amp;firstname=toto&amp;lastname=tata</a></p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>The client side sha1 signature is optional.</p>
+<p>By passing check_signature=False at your PluginRunner initialization you can exempt the consumer from building the sha1.</p>
+<p>It does not mean that the matching validation will be skipped, but that it will be made internally by Excalibur.</p>
+</div>
+<div class="section" id="for-pluginsrunner">
+<h3>For PluginsRunner<a class="headerlink" href="#for-pluginsrunner" title="Permalink to this headline">¶</a></h3>
+<p>The PluginsRunner constructor signature takes for arguments the yml configuration files paths, the plugin module&#8217;s name and query</p>
+<ul class="simple">
+<li>acl_file : the acl file path.</li>
+<li>sources_file : the sources file path.</li>
+<li>ressources_file : the ressources file path.</li>
+<li>plugins_module : the plugins module&#8217;s name.</li>
+</ul>
+<p>The callable method need the following argument:</p>
+<ul class="simple">
+<li>query : the query object.</li>
+</ul>
+</div>
+</div>
+<div class="section" id="how-to">
+<h2>How to<a class="headerlink" href="#how-to" title="Permalink to this headline">¶</a></h2>
+<p>In your code you could, for instance, write :</p>
+<div class="highlight-python"><div class="highlight"><pre>    from excalibur.core import PluginsRunner, Query
+    from excalibur.exceptions import ExcaliburClientError, ExcaliburInternalError
+
+    query = Query(source=source,
+            remote_ip=remote_ip,
+            signature=signature,
+            ressource=ressource,
+            method=method,
+            request_method=request_method,
+            arguments=arguments)
+
+    plugin_runner = PluginsRunner(acl_file,
+                          sources_file,
+                          ressources_file,
+                          plugins_module)
+
+data, errors = plugin_runner(query)
+</pre></div>
+</div>
+<ul class="simple">
+<li>data is a dict which contains all plugins&#8217;s data</li>
+<li>errors is a dict which contains all plugins&#8217;s errors</li>
+</ul>
+<p>In a Django project it would differ a bit in that way :</p>
+<div class="highlight-python"><div class="highlight"><pre>    from django.conf import settings
+
+    ...
+
+    plugin_runner = PluginsRunner(settings.EXCALIBUR_ACL_FILE,
+                          settings.EXCALIBUR_SOURCES_FILE,
+                          settings.EXCALIBUR_RESSOURCES_FILE,
+                          settings.EXCALIBUR_PLUGINS_MODULE)
+...
+</pre></div>
+</div>
+<p>You can now use the collected data and/or errors as you see fit.</p>
+<div class="section" id="tips">
+<h3>Tips<a class="headerlink" href="#tips" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>You can use the sources_names method of the PluginsRunner to get all sources names by project. It can be useful to loop over it to make multiple queries.</li>
+<li>You can use the &#8220;raw_yaml_content=True&#8221; parameter for the PluginsRunner to pass a raw string instead of a file</li>
+<li>You can use the &#8220;check_ip=False&#8221; parameter for the PluginsRunner to allow all ips.</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Usage</a><ul>
+<li><a class="reference internal" href="#required-parameters">Required Parameters</a><ul>
+<li><a class="reference internal" href="#for-query">For Query</a></li>
+<li><a class="reference internal" href="#specs-of-the-signature">Specs of the signature</a></li>
+<li><a class="reference internal" href="#for-pluginsrunner">For PluginsRunner</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#how-to">How to</a><ul>
+<li><a class="reference internal" href="#tips">Tips</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="configuration.html"
+                        title="previous chapter">Configuration</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="development.html"
+                        title="next chapter">Development</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/usage.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="development.html" title="Development"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="configuration.html" title="Configuration"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">excalibur 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, DIP.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

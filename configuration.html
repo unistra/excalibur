@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Configuration &mdash; excalibur 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="excalibur 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="usage.html" title="Usage"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">excalibur 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="configuration">
+<h1>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h1>
+<p>All settings directives are done by yaml files.
+This is where you specify which process Excalibur should call, which way it should do it, depending on who asks it.</p>
+<div class="section" id="sources-yml">
+<h2>sources.yml<a class="headerlink" href="#sources-yml" title="Permalink to this headline">¶</a></h2>
+<p>WARNING : &#8216;all&#8217; and &#8216;,&#8217; are reserved in the Excalibur syntax, don&#8217;t use them as sources names.</p>
+<p>Api configuration by sources.</p>
+<p>Each source can have an apikey entry, which will be matched against the
+apikey carried by the request.</p>
+<p>Multiple apikeys can be registered by setting the value of this entry
+to a list.</p>
+<p>The ip entry works the same way, and is used to determine which ips are authorized.</p>
+<p>A single request can target one or many sources.</p>
+<p>When building the request, to target multiple establishments
+you should use &#8221;,&#8221; as separator, in the following example it would thus be source=&#8221;uds,ensas&#8221;.</p>
+<p>You can also
+set the source to &#8220;all&#8221; in the request, in which case the PluginRunner will return all the sources where your credentials
+are found.</p>
+<p>The parameters with which each plugin is to be executed depending on the user requiring it are registered here.</p>
+<p>Example :</p>
+<div class="highlight-python"><div class="highlight"><pre>uds:
+        apikey: S3CR3T
+        ip:
+                - 127.0.0.1
+                - X.X.X.X
+
+        plugins:
+                Ldap:
+                        -       url: ldaps://ldap1.domaine.fr:636
+                                binddn: S3CR3T
+                                password: S3CR3T
+                                basedn: ou=users
+                                password method: [userPassword, sambaLMPassword, sambaNTPassword]
+                                login attribute: uid
+
+                        -       url: ldaps://ldap2.domaine.fr:636
+                                binddn: S3CR3T
+                                password: S3CR3T
+                                basedn: ou=users
+                                password method: [unicodePwd]
+                                login attribute: sAMAccountName
+
+                Kerberos:
+                        -       spn: S3CR3T
+                                keytabfile: &quot;file.keytab&quot;
+                                kinit_command: &quot;/usr/bin/kinit&quot;
+                                kadmin_command: &quot;/usr/sbin/kadmin&quot;
+
+                Process:
+                        -       path: /path/script_webmail.sh
+                                user_deactivate_parameters: [login, ]
+
+                Ldapuds:
+                        -       spore: http://ldapws.domaine.fr/description.json
+                                token: S3CR3T
+
+                Aduds:
+                        -       spore: http://aduds.domaine.fr/description.json
+                                token: S3CR3T
+                                deactivation_code: 66050
+                                delete_info: delete
+
+ensas:
+        ...
+</pre></div>
+</div>
+<p>A further level can be set in order to manage sources by projects.</p>
+<p>Example :</p>
+<div class="highlight-python"><div class="highlight"><pre>project1:
+    source1:
+        ...
+
+    source2:
+        ...
+
+project2:
+    source1:
+        ...
+</pre></div>
+</div>
+</div>
+<div class="section" id="ressources-yml">
+<h2>ressources.yml<a class="headerlink" href="#ressources-yml" title="Permalink to this headline">¶</a></h2>
+<p>Methods and arguments descriptions by sources.
+The registered keys found under the &#8220;arguments&#8221; entry are the the request arguments for
+which validations will be made. If you want a validation to be optional, i.e to be runned
+only if the the argument is present, you can set optional to true at the same level than the
+check.</p>
+<p>Example :</p>
+<div class="highlight-python"><div class="highlight"><pre>    user:
+            setpassword:
+                    request method: GET
+                    arguments:
+                            login:
+                                    checks:
+                                            min_length: 2
+                                            max_length: 50
+                            password:
+                                    checks:
+                                            min_length: 8
+                                            max_length: 50
+                                    encoding: base64
+                            first_name:
+                                   checks:
+                                            min_length: 8
+                                            max_length: 50
+                                    optional:true
+
+
+...
+</pre></div>
+</div>
+</div>
+<div class="section" id="acl-yml">
+<h2>acl.yml<a class="headerlink" href="#acl-yml" title="Permalink to this headline">¶</a></h2>
+<p>List of allowed methods by sources. This module is used by the PluginRunner for validation purposes.
+On receiving the request it ensures that the plugins it targets contain the methods that are going to be
+called by the request.</p>
+<p>Example :</p>
+<div class="highlight-python"><div class="highlight"><pre>uds:
+        user:
+                - setpassword
+                - deactivate
+                - archive
+ensas:
+        user:
+                - setpassword
+</pre></div>
+</div>
+<p>A further level can be specified to manage sources by project.</p>
+<p>Example :</p>
+<div class="highlight-python"><div class="highlight"><pre>project1:
+    source1:
+        actions:
+            - action1
+            - action2
+
+    source2:
+        actions:
+            - action1
+
+project2:
+    source1:
+        actions:
+            - action1
+            - action2
+</pre></div>
+</div>
+</div>
+<div class="section" id="plugins-module">
+<h2>plugins module<a class="headerlink" href="#plugins-module" title="Permalink to this headline">¶</a></h2>
+<p>A private module dedicated to plugins must be present in your app.</p>
+<p>It should conform to the following format :</p>
+<div class="highlight-python"><div class="highlight"><pre>plugins
+        Plugin1.py
+        Plugin2.py
+        Plugin3.py
+</pre></div>
+</div>
+<p>Each plugin class must be contained in an homonymous .py.
+This class must contain all the methods that the yml description files describe as available.
+Those methods signatures should at least be able to take as arguments &#8220;parameters&#8221; and &#8220;arguments&#8221;, their return type is up to you.</p>
+<p>Example :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Plugin1</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">user_deactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">arguments</span><span class="p">):</span>
+                <span class="o">...</span>
+                <span class="k">return</span> <span class="n">data</span>
+
+        <span class="k">def</span> <span class="nf">user_archive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">arguments</span><span class="p">):</span>
+                <span class="o">...</span>
+                <span class="k">return</span> <span class="n">data</span>
+
+        <span class="k">def</span> <span class="nf">user_setpassword</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">arguments</span><span class="p">):</span>
+                <span class="o">...</span>
+                <span class="k">return</span> <span class="n">data</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="in-a-django-project">
+<h2>In a Django project<a class="headerlink" href="#in-a-django-project" title="Permalink to this headline">¶</a></h2>
+<p>In your django project&#8217;s settings.py, the yaml file paths and the plugins module&#8217;s name should be specified, for instance :</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">basename</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">normpath</span>
+
+<span class="n">SETTINGS_ROOT</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
+<span class="n">EXCALIBUR_SOURCES_FILE</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">SETTINGS_ROOT</span><span class="p">,</span> <span class="s">&quot;sources.yml&quot;</span><span class="p">)</span>
+<span class="n">EXCALIBUR_RESSOURCES_FILE</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">SETTINGS_ROOT</span><span class="p">,</span> <span class="s">&quot;ressources.yml&quot;</span><span class="p">)</span>
+<span class="n">EXCALIBUR_ACL_FILE</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">SETTINGS_ROOT</span><span class="p">,</span> <span class="s">&quot;acl.yml&quot;</span><span class="p">)</span>
+<span class="n">EXCALIBUR_PLUGINS_MODULE</span> <span class="o">=</span> <span class="s">&quot;yourproject.yourapp.plugins&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Configuration</a><ul>
+<li><a class="reference internal" href="#sources-yml">sources.yml</a></li>
+<li><a class="reference internal" href="#ressources-yml">ressources.yml</a></li>
+<li><a class="reference internal" href="#acl-yml">acl.yml</a></li>
+<li><a class="reference internal" href="#plugins-module">plugins module</a></li>
+<li><a class="reference internal" href="#in-a-django-project">In a Django project</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="usage.html"
+                        title="next chapter">Usage</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/configuration.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="usage.html" title="Usage"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">excalibur 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2014, DIP.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
