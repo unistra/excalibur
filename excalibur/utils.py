@@ -6,6 +6,7 @@ import hashlib
 import traceback
 import re
 from excalibur.exceptions import WrongSignatureError
+import asyncio
 
 ALL_KEYWORD = "all"
 PLUGIN_NAME_SEPARATOR = "|"
@@ -127,10 +128,11 @@ def get_api_keys_by_sources(sources, targets):
 
     return {target: get_keys(target) for target in targets}
 
-
-def get_data(plugin, f_name, parameters, query):
+@asyncio.coroutine
+def get_data(plugin, f_name, parameters, query, future, raw_plugin_name, index):
     f = getattr(plugin, f_name)
-    return f(parameters, query.arguments)
+    # TODO WARNING !!!!! query.arguments -> query
+    yield from f(parameters, query, future, raw_plugin_name, index)
 
 
 def set_targeted_sources(t, name, value, args, sign):
@@ -193,9 +195,9 @@ def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
             data[plugin_name] = plugin_data
     return data
 
-
+@asyncio.coroutine
 def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, data,
-                   errors):
+                   errors, future):
     """
     real core of the application that tries to execute the plugin's code or 
     continue
@@ -211,12 +213,12 @@ def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, data,
         plugin_data = None
         if hasattr(plugin, f_name):
             # Get data
-            try:
-                plugin_data = get_data(plugin, f_name, parameters, query)
+            # try:
+            plugin_data = yield from get_data(plugin, f_name, parameters, query, future, raw_plugin_name, index)
             # Or register exception
-            except Exception as e:
-                errors[plugin_name] = format_error(query, e, index)
-            # Register data by plugin name
-            data = plugin_data_format(plugin_data, data, separated,
-                                      raw_plugin_name, plugin_name)
-    return data, errors
+            # except Exception as e:
+            #     errors[plugin_name] = format_error(query, e, index)
+            # TODO Register data by plugin name
+            # data = plugin_data_format(plugin_data, data, separated,
+            #                           raw_plugin_name, plugin_name)
+
