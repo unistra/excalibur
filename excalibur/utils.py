@@ -129,10 +129,10 @@ def get_api_keys_by_sources(sources, targets):
     return {target: get_keys(target) for target in targets}
 
 @asyncio.coroutine
-def get_data(plugin, f_name, parameters, query, future, raw_plugin_name, index):
+def get_data(plugin, f_name, parameters, future, raw_plugin_name, index):
     f = getattr(plugin, f_name)
     # TODO WARNING !!!!! query.arguments -> query
-    yield from f(parameters, query, future, raw_plugin_name, index)
+    yield from f(parameters, future, raw_plugin_name, index)
 
 
 def set_targeted_sources(t, name, value, args, sign):
@@ -187,14 +187,6 @@ def separator_contained(plugin_name):
     return PLUGIN_NAME_SEPARATOR in plugin_name
 
 
-def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
-    if plugin_data is not None:
-        if bool:
-            data[raw_plugin_name] = plugin_data
-        else:
-            data[plugin_name] = plugin_data
-    return data
-
 @asyncio.coroutine
 def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, future):
     """
@@ -205,4 +197,4 @@ def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, future):
     plugin = plugin_loader.get_plugin(set_plugin_name(plugin_name))
     for index, parameters in enumerate(parameters_sets):
         if hasattr(plugin, f_name):
-            yield from get_data(plugin, f_name, parameters, query, future, plugin_name, index)
+            yield from get_data(plugin, f_name, parameters, future, plugin_name, index)

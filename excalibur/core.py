@@ -175,7 +175,7 @@ class PluginsRunner(object):
             list_futures.append(future.result())
 
         # Load plugins
-        loader = PluginLoader(self.__plugins_module)
+        loader = PluginLoader(self.__plugins_module, query)
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
         plugins_list = self.__plugins_order or plugins.keys()
