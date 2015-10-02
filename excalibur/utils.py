@@ -196,29 +196,13 @@ def plugin_data_format(plugin_data, data, bool, raw_plugin_name, plugin_name):
     return data
 
 @asyncio.coroutine
-def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, data,
-                   errors, future):
+def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, future):
     """
     real core of the application that tries to execute the plugin's code or 
     continue
     """
     f_name = query.function_name
-    raw_plugin_name = plugin_name
-    separated = separator_contained(plugin_name)
-    plugin_name = set_plugin_name(plugin_name)
-    plugin = plugin_loader.get_plugin(plugin_name)
-
+    plugin = plugin_loader.get_plugin(set_plugin_name(plugin_name))
     for index, parameters in enumerate(parameters_sets):
-            # Initialize returned data to None
-        plugin_data = None
         if hasattr(plugin, f_name):
-            # Get data
-            # try:
-            plugin_data = yield from get_data(plugin, f_name, parameters, query, future, raw_plugin_name, index)
-            # Or register exception
-            # except Exception as e:
-            #     errors[plugin_name] = format_error(query, e, index)
-            # TODO Register data by plugin name
-            # data = plugin_data_format(plugin_data, data, separated,
-            #                           raw_plugin_name, plugin_name)
-
+            yield from get_data(plugin, f_name, parameters, query, future, plugin_name, index)

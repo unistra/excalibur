@@ -168,15 +168,12 @@ class PluginsRunner(object):
 
         list_futures = []
         list_tasks = []
-
         loop = asyncio.get_event_loop()
+        data, errors = collections.OrderedDict(), collections.OrderedDict()
 
         def got_result(future):
-            #print(future.result())
             list_futures.append(future.result())
 
-
-        data, errors = collections.OrderedDict(), collections.OrderedDict()
         # Load plugins
         loader = PluginLoader(self.__plugins_module)
         # Get required plugins depending on the sources.yml depth
@@ -189,39 +186,22 @@ class PluginsRunner(object):
             params = plugins[name]
             future = asyncio.Future()
             list_tasks.append(asyncio.async(data_or_errors(loader, name, query,
-                                            params, data, errors, future)))
+                                            params, future)))
             future.add_done_callback(got_result)
 
-        
+        # Run async loop
         loop.run_until_complete(asyncio.wait(list_tasks))
-
-        #TODO FORMAT LIST FUTURES
-
-        #ENTREE [{'plugin_name': 'Plugin1', 'error': None, 'data': 'p1ok1'}, {'plugin_name': 'Plugin2', 'error': None, 'data': 'p2ok1'}]
-
-
-        final_data, final_errors = collections.OrderedDict(), collections.OrderedDict()
 
         for p in list_futures:
             if 'error' in p.keys() and p['error']:
-                final_errors[p['plugin_name']] = p['error']
+                errors[p['plugin_name']] = p['error']
             elif 'data' in p.keys() and p['data']:
-                final_data[p['plugin_name']] = p['data']
+                data[p['plugin_name']] = p['data']
 
-
-
-
-        #SORTIE {'Plugin2': 'p2ok1', 'Plugin1': 'p1ok1'} {}
-        # OU } {'Plugin2': {'method': 'action2', 'error_message': 'error plugin 2 action 2 !', 'ressource': 'actions', 'source': 'etab1', 'error': 'Exception', 'arguments': {'login': 'testzombie1'}, 'parameters_index': 0}, 'Plugin1': {'method': 'action2', 'error_message': 'error plugin 1 action 2 !', 'ressource': 'actions', 'source': 'etab1', 'error': 'Exception', 'arguments': {'login': 'testzombie1'}, 'parameters_index': 0}}
-
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-        print(final_data)
-        print('=============================================')
-        
-        #TODO Best practice for managing loop: don't close it (really!?)
+        #TODO Best practice for managing loop: don't close it (really!?) cf Guido
         #loop.close()
 
-        return final_data, final_errors
+        return data, errors
 
 
 class Query(object):

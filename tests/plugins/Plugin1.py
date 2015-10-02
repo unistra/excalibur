@@ -14,7 +14,7 @@ class Plugin1(object):
     @asyncio.coroutine
     def actions_action2(self, parameters, query, future, raw_plugin_name, index):
 
-        e = Exception("error plugin 2 action 2 !")
+        e = Exception("error plugin 1 action 2 !")
 
         future.set_result(
             {"plugin_name": raw_plugin_name,

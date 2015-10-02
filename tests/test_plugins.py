@@ -576,8 +576,6 @@ actions:
             raw_yaml_content=True)
 
         data, errors = plugin_runner(self.query2)
-        print(errors)
-        print(self.errors_raw)
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})
 
