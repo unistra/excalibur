@@ -1,6 +1,8 @@
 import asyncio
+from excalibur.core import Plugin
 
-class Plugin2(object):
+
+class Plugin2(Plugin):
 
     @asyncio.coroutine
     def actions_action1(self, parameters, query, future, raw_plugin_name, index):

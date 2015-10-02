@@ -296,3 +296,9 @@ class Query(object):
 
     def __call__(self, for_=None):
         return self.for_(for_) if for_ in ["plugins", "checks"] else None
+
+
+class Plugin(object):
+
+    def __init__(self, query=None):
+        self.query = query
