@@ -302,3 +302,17 @@ class Plugin(object):
 
     def __init__(self, query=None):
         self.query = query
+        
+    def format_error(self, query, e, index):
+        """
+        The dict structure of the error returned to the client.
+        """
+        return {'project': query.project,
+                'source': query.source,
+                'ressource': query.ressource,
+                'method': query.method,
+                'arguments': query.arguments,
+                'parameters_index': index,
+                'error': e.__class__.__name__,
+                'error_message': str(e)
+                }

@@ -159,21 +159,6 @@ def get_sources_for_all(signature, data_project,
         return data_project["sources"]
 
 
-def format_error(query, e, parameters_index):
-    """
-    The dict structure of the error returned to the client.
-    """
-    return {'project': query.project,
-            'source': query.source,
-            'ressource': query.ressource,
-            'method': query.method,
-            'arguments': query.arguments,
-            'parameters_index': parameters_index,
-            'error': e.__class__.__name__,
-            'error_message': str(e)
-            }
-
-
 def clean_plugin_name(plugin_name):
     return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
 
