@@ -128,12 +128,6 @@ def get_api_keys_by_sources(sources, targets):
 
     return {target: get_keys(target) for target in targets}
 
-@asyncio.coroutine
-def get_data(plugin, f_name, parameters, future, raw_plugin_name, index):
-    f = getattr(plugin, f_name)
-    # TODO WARNING !!!!! query.arguments -> query
-    yield from f(parameters, future, raw_plugin_name, index)
-
 
 def set_targeted_sources(t, name, value, args, sign):
     api_keys = get_api_keys(value, args)

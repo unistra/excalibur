@@ -19,7 +19,7 @@ from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError, WrongSignatureError
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
-    separator_contained, get_data
+    separator_contained
 
 
 from excalibur.conf import Sources
@@ -161,7 +161,11 @@ class PluginsRunner(object):
     def set_plugin_name(self,plugin_name):
         return self.clean_plugin_name(plugin_name) if\
             separator_contained(plugin_name) else plugin_name
-        
+    @asyncio.coroutine
+    def get_data(self,plugin, f_name, parameters, future, raw_plugin_name, index):
+        f = getattr(plugin, f_name)
+        yield from f(parameters, future, raw_plugin_name, index) 
+       
     @asyncio.coroutine
     def data_or_errors(self, loader, plugin_name, query, parameters_sets, future):
         """
@@ -172,7 +176,7 @@ class PluginsRunner(object):
         plugin = loader.get_plugin(self.set_plugin_name(plugin_name))
         for index, parameters in enumerate(parameters_sets):
             if hasattr(plugin, f_name):
-                yield from get_data(plugin, f_name, parameters, future, plugin_name, index)
+                yield from self.get_data(plugin, f_name, parameters, future, plugin_name, index)
                 
     def run(self, query):
         """
@@ -184,36 +188,38 @@ class PluginsRunner(object):
         """
 
         list_futures, list_tasks = [], []
-
         loop = asyncio.get_event_loop()
         data, errors = collections.OrderedDict(), collections.OrderedDict()
 
-        def got_result(future):
+        def put_future_in_a_list(future):
             list_futures.append(future.result())
 
+        def contained_and_not_null(key, map):
+            return key in map.keys() and p[key]
+        
         # Load plugins
         loader = PluginLoader(self.__plugins_module, query)
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
         plugins_list = self.__plugins_order or plugins.keys()
-        # Actually browse plugins to launch required methods
 
         # Create an async loop
+        # Register tasks          
         for name in plugins_list:
             params = plugins[name]
             future = asyncio.Future()
-            func = self.data_or_errors
-            list_tasks.append(asyncio.async(func(loader, name, query,
+            list_tasks.append(asyncio.async(self.data_or_errors(loader, name, query,
                                                            params, future)))
-            future.add_done_callback(got_result)
+            future.add_done_callback(put_future_in_a_list)
 
-        # Run async loop
+        # Run async loop till condition is met
         loop.run_until_complete(asyncio.wait(list_tasks))
-
+        
+        #fill data and errors from the futures
         for p in list_futures:
-            if 'error' in p.keys() and p['error']:
+            if contained_and_not_null('error',p):
                 errors[p['plugin_name']] = p['error']
-            elif 'data' in p.keys() and p['data']:
+            elif contained_and_not_null('data',p):
                 data[p['plugin_name']] = p['data']
 
         # TODO Best practice for managing loop: don't close it (really!?)
