@@ -1,0 +1,8 @@
+website:
+    get:
+        request method: GET
+        arguments:
+            title:
+                checks:
+                    min length: 1
+                    max length: 50

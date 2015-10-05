@@ -1,0 +1,14 @@
+test:
+    apikey: S3CR3T
+    plugins:
+        Plugin1:
+            - url: "https://www.google.fr/"
+
+        Plugin2:
+            - url: "https://www.mozilla.org/fr/"
+
+        Plugin3:
+            - url: "https://golang.org/"
+
+        Plugin4:
+            - url: "https://www.rust-lang.org/"
