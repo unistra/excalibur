@@ -154,18 +154,7 @@ class PluginsRunner(object):
     def __call__(self, query):
         data, errors = self.run(query)
         return data, errors
-    
-    def clean_plugin_name(self,plugin_name):
-        return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
 
-    def set_plugin_name(self,plugin_name):
-        return self.clean_plugin_name(plugin_name) if\
-            separator_contained(plugin_name) else plugin_name
-    @asyncio.coroutine
-    def get_data(self,plugin, f_name, parameters, future, raw_plugin_name, index):
-        f = getattr(plugin, f_name)
-        yield from f(parameters, future, raw_plugin_name, index) 
-       
     @asyncio.coroutine
     def data_or_errors(self, loader, plugin_name, query, parameters_sets, future):
         """
@@ -173,11 +162,11 @@ class PluginsRunner(object):
         continue
         """
         f_name = query.function_name
-        plugin = loader.get_plugin(self.set_plugin_name(plugin_name))
+        plugin = loader.get_plugin(plugin_name)
         for index, parameters in enumerate(parameters_sets):
             if hasattr(plugin, f_name):
-                yield from self.get_data(plugin, f_name, parameters, future, plugin_name, index)
-                
+                yield from plugin.get_data(f_name, parameters, future, index)
+
     def run(self, query):
         """
         Takes the query as argument and
@@ -196,7 +185,7 @@ class PluginsRunner(object):
 
         def contained_and_not_null(key, map):
             return key in map.keys() and p[key]
-        
+
         # Load plugins
         loader = PluginLoader(self.__plugins_module, query)
         # Get required plugins depending on the sources.yml depth
@@ -204,22 +193,22 @@ class PluginsRunner(object):
         plugins_list = self.__plugins_order or plugins.keys()
 
         # Create an async loop
-        # Register tasks          
+        # Register tasks
         for name in plugins_list:
             params = plugins[name]
             future = asyncio.Future()
             list_tasks.append(asyncio.async(self.data_or_errors(loader, name, query,
-                                                           params, future)))
+                                                                params, future)))
             future.add_done_callback(put_future_in_a_list)
 
         # Run async loop till condition is met
         loop.run_until_complete(asyncio.wait(list_tasks))
-        
-        #fill data and errors from the futures
+
+        # fill data and errors from the futures
         for p in list_futures:
-            if contained_and_not_null('error',p):
+            if contained_and_not_null('error', p):
                 errors[p['plugin_name']] = p['error']
-            elif contained_and_not_null('data',p):
+            elif contained_and_not_null('data', p):
                 data[p['plugin_name']] = p['data']
 
         # TODO Best practice for managing loop: don't close it (really!?)
@@ -325,8 +314,10 @@ class Query(object):
 
 class Plugin(object):
 
-    def __init__(self, query=None):
+    def __init__(self, query=None, name=None, original_name=None):
         self.query = query
+        self.name = name
+        self.original_name = original_name
 
     def format_error(self, query, e, index):
         """
@@ -341,3 +332,15 @@ class Plugin(object):
                 'error': e.__class__.__name__,
                 'error_message': str(e)
                 }
+
+    def clean_plugin_name(self, plugin_name):
+        return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
+
+    def set_plugin_name(self, plugin_name):
+        return self.clean_plugin_name(plugin_name) if\
+            separator_contained(plugin_name) else plugin_name
+
+    @asyncio.coroutine
+    def get_data(self, f_name, parameters, future, index):
+        f = getattr(self, f_name)
+        yield from f(parameters, future, self.original_name, index)

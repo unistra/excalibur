@@ -7,6 +7,7 @@ from excalibur.exceptions import ExcaliburError, ConfigurationLoaderError,\
     PluginLoaderError
 import importlib
 import yaml
+from excalibur.utils import PLUGIN_NAME_SEPARATOR, separator_contained
 
 
 class ConfigurationLoader(object):
@@ -52,16 +53,23 @@ class PluginLoader(object):
         self.plugin_module = plugin_module
         self.query = query
 
+    def clean_plugin_name(self, plugin_name):
+        return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
+
+    def set_plugin_name(self, plugin_name):
+        return self.clean_plugin_name(plugin_name) if\
+            separator_contained(plugin_name) else plugin_name
+
     def get_plugin(self, plugin_name):
         """
         return plugin instance
         """
         try:
+            cleaned_name = self.set_plugin_name(plugin_name)
             module = importlib.import_module(
-                "%s.%s" % (self.plugin_module, plugin_name))
-            plugin = getattr(module, plugin_name)
-            return plugin(query=self.query)
+                "%s.%s" % (self.plugin_module, cleaned_name))
+            plugin = getattr(module, cleaned_name)
+            return plugin(query=self.query, name=cleaned_name, original_name=plugin_name)
         except Exception as e:
             raise PluginLoaderError(
                 "Plugin %s failed to load: %s" % (plugin_name, e))
-    
