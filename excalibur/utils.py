@@ -158,28 +158,8 @@ def get_sources_for_all(signature, data_project,
     else:
         return data_project["sources"]
 
-
-def clean_plugin_name(plugin_name):
-    return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
-
-
-def set_plugin_name(plugin_name):
-    return clean_plugin_name(plugin_name) if\
-        separator_contained(plugin_name) else plugin_name
-
-
 def separator_contained(plugin_name):
     return PLUGIN_NAME_SEPARATOR in plugin_name
 
 
-@asyncio.coroutine
-def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, future):
-    """
-    real core of the application that tries to execute the plugin's code or 
-    continue
-    """
-    f_name = query.function_name
-    plugin = plugin_loader.get_plugin(set_plugin_name(plugin_name))
-    for index, parameters in enumerate(parameters_sets):
-        if hasattr(plugin, f_name):
-            yield from get_data(plugin, f_name, parameters, future, plugin_name, index)
+

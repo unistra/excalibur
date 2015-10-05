@@ -17,14 +17,6 @@ class Plugin2(Plugin):
         future.set_result(
             {"plugin_name": raw_plugin_name,
              'data': None,
-             'error':{ 'project': self.query.project,
-                        'source': self.query.source,
-                        'ressource': self.query.ressource,
-                        'method': self.query.method,
-                        'arguments': self.query.arguments,
-                        'parameters_index': index,
-                        'error': e.__class__.__name__,
-                        'error_message': str(e)
-                    }
+             'error': self.format_error(self.query,e,index)
              }
         )

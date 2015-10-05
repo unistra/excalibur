@@ -19,7 +19,7 @@ from excalibur.decode import DecodeArguments
 from excalibur.exceptions import PluginRunnerError, WrongSignatureError
 from excalibur.utils import add_args_then_encode, get_api_keys, ALL_KEYWORD,\
     PLUGIN_NAME_SEPARATOR, SOURCE_SEPARATOR, get_sources_for_all,\
-    data_or_errors
+    separator_contained, get_data
 
 
 from excalibur.conf import Sources
@@ -154,9 +154,26 @@ class PluginsRunner(object):
     def __call__(self, query):
         data, errors = self.run(query)
         return data, errors
+    
+    def clean_plugin_name(self,plugin_name):
+        return plugin_name[plugin_name.index(PLUGIN_NAME_SEPARATOR) + 1:]
 
-
-
+    def set_plugin_name(self,plugin_name):
+        return self.clean_plugin_name(plugin_name) if\
+            separator_contained(plugin_name) else plugin_name
+        
+    @asyncio.coroutine
+    def data_or_errors(self, loader, plugin_name, query, parameters_sets, future):
+        """
+        real core of the application that tries to execute the plugin's code or 
+        continue
+        """
+        f_name = query.function_name
+        plugin = loader.get_plugin(self.set_plugin_name(plugin_name))
+        for index, parameters in enumerate(parameters_sets):
+            if hasattr(plugin, f_name):
+                yield from get_data(plugin, f_name, parameters, future, plugin_name, index)
+                
     def run(self, query):
         """
         Takes the query as argument and
@@ -166,8 +183,8 @@ class PluginsRunner(object):
         launched plugins.
         """
 
-        list_futures = []
-        list_tasks = []
+        list_futures, list_tasks = [], []
+
         loop = asyncio.get_event_loop()
         data, errors = collections.OrderedDict(), collections.OrderedDict()
 
@@ -185,8 +202,9 @@ class PluginsRunner(object):
         for name in plugins_list:
             params = plugins[name]
             future = asyncio.Future()
-            list_tasks.append(asyncio.async(data_or_errors(loader, name, query,
-                                            params, future)))
+            func = self.data_or_errors
+            list_tasks.append(asyncio.async(func(loader, name, query,
+                                                           params, future)))
             future.add_done_callback(got_result)
 
         # Run async loop
@@ -198,8 +216,9 @@ class PluginsRunner(object):
             elif 'data' in p.keys() and p['data']:
                 data[p['plugin_name']] = p['data']
 
-        #TODO Best practice for managing loop: don't close it (really!?) cf Guido
-        #loop.close()
+        # TODO Best practice for managing loop: don't close it (really!?)
+        # cf Guido
+        # loop.close()
 
         return data, errors
 
@@ -302,7 +321,7 @@ class Plugin(object):
 
     def __init__(self, query=None):
         self.query = query
-        
+
     def format_error(self, query, e, index):
         """
         The dict structure of the error returned to the client.
