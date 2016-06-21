@@ -34,7 +34,7 @@ class PluginsRunner(object):
 
     def __init__(self, acl, sources, ressources,
                  plugins_module, check_signature=True, check_ip=True,
-                 raw_yaml_content=False, plugins_order=None):
+                 raw_yaml_content=False):
         self.__raw_yaml_content = raw_yaml_content
         self["acl"] = acl
         self["sources"] = sources
@@ -42,7 +42,6 @@ class PluginsRunner(object):
         self["plugins_module"] = plugins_module
         self["check_signature"] = check_signature
         self["check_ip"] = check_ip
-        self["plugins_order"] = plugins_order
 
     @property
     def acl(self):
@@ -65,21 +64,33 @@ class PluginsRunner(object):
         """
         try:
             if source != ALL_KEYWORD and SOURCE_SEPARATOR not in source:
-                return self.sources(signature,
-                                    project,
-                                    arguments)[source]["plugins"]
+                plugins = self.sources(signature,
+                                       project,
+                                       arguments)[source]
+                plugins_order = plugins.get('plugins_order')
+
+                if plugins_order:
+                    # Order the plugins by the plugins_order entry in the YAML
+                    # if the plugin name is in plugins_order
+                    return collections.OrderedDict(sorted(
+                        {k: v for k,v in plugins["plugins"].items()\
+                            if k in plugins_order}.items(),
+                        key=lambda x: plugins_order.index(x[0])))
+                else:
+                    return plugins["plugins"]
             else:
                 sources = get_sources_for_all(signature,
                                               self.__sources[project],
                                               arguments,
                                               self.__check_signature)
-                cleanPluginList = {}
-                for k, v in sources.items():
-                    for clef, valeur in v['plugins'].items():
-                        cleanPluginList[
-                            k + PLUGIN_NAME_SEPARATOR + clef] = valeur
-                return cleanPluginList
-        except KeyError as k:
+                clean_plugin_list = {}
+                for source_key, values in sources.items():
+                    for key, value in values['plugins'].items():
+                        clean_plugin_list[
+                            source_key + PLUGIN_NAME_SEPARATOR + key] = value
+
+                return clean_plugin_list
+        except KeyError:
             raise PluginRunnerError("no such plugin found")
 
     def sources(self, signature, project=None, arguments=None):
@@ -96,7 +107,7 @@ class PluginsRunner(object):
         if project:
             try:
                 return self.project_sources(project)
-            except KeyError as k:
+            except KeyError:
                 raise PluginRunnerError("no such source found")
         else:
             return self.__sources
@@ -105,11 +116,11 @@ class PluginsRunner(object):
         setattr(self, "_" + self.__class__.__name__ + "__" + key,
                 self.resolve(value, key))
 
-    def resolve(self, file, key):
-        return ConfigurationLoader(file, self.__raw_yaml_content, key=key
-                                   ).content if\
+    def resolve(self, file_, key):
+        return ConfigurationLoader(file_, self.__raw_yaml_content, key=key
+                                  ).content if\
             key in ["acl", "sources", "ressources"]\
-            else file
+            else file_
 
     def sources_names(self, project=None):
         """
@@ -123,7 +134,7 @@ class PluginsRunner(object):
         else:
             return sorted(self.__sources.keys())
 
-    def check_all(foo):
+    def check_all(func):
         """
         Check all yml
         """
@@ -137,8 +148,8 @@ class PluginsRunner(object):
                 'CheckArguments'
             ]
 
-            def checker(x):
-                checker = getattr(module, x)
+            def checker(method_name):
+                checker = getattr(module, method_name)
                 checker(query, self.__ressources,
                         self.sources(*query("checks")),
                         self.__acl,
@@ -146,7 +157,7 @@ class PluginsRunner(object):
                         ipcheck=self.__check_ip)()
             list(map(checker, [method_name for method_name in dir(module) if
                                method_name in check_list]))
-            return foo(self, query)
+            return func(self, query)
 
         return checks
 
@@ -166,9 +177,11 @@ class PluginsRunner(object):
         data, errors = collections.OrderedDict(), collections.OrderedDict()
         # Load plugins
         loader = PluginLoader(self.__plugins_module)
+
         # Get required plugins depending on the sources.yml depth
         plugins = self.plugins(*query("plugins"))
-        plugins_list = self.__plugins_order or plugins.keys()
+        plugins_list = plugins.keys()
+
         # Actually browse plugins to launch required methods
         for name in plugins_list:
             params = plugins[name]
@@ -214,15 +227,15 @@ class Query(object):
         return reduce(lambda x, y: (',').join((x, y)),
                       [item_to_string(i) for i in exposed_attrs])
 
-    def getattrsubset(self, list):
-        return (self[y] for y in list)
+    def getattrsubset(self, attr_list):
+        return (self[y] for y in attr_list)
 
     def for_(self, what):
-        l1 = ['source', 'signature', 'arguments', 'project']
-        l2 = ['signature', 'project', 'arguments']
-        return {"plugins": self.getattrsubset(l1),
-                "checks": self.getattrsubset(l2)
-                }[what]
+        list_1 = ['source', 'signature', 'arguments', 'project']
+        list_2 = ['signature', 'project', 'arguments']
+        return {"plugins": self.getattrsubset(list_1),
+                "checks": self.getattrsubset(list_2)
+               }[what]
 
     @property
     def function_name(self):

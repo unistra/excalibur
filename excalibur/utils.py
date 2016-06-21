@@ -128,9 +128,9 @@ def get_api_keys_by_sources(sources, targets):
     return {target: get_keys(target) for target in targets}
 
 
-def get_data(plugin, f_name, parameters, query):
+def get_data(plugin, f_name, parameters, query, data):
     f = getattr(plugin, f_name)
-    return f(parameters, query.arguments)
+    return f(parameters, query.arguments, data=data, source=query.source, project=query.project)
 
 
 def set_targeted_sources(t, name, value, args, sign):
@@ -207,12 +207,12 @@ def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, data,
     plugin = plugin_loader.get_plugin(plugin_name)
 
     for index, parameters in enumerate(parameters_sets):
-            # Initialize returned data to None
+        # Initialize returned data to None
         plugin_data = None
         if hasattr(plugin, f_name):
             # Get data
             try:
-                plugin_data = get_data(plugin, f_name, parameters, query)
+                plugin_data = get_data(plugin, f_name, parameters, query, data)
             # Or register exception
             except Exception as e:
                 errors[plugin_name] = format_error(query, e, index)

@@ -119,6 +119,24 @@ class RunnerTest(TestCase):
                             request_method="GET"
                             )
 
+        self.query3 = Query(source="etab2",
+                            remote_ip="127.0.0.1",
+                            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                            arguments={"login": "testzombie1", },
+                            ressource="actions",
+                            method="action1",
+                            request_method="GET"
+                            )
+
+        self.query4 = Query(source="etab3",
+                            remote_ip="127.0.0.1",
+                            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                            arguments={"login": "testzombie1", },
+                            ressource="actions",
+                            method="action1",
+                            request_method="GET"
+                            )
+
         self.plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
             "./tests/data/sources.yml",
@@ -252,28 +270,34 @@ actions:
         self.assertEqual(data, {})
 
     def test_runner_with_plugins_order(self):
-        plugins_order = ['Plugin2', 'Plugin1']
-        plugin_runner2 = PluginsRunner(
+        plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
-            "./tests/data/sources.yml",
+            "./tests/data/sources_with_plugins_order.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            plugins_order=plugins_order
+            "tests.plugins"
         )
-        data, errors = plugin_runner2(self.query)
-        self.assertListEqual(plugins_order, list(data.keys()))
+        data, errors = plugin_runner(self.query)
+        self.assertListEqual(['Plugin2', 'Plugin1'], list(data.keys()))
+
+    def test_runner_with_plugins_order_and_more_plugins(self):
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl.yml",
+            "./tests/data/sources_with_plugins_order.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins"
+        )
+        data, errors = plugin_runner(self.query3)
+        self.assertListEqual(['Plugin2'], list(data.keys()))
 
     def test_runner_with_plugins_order_and_less_plugins(self):
-        plugins_order = ['Plugin2']
-        plugin_runner2 = PluginsRunner(
+        plugin_runner = PluginsRunner(
             "./tests/data/acl.yml",
-            "./tests/data/sources.yml",
+            "./tests/data/sources_with_plugins_order.yml",
             "./tests/data/ressources.yml",
-            "tests.plugins",
-            plugins_order=plugins_order
+            "tests.plugins"
         )
-        data, errors = plugin_runner2(self.query)
-        self.assertListEqual(plugins_order, list(data.keys()))
+        data, errors = plugin_runner(self.query4)
+        self.assertListEqual(['Plugin2', 'Plugin1'], list(data.keys()))
 
 
 class RunnerWithProjectsTest(TestCase):
@@ -311,6 +335,26 @@ class RunnerWithProjectsTest(TestCase):
                             )
 
         self.query4 = Query(source="etab1,etab2",
+                            remote_ip="127.0.0.1",
+                            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                            arguments={"login": "testzombie1", },
+                            ressource="actions",
+                            method="action1",
+                            request_method="GET",
+                            project="project1"
+                            )
+
+        self.query5 = Query(source="etab2",
+                            remote_ip="127.0.0.1",
+                            signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
+                            arguments={"login": "testzombie1", },
+                            ressource="actions",
+                            method="action1",
+                            request_method="GET",
+                            project="project1"
+                            )
+
+        self.query6 = Query(source="etab3",
                             remote_ip="127.0.0.1",
                             signature="c08b3ff9dff7c5f08a1abdfabfbd24279e82dd10",
                             arguments={"login": "testzombie1", },
@@ -578,6 +622,36 @@ actions:
         data, errors = plugin_runner(self.query2)
         self.assertEqual(errors, self.errors_raw)
         self.assertEqual(data, {})
+
+    def test_runner_projects_with_plugins_order(self):
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sources_projects_with_plugins_order.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins"
+        )
+        data, errors = plugin_runner(self.query)
+        self.assertListEqual(['Plugin2', 'Plugin1'], list(data.keys()))
+
+    def test_runner_projects_with_plugins_order_and_more_plugins(self):
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sources_projects_with_plugins_order.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins"
+        )
+        data, errors = plugin_runner(self.query5)
+        self.assertListEqual(['Plugin2'], list(data.keys()))
+
+    def test_runner_projects_with_plugins_order_and_less_plugins(self):
+        plugin_runner = PluginsRunner(
+            "./tests/data/acl_projects.yml",
+            "./tests/data/sources_projects_with_plugins_order.yml",
+            "./tests/data/ressources.yml",
+            "tests.plugins"
+        )
+        data, errors = plugin_runner(self.query6)
+        self.assertListEqual(['Plugin2', 'Plugin1'], list(data.keys()))
 
 
 if __name__ == '__main__':
