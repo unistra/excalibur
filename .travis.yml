@@ -5,7 +5,7 @@ env:
  - TOX_ENV=py32
  - TOX_ENV=py33
 install:
- - pip install tox
+ - travis_retry pip install "virtualenv<14.0.0" tox 
 script: tox -e $TOX_ENV
 after_success:
  - pip install coveralls
