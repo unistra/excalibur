@@ -15,7 +15,7 @@ with open('requirements.txt') as requirements:
 
 setup(
     name='excalibur',
-    version='1.0.8.4',
+    version='1.0.9',
     author='di-dip-unistra',
     author_email='di-dip@unistra.fr',
     maintainer='di-dip-unistra',
