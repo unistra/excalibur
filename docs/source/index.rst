@@ -13,7 +13,7 @@ Excalibur
 Documentation
 =============
 
-This documentation is Python 2.7, 3.2, 3.3 compliant.
+This documentation is Python 2.7, 3.3, 3.4 compliant.
 It contains details concerning its installation, configuration and usage.
 
 .. toctree::
