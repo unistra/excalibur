@@ -1,7 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import base64
+import hashlib
+from importlib import import_module
 from unittest import TestCase, main
+
+import six
+
 from excalibur.decode import DecodeArguments
 from excalibur.loader import ConfigurationLoader
 from excalibur.check import CheckSource, CheckACL, CheckRequest, \
@@ -12,12 +17,18 @@ from excalibur.exceptions import SourceNotFoundError, IPNotAuthorizedError,\
     ArgumentCheckMethodNotFoundError, ExcaliburError, \
     DecodeAlgorithmNotFoundError
 from excalibur.core import PluginsRunner, Query
-import base64
-from importlib import import_module
 from excalibur.utils import ALL_KEYWORD
 
 
 class CheckTest(TestCase):
+
+    @staticmethod
+    def calculate_merlin_sign(data, apikey):
+        # Trie les éléments par ordre alphabétique
+        sign = ''.join('%s%s' % (e[0], e[1])
+                       for e in sorted(data.items(), key=lambda t: t[0]))
+        # Calcule la signature
+        return hashlib.sha1(six.b(apikey + sign)).hexdigest()
 
     """
     Unit test for check method
@@ -693,8 +704,6 @@ class CheckTest(TestCase):
             error = e
         self.assertTrue(not error)
 
-
-
     def test_encode_base64_runner(self):
         error = None
         try:
@@ -708,11 +717,6 @@ class CheckTest(TestCase):
         except Exception as e:
             error = e
         self.assertTrue(not error)
-
-
-
-
-
 
     def test_optional_ressourcearg_matching_reqarg_and_exceeding_arg(self):
         with self.assertRaises(ArgumentError):
@@ -836,6 +840,53 @@ class CheckTest(TestCase):
                 "tests.plugins",
                 check_signature=False)
             plugin_runner(query)
+
+    def test_overwritten_args(self):
+        with self.assertRaises(ArgumentError) as e:
+            login = 'zombie'
+            signature = self.calculate_merlin_sign(
+                {'login': login}, 'S3CR3T')
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature=signature,
+                arguments={'login': login},
+                ressource="actions",
+                method="action2",
+                request_method="GET"
+            )
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml",
+                "./tests/data/sources_with_overwritten_args.yml",
+                "./tests/data/ressources.yml",
+                "tests.plugins",
+                check_signature=False)
+            plugin_runner(query)
+
+        login = 'zombiezombie'
+        signature = self.calculate_merlin_sign(
+            {'login': login}, 'S3CR3T')
+        error = None
+        try:
+            query = Query(
+                source="etab1",
+                remote_ip="127.0.0.1",
+                signature=signature,
+                arguments={'login': login},
+                ressource="actions",
+                method="action2",
+                request_method="GET"
+            )
+            plugin_runner = PluginsRunner(
+                "./tests/data/acl.yml",
+                "./tests/data/sources_with_overwritten_args.yml",
+                "./tests/data/ressources.yml",
+                "tests.plugins",
+                check_signature=False)
+            plugin_runner(query)
+        except Exception as e:
+            error = e
+        self.assertIsNone(error)
 
 
 if __name__ == '__main__':

@@ -9,9 +9,9 @@ from excalibur.exceptions import ArgumentError,\
 from excalibur.decode import DecodeArguments
 from excalibur.utils import add_args_then_encode,\
     ALL_KEYWORD, SOURCE_SEPARATOR, sources_list_or_list,\
-    all_sources_or_sources_list_or_list,\
+    all_sources_or_sources_list_or_list, dict_merge,\
     is_simple_request_and_source_not_found, ip_found_in_sources,\
-    get_api_keys_by_sources
+    get_api_keys_by_sources, get_nested_dict_value
 
 import itertools
 
@@ -49,13 +49,29 @@ class CheckArguments(Check):
         self.ressource = query.ressource
         self.method = query.method
         self.query = query
+        self.source = query.source
+        self.sources = sources
+        self.acl = acl
 
     def __call__(self):
 
         # Keep trace of arguments that do not pass tests.
         errors = {}
+
+        # Check if there is an arguments parameter in the source
+        try:
+            source_arguments = self.sources[self.source]['arguments']
+        except (KeyError, TypeError):
+            source_arguments = {}
+
         targeted_ressource = self.ressources[self.ressource]\
             if self.ressource in self.ressources.keys() else None
+
+        # Merge targeted_ressource and source_arguments
+        dict_merge(
+            get_nested_dict_value(targeted_ressource, (self.method, 'arguments')),
+            # targeted_ressource[self.method]["arguments"],
+            source_arguments)
 
         if targeted_ressource is None:
             raise ArgumentError("unexpected argument")

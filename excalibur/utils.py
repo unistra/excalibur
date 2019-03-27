@@ -2,6 +2,7 @@
 """
 Cross-classes utils
 """
+from functools import reduce
 import hashlib
 import traceback
 import re
@@ -220,3 +221,22 @@ def data_or_errors(plugin_loader, plugin_name, query, parameters_sets, data,
             data = plugin_data_format(plugin_data, data, separated,
                                       raw_plugin_name, plugin_name)
     return data, errors
+
+
+def dict_merge(d1, d2):
+    """update first dict with second recursively"""
+    d1 = d1 or {}
+    d2 = d2 or {}
+    for k, v in d1.items(): # in Python 2, use .iteritems()!
+        if k in d2:
+            if isinstance(v, dict):
+                d2[k] = dict_merge(v, d2[k])
+    d1.update(d2)
+    return d1
+
+
+def get_nested_dict_value(d, keys, default=None):
+    try:
+        return reduce(dict.__getitem__ , keys, d)
+    except (KeyError, TypeError):
+        return default
